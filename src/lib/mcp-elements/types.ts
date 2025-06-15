@@ -21,6 +21,8 @@ export interface ToolAction {
   element: string;
   /** The value to use for the action (e.g., text for 'fillInput'). Can be parameterized. */
   value?: any;
+  /** Delay in milliseconds before performing this action (for 'silent' mode) */
+  delay?: number;
 }
 
 /**
@@ -37,6 +39,8 @@ export interface ToolStep {
   action?: ToolAction;
   /** An object to pass any additional ShepherdJS step options directly */
   shepherdOptions?: any;
+  /** Whether to stop execution if this step fails (default: false) */
+  stopOnFailure?: boolean;
 }
 
 /**
@@ -51,12 +55,39 @@ export interface ToolConfiguration {
   description: string;
   /** The execution mode for the Tool */
   mode: ToolMode;
-  /** A URL string or regex to determine if the Tool is available on the current page */
+  /** 
+   * A URL string or regex to determine if the Tool is available on the current page.
+   * If not specified, the tool is considered global and available on all pages.
+   */
   pageMatcher?: string | RegExp;
-  /** If true, this Tool can be invoked from any page */
-  global?: boolean;
   /** An array of steps that make up the Tool */
   steps: ToolStep[];
+  /** Override global options for this specific tool */
+  options?: Partial<MCPElementsOptions>;
+}
+
+/**
+ * Global configuration options for MCP Elements Controller
+ */
+export interface MCPElementsOptions {
+  /** Whether to show visual feedback for automated actions (default: true) */
+  enableVisualFeedback: boolean;
+  /** Whether to enable debug mode logging (default: false) */
+  debugMode: boolean;
+  /** Whether to stop execution if a step fails (default: false) */
+  stopOnFailure: boolean;
+  /** Timeout in milliseconds for waiting for elements (default: 5000) */
+  elementTimeout: number;
+  /** Duration in milliseconds for highlighting elements (default: 2000) */
+  highlightDuration: number;
+  /** Duration in milliseconds for focus effects (default: 1000) */
+  focusEffectDuration: number;
+  /** Duration in milliseconds for click effects (default: 600) */
+  clickEffectDuration: number;
+  /** Delay in milliseconds between actions in silent mode (default: 500) */
+  actionDelay: number;
+  /** Default delay in milliseconds for buttonless mode steps (default: 3000) */
+  defaultButtonlessDelay: number;
 }
 
 /**

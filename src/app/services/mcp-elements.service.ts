@@ -19,10 +19,9 @@ export class MCPElementsService {
         popperOptions: {
           modifiers: [
             { name: 'offset', options: { offset: [0, 20] } }
-          ]
-        }
+          ]        }
       }
-    }, true); // Enable visual feedback by default
+    }, { enableVisualFeedback: true }); // Enable visual feedback by default
 
     this.setupEventListeners();
   }
@@ -317,13 +316,12 @@ export class MCPElementsService {
   getDebugInfo(): any {
     const allTools = this.mcpController.getRegistry().getAllTools();
     return {      isInitialized: this.isInitialized,
-      totalTools: allTools.size,
-      toolIds: Array.from(allTools.keys()),
+      totalTools: allTools.size,      toolIds: Array.from(allTools.keys()),
       tools: Array.from(allTools.values()).map(tool => ({
         id: tool.toolId,
         title: tool.title,
         mode: tool.mode,
-        global: tool.global,
+        isGlobal: !tool.pageMatcher, // Global if no pageMatcher
         pageMatcher: tool.pageMatcher
       }))
     };

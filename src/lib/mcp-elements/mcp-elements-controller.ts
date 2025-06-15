@@ -3,31 +3,45 @@
  * @description The main controller for managing and running MCP Elements Tools
  */
 
-import Shepherd from 'shepherd.js';
+import { Tour, Shepherd, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
  */
 export class MCPElementsController {
   private registry: ToolRegistry;
-  private shepherdTour: Shepherd.Tour | null = null;
+  private shepherdTour: Tour | null = null;
   private activeTool: ToolConfiguration | null = null;
   private toolQueue: ToolStartConfig[] = [];
   private eventListeners: Map<MCPElementsEvent, Function[]> = new Map();
   private currentStepIndex: number = 0;
   private currentParams: Record<string, any> = {};
-  private visualFeedbackEnabled: boolean = true;
+  private globalOptions: MCPElementsOptions;
 
   /**
    * Creates a new MCPElementsController instance.
    * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor.
-   * @param enableVisualFeedback - Whether to show visual feedback for automated actions (default: true).
+   * @param options - Global configuration options for the controller.
    */
-  constructor(private shepherdOptions: any = {}, enableVisualFeedback: boolean = true) {
+  constructor(private shepherdOptions: any = {}, options: Partial<MCPElementsOptions> = {}) {
     this.registry = new ToolRegistry();
-    this.visualFeedbackEnabled = enableVisualFeedback;
+
+    // Set default options
+    this.globalOptions = {
+      enableVisualFeedback: true,
+      debugMode: false,
+      stopOnFailure: false,
+      elementTimeout: 5000,
+      highlightDuration: 2000,
+      focusEffectDuration: 1000,
+      clickEffectDuration: 600,
+      actionDelay: 500,
+      defaultButtonlessDelay: 3000,
+      ...options
+    };
+
     this.initializeEventListeners();
     this.injectVisualFeedbackStyles();
   }
@@ -40,6 +54,46 @@ export class MCPElementsController {
     return this.registry;
   }
 
+  /**
+   * Gets the current global options.
+   * @returns The current global options.
+   */
+  getGlobalOptions(): MCPElementsOptions {
+    return { ...this.globalOptions };
+  }
+
+  /**
+   * Updates global options.
+   * @param options - Partial options to update.
+   */
+  updateGlobalOptions(options: Partial<MCPElementsOptions>): void {
+    this.globalOptions = { ...this.globalOptions, ...options };
+    if (options.enableVisualFeedback === true) {
+      this.injectVisualFeedbackStyles();
+    }
+  }
+
+  /**
+   * Gets the effective options for a tool (merges global and tool-specific options).
+   * @private
+   * @param tool - The tool configuration.
+   * @returns The effective options for the tool.
+   */
+  private getEffectiveOptions(tool: ToolConfiguration): MCPElementsOptions {
+    return { ...this.globalOptions, ...tool.options };
+  }
+
+  /**
+   * Logs a debug message if debug mode is enabled.
+   * @private
+   * @param message - The message to log.
+   * @param data - Optional data to log.
+   */
+  private debugLog(message: string, ...data: any[]): void {
+    if (this.globalOptions.debugMode) {
+      console.log(`[MCP Debug] ${message}`, ...data);
+    }
+  }
   /**
    * Starts a sequence of Tools.
    * @param toolsToStart - An array of objects, each with a toolId and optional parameters to pass to the tool.
@@ -55,7 +109,9 @@ export class MCPElementsController {
 
     // Queue the tools
     this.toolQueue = [...toolsToStart];
-    
+
+    this.debugLog('Starting tool sequence', toolsToStart.map(t => t.toolId));
+
     // Start the first tool
     this.executeNextTool();
   }
@@ -67,13 +123,13 @@ export class MCPElementsController {
       this.shepherdTour.cancel();
       this.shepherdTour = null;
     }
-    
+
     const currentTool = this.activeTool;
     this.activeTool = null;
     this.toolQueue = [];
     this.currentStepIndex = 0;
     this.currentParams = {};
-    
+
     this.emit('cancel', { tool: currentTool });
   }
 
@@ -151,6 +207,7 @@ export class MCPElementsController {
     const { toolId, params = {} } = this.toolQueue.shift()!;
     this.executeTool(toolId, params);
   }
+
   /**
    * Executes a single tool.
    * @private
@@ -158,11 +215,11 @@ export class MCPElementsController {
    * @param params - Optional parameters to pass to the tool.
    */
   private executeTool(toolId: string, params: Record<string, any> = {}): void {
-    console.log(`Looking for tool: ${toolId}`);
+    this.debugLog(`Looking for tool: ${toolId}`);
     const tool = this.registry.getToolById(toolId);
     if (!tool) {
       console.error(`Tool with ID '${toolId}' not found`);
-      console.log('Available tools:', Array.from(this.registry.getAllTools().keys()));
+      this.debugLog('Available tools:', Array.from(this.registry.getAllTools().keys()));
       this.executeNextTool(); // Try next tool in queue
       return;
     }
@@ -171,7 +228,7 @@ export class MCPElementsController {
     this.currentParams = params;
     this.currentStepIndex = 0;
 
-    console.log(`Starting tool: ${tool.title} (${tool.mode} mode)`);
+    this.debugLog(`Starting tool: ${tool.title} (${tool.mode} mode)`, { params });
     this.emit('start', { tool, params });
 
     try {
@@ -201,11 +258,11 @@ export class MCPElementsController {
    */
   private executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): void {
     const steps = this.prepareSteps(tool, params);
-    
-    this.shepherdTour = new Shepherd.Tour({
+
+    this.shepherdTour = new (new ShepherdBase()).Tour({
       useModalOverlay: true,
       ...this.shepherdOptions
-    });
+    }) as Tour;
     steps.forEach((step, index) => {
       this.shepherdTour!.addStep({
         id: `step-${index}`, // Explicitly set ID for consistency
@@ -221,19 +278,21 @@ export class MCPElementsController {
     });
 
     this.setupTourEventHandlers();
-    this.shepherdTour.start();
+    this.shepherdTour!.start();
   }
+
   /**
    * Executes a tool in buttonless mode (auto-advancing).
    * @private
    */
   private executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): void {
     const steps = this.prepareSteps(tool, params);
-    
-    this.shepherdTour = new Shepherd.Tour({
+    const effectiveOptions = this.getEffectiveOptions(tool);
+
+    this.shepherdTour = new (new ShepherdBase()).Tour({
       useModalOverlay: true,
       ...this.shepherdOptions
-    });
+    }) as Tour;
     steps.forEach((step, index) => {
       this.shepherdTour!.addStep({
         id: `step-${index}`, // Explicitly set ID to match index
@@ -256,23 +315,23 @@ export class MCPElementsController {
           console.warn('No current step found for buttonless mode');
           return;
         }
-        
+
         // Extract index from step ID (format: "step-0", "step-1", etc.)
         const stepIndexMatch = currentStep.id.match(/step-(\d+)/);
         if (!stepIndexMatch) {
           console.warn('Could not parse step index from ID:', currentStep.id);
           return;
         }
-        
+
         const stepIndex = parseInt(stepIndexMatch[1], 10);
         const step = steps[stepIndex];
-        
+
         if (!step) {
           console.warn('Step not found at index:', stepIndex);
           return;
         }
-        
-        const delay = step.delay || 3000;
+
+        const delay = step.delay || effectiveOptions.defaultButtonlessDelay;
 
         setTimeout(() => {
           if (this.shepherdTour && this.activeTool) {
@@ -297,28 +356,42 @@ export class MCPElementsController {
    */
   private async executeSilentMode(tool: ToolConfiguration, params: Record<string, any>): Promise<void> {
     const steps = this.prepareSteps(tool, params);
-    console.log('Executing silent mode tool:', tool.title, 'with', steps.length, 'steps');
+    const effectiveOptions = this.getEffectiveOptions(tool);
+
+    this.debugLog('Executing silent mode tool:', tool.title, 'with', steps.length, 'steps');
 
     try {
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
         this.currentStepIndex = i;
-        
-        console.log(`Executing step ${i + 1}/${steps.length}:`, step);
-        this.emit('step:show', { step, index: i, tool });
 
-        if (step.action) {
-          console.log('Performing action for step', i + 1);
-          await this.performAction(step.action, step.targetElement);
+        this.debugLog(`Executing step ${i + 1}/${steps.length}:`, step);
+        this.emit('step:show', { step, index: i, tool }); if (step.action) {
+          this.debugLog('Performing action for step', i + 1);
+          try {
+            await this.performAction(step.action, step.targetElement);
+          } catch (stepError) {
+            const errorMessage = stepError instanceof Error ? stepError.message : String(stepError);
+            console.error(`Error in step ${i + 1}:`, stepError);
+
+            // Check if we should stop on failure (step-level or tool-level)
+            const shouldStop = step.stopOnFailure !== undefined ? step.stopOnFailure : effectiveOptions.stopOnFailure;
+            if (shouldStop) {
+              throw new Error(`Step ${i + 1} failed and stopOnFailure is enabled: ${errorMessage}`);
+            }
+            // Continue with next step if stopOnFailure is false
+            this.debugLog(`Step ${i + 1} failed but continuing due to stopOnFailure=false`);
+          }
         } else {
-          console.log('No action defined for step', i + 1);
+          this.debugLog('No action defined for step', i + 1);
         }
 
-        // Delay between actions to ensure DOM updates
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Delay between actions to ensure DOM updates (configurable)
+        const actionDelay = step.action?.delay || effectiveOptions.actionDelay;
+        await new Promise(resolve => setTimeout(resolve, actionDelay));
       }
 
-      console.log('Silent mode tool completed successfully');
+      this.debugLog('Silent mode tool completed successfully');
       this.emit('complete', { tool });
       this.executeNextTool();
     } catch (error) {
@@ -397,7 +470,7 @@ export class MCPElementsController {
    */
   private setupTourEventHandlers(): void {
     if (!this.shepherdTour) return;
-    
+
     this.shepherdTour.on('show', (event: any) => {
       this.emit('step:show', {
         step: this.activeTool?.steps[this.currentStepIndex],
@@ -420,76 +493,73 @@ export class MCPElementsController {
       this.toolQueue = []; // Clear queue on cancel
     });
   }
-  
+
   /**
    * Performs an automated action on a DOM element.
    * @private
    */
   private async performAction(action: ToolAction, targetElement: string): Promise<void> {
-    console.log('Performing action:', action.type, 'on element:', targetElement);
-    
+    const effectiveOptions = this.activeTool ? this.getEffectiveOptions(this.activeTool) : this.globalOptions;
+
+    this.debugLog('Performing action:', action.type, 'on element:', targetElement);
+
     // Wait for element to be available
-    const element = await this.waitForElement(targetElement, 5000);
+    const element = await this.waitForElement(targetElement, effectiveOptions.elementTimeout);
     if (!element) {
       throw new Error(`Element not found: ${targetElement}`);
-    }
-
-    console.log('Element found:', element);
+    } this.debugLog('Element found:', element);
 
     // Highlight the target element before performing action
-    this.highlightElement(element, 1500);
+    this.highlightElement(element, effectiveOptions.highlightDuration, effectiveOptions);
 
     switch (action.type) {
       case 'click':
-        console.log('Clicking element...');
+        this.debugLog('Clicking element...');
         // Show visual click effect before actual click
-        this.showClickEffect(element);
+        this.showClickEffect(element, effectiveOptions);
         // Small delay to let visual effect show
         await new Promise(resolve => setTimeout(resolve, 200));
         element.click();
         break;
-      
       case 'fillInput':
-        console.log('Filling input with value:', action.value);
+        this.debugLog('Filling input with value:', action.value);
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           // Use typing animation for visual feedback
-          await this.showTypingEffect(element, action.value || '');
-          
+          await this.showTypingEffect(element, action.value || '', effectiveOptions);
+
           element.dispatchEvent(new Event('blur', { bubbles: true }));
         } else {
           console.error('Element is not an input or textarea:', element);
         }
         break;
-      
       case 'selectOption':
-        console.log('Selecting option with value:', action.value);
+        this.debugLog('Selecting option with value:', action.value);
         if (element instanceof HTMLSelectElement) {
           // Show focus effect before selection
-          this.showFocusEffect(element, 800);
+          this.showFocusEffect(element, effectiveOptions.focusEffectDuration, effectiveOptions);
           element.focus();
           await new Promise(resolve => setTimeout(resolve, 300));
-          
+
           element.value = action.value || '';
           element.dispatchEvent(new Event('change', { bubbles: true }));
         } else {
           console.error('Element is not a select:', element);
         }
         break;
-      
       case 'navigate':
-        console.log('Navigating to:', action.value);
+        this.debugLog('Navigating to:', action.value);
         // Show click effect if element is clickable (like a link)
-        this.showClickEffect(element);
+        this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
         window.location.href = action.value || '';
         break;
-      
+
       default:
         throw new Error(`Unknown action type: ${action.type}`);
     }
-    
-    // Add a small delay after each action
-    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Add a small delay after each action (configurable)
+    await new Promise(resolve => setTimeout(resolve, effectiveOptions.actionDelay));
   }
 
   /**
@@ -498,7 +568,7 @@ export class MCPElementsController {
    */
   private async waitForElement(selector: string, timeout: number = 5000): Promise<HTMLElement | null> {
     const startTime = Date.now();
-    
+
     while (Date.now() - startTime < timeout) {
       const element = document.querySelector(selector) as HTMLElement;
       if (element) {
@@ -506,7 +576,7 @@ export class MCPElementsController {
       }
       await new Promise(resolve => setTimeout(resolve, 100));
     }
-    
+
     console.error(`Element not found after ${timeout}ms:`, selector);
     return null;
   }
@@ -521,13 +591,12 @@ export class MCPElementsController {
     this.eventListeners.set('cancel', []);
     this.eventListeners.set('step:show', []);
   }
-
   /**
    * Injects CSS styles for visual feedback animations.
    * @private
    */
   private injectVisualFeedbackStyles(): void {
-    if (!this.visualFeedbackEnabled) return;
+    if (!this.globalOptions.enableVisualFeedback) return;
 
     const styleId = 'mcp-visual-feedback-styles';
     if (document.getElementById(styleId)) return; // Already injected
@@ -617,38 +686,36 @@ export class MCPElementsController {
       }
     `;
     document.head.appendChild(style);
-  }
-
-  /**
+  }  /**
    * Shows a click visual effect on an element.
    * @private
    */
-  private showClickEffect(element: HTMLElement): void {
-    if (!this.visualFeedbackEnabled) return;
+  private showClickEffect(element: HTMLElement, options?: MCPElementsOptions): void {
+    const effectiveOptions = options || this.globalOptions;
+    if (!effectiveOptions.enableVisualFeedback) return;
 
     const rect = element.getBoundingClientRect();
     const ripple = document.createElement('div');
     ripple.className = 'mcp-click-ripple';
     ripple.style.left = (rect.left + rect.width / 2) + 'px';
     ripple.style.top = (rect.top + rect.height / 2) + 'px';
-    
+
     document.body.appendChild(ripple);
-    
+
     // Add pulse effect to the target element
     element.classList.add('mcp-pulse');
-    
+
     setTimeout(() => {
       ripple.remove();
       element.classList.remove('mcp-pulse');
-    }, 600);
-  }
-
-  /**
+    }, effectiveOptions.clickEffectDuration);
+  }  /**
    * Shows typing animation on an input element.
    * @private
    */
-  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string): Promise<void> {
-    if (!this.visualFeedbackEnabled) {
+  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: MCPElementsOptions): Promise<void> {
+    const effectiveOptions = options || this.globalOptions;
+    if (!effectiveOptions.enableVisualFeedback) {
       element.value = text;
       element.dispatchEvent(new Event('input', { bubbles: true }));
       return;
@@ -664,7 +731,7 @@ export class MCPElementsController {
     // Type character by character
     for (let i = 0; i <= text.length; i++) {
       element.value = text.substring(0, i);
-      
+
       // Random typing speed between 50-150ms per character
       const delay = Math.random() * 100 + 50;
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -673,39 +740,37 @@ export class MCPElementsController {
     // Remove typing effects
     element.classList.remove('mcp-typing-indicator', 'mcp-focus-ring');
     element.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  /**
+  }  /**
    * Highlights an element temporarily.
    * @private
    */
-  private highlightElement(element: HTMLElement, duration: number = 2000): void {
-    if (!this.visualFeedbackEnabled) return;
+  private highlightElement(element: HTMLElement, duration: number = 2000, options?: MCPElementsOptions): void {
+    const effectiveOptions = options || this.globalOptions;
+    if (!effectiveOptions.enableVisualFeedback) return;
 
     element.classList.add('mcp-highlight');
     setTimeout(() => {
       element.classList.remove('mcp-highlight');
     }, duration);
   }
-
   /**
    * Shows a focus effect on an element.
    * @private
    */
-  private showFocusEffect(element: HTMLElement, duration: number = 1000): void {
-    if (!this.visualFeedbackEnabled) return;
+  private showFocusEffect(element: HTMLElement, duration: number = 1000, options?: MCPElementsOptions): void {
+    const effectiveOptions = options || this.globalOptions;
+    if (!effectiveOptions.enableVisualFeedback) return;
 
     element.classList.add('mcp-focus-ring');
     setTimeout(() => {
       element.classList.remove('mcp-focus-ring');
     }, duration);
   }
-
   /**
    * Sets whether visual feedback is enabled.
    */
   public setVisualFeedbackEnabled(enabled: boolean): void {
-    this.visualFeedbackEnabled = enabled;
+    this.globalOptions.enableVisualFeedback = enabled;
     if (enabled) {
       this.injectVisualFeedbackStyles();
     }
@@ -715,6 +780,6 @@ export class MCPElementsController {
    * Gets whether visual feedback is enabled.
    */
   public isVisualFeedbackEnabled(): boolean {
-    return this.visualFeedbackEnabled;
+    return this.globalOptions.enableVisualFeedback;
   }
 }

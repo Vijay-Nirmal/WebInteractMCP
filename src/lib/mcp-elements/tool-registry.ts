@@ -87,16 +87,15 @@ export class ToolRegistry {
 
     return availableTools;
   }
-
   /**
-   * Returns a map of all global tools.
+   * Returns a map of all global tools (tools without pageMatcher).
    * @returns A map of all global tools.
    */
   getGlobalTools(): Map<string, ToolConfiguration> {
     const globalTools = new Map<string, ToolConfiguration>();
 
     for (const [toolId, tool] of this.tools) {
-      if (tool.global) {
+      if (!tool.pageMatcher) {
         globalTools.set(toolId, tool);
       }
     }
@@ -150,7 +149,6 @@ export class ToolRegistry {
       }
     }
   }
-
   /**
    * Checks if a tool is available for a specific page URL.
    * @private
@@ -159,12 +157,8 @@ export class ToolRegistry {
    * @returns True if the tool is available for the page.
    */
   private isToolAvailableForPage(tool: ToolConfiguration, url: string): boolean {
-    if (tool.global) {
-      return true;
-    }
-
     if (!tool.pageMatcher) {
-      return true; // No matcher means available everywhere
+      return true; // No matcher means available everywhere (global tool)
     }
 
     if (typeof tool.pageMatcher === 'string') {

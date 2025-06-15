@@ -1,43 +1,53 @@
-[  {
+[
+  {
     "toolId": "stack-overflow-welcome",
     "title": "Stack Overflow Clone Welcome Tour",
     "description": "Introduces new users to the Stack Overflow clone platform features",
     "mode": "normal",
-    "global": true,
     "steps": [
       {
         "targetElement": "app-header",
         "content": "Welcome to AutoBot - our Stack Overflow clone! This is the main navigation header where you can access different sections of the platform.",
         "shepherdOptions": {
-          "attachTo": { "on": "bottom" }
+          "attachTo": {
+            "on": "bottom"
+          }
         }
       },
       {
         "targetElement": "app-left-sidebar",
         "content": "The sidebar contains quick navigation links to important sections like Home, Questions, Tags, and Users.",
         "shepherdOptions": {
-          "attachTo": { "on": "right" }
+          "attachTo": {
+            "on": "right"
+          }
         }
       },
       {
         "targetElement": ".btn-primary",
         "content": "Use this 'Ask Question' button to post new questions to the community. It's the primary way to get help!",
         "shepherdOptions": {
-          "attachTo": { "on": "bottom" }
+          "attachTo": {
+            "on": "bottom"
+          }
         }
       },
       {
         "targetElement": ".questions-tabs",
         "content": "These tabs help you filter questions by different criteria like 'Interesting', 'Hot', or by time periods.",
         "shepherdOptions": {
-          "attachTo": { "on": "bottom" }
+          "attachTo": {
+            "on": "bottom"
+          }
         }
       },
       {
         "targetElement": ".questions-list",
         "content": "Here you'll find all the questions posted by the community. Each question shows votes, answers, and views.",
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
       }
     ]
@@ -47,13 +57,16 @@
     "title": "How to Ask a Question",
     "description": "Step-by-step guide for asking effective questions",
     "mode": "buttonless",
-    "pageMatcher": "/ask",    "steps": [
+    "pageMatcher": "/ask",
+    "steps": [
       {
         "targetElement": "#question-title",
         "content": "Start with a clear, descriptive title that summarizes your problem in one line.",
         "delay": 4000,
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
       },
       {
@@ -61,14 +74,19 @@
         "content": "Provide detailed information about your problem. Include code examples, error messages, and what you've tried.",
         "delay": 5000,
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
-      },      {
+      },
+      {
         "targetElement": "#question-tags",
         "content": "Add relevant tags to help others find and categorize your question. Use specific technology names.",
         "delay": 4000,
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
       },
       {
@@ -76,9 +94,12 @@
         "content": "Review your question and click submit when you're ready to post it to the community.",
         "delay": 3000,
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
-      }    ]
+      }
+    ]
   },
   {
     "toolId": "auto-question-demo",
@@ -86,6 +107,12 @@
     "description": "Demonstrates automated question posting for demo purposes",
     "mode": "silent",
     "pageMatcher": "/ask",
+    "options": {
+      "debugMode": true,
+      "elementTimeout": 8000,
+      "actionDelay": 1000,
+      "highlightDuration": 3000
+    },
     "steps": [
       {
         "targetElement": "#question-title",
@@ -108,10 +135,12 @@
       {
         "targetElement": "#question-tags",
         "content": "Adding relevant tags...",
+        "stopOnFailure": true,
         "action": {
           "type": "fillInput",
           "element": "#question-tags",
-          "value": "{{tags}}"
+          "value": "{{tags}}",
+          "delay": 2000
         }
       }
     ]
@@ -121,7 +150,6 @@
     "title": "Platform Navigation Demo",
     "description": "Shows how to navigate between different sections",
     "mode": "silent",
-    "global": true,
     "steps": [
       {
         "targetElement": "[routerLink='/']",
@@ -145,7 +173,9 @@
         "content": "This shows the vote score for each question. Higher scores indicate more useful questions.",
         "delay": 3000,
         "shepherdOptions": {
-          "attachTo": { "on": "right" }
+          "attachTo": {
+            "on": "right"
+          }
         }
       },
       {
@@ -153,7 +183,9 @@
         "content": "The answer count shows how many people have responded to this question.",
         "delay": 3000,
         "shepherdOptions": {
-          "attachTo": { "on": "right" }
+          "attachTo": {
+            "on": "right"
+          }
         }
       },
       {
@@ -161,7 +193,9 @@
         "content": "View count indicates how many times this question has been viewed by users.",
         "delay": 3000,
         "shepherdOptions": {
-          "attachTo": { "on": "right" }
+          "attachTo": {
+            "on": "right"
+          }
         }
       },
       {
@@ -169,7 +203,9 @@
         "content": "Tags help categorize questions and make them easier to find for people with expertise in specific areas.",
         "delay": 4000,
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
       }
     ]
@@ -179,26 +215,32 @@
     "title": "Search and Filter Questions",
     "description": "Learn how to find specific questions using search and filters",
     "mode": "normal",
-    "global": true,
     "steps": [
       {
         "targetElement": ".search-input",
         "content": "Use the search bar to find questions related to specific topics or technologies.",
         "shepherdOptions": {
-          "attachTo": { "on": "bottom" }
+          "attachTo": {
+            "on": "bottom"
+          }
         }
       },
       {
         "targetElement": ".questions-tabs",
         "content": "Use these filter tabs to sort questions by different criteria like popularity or recency.",
         "shepherdOptions": {
-          "attachTo": { "on": "bottom" }
+          "attachTo": {
+            "on": "bottom"
+          }
         }
       },
-      {        "targetElement": ".pagination",
+      {
+        "targetElement": ".pagination",
         "content": "Navigate through multiple pages of questions using the pagination controls at the bottom.",
         "shepherdOptions": {
-          "attachTo": { "on": "top" }
+          "attachTo": {
+            "on": "top"
+          }
         }
       }
     ]
@@ -208,7 +250,6 @@
     "title": "Debug Test Tool",
     "description": "Simple test tool for debugging",
     "mode": "silent",
-    "global": true,
     "steps": [
       {
         "targetElement": "body",
