@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MCPElementsController, ToolConfiguration, ToolStartConfig } from '../../lib/mcp-elements';
+import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction } from '../../lib/mcp-elements';
 
 /**
  * Angular service for integrating MCP Elements with the AutoBot application
@@ -333,11 +333,38 @@ export class MCPElementsService {
   setVisualFeedbackEnabled(enabled: boolean): void {
     this.mcpController.setVisualFeedbackEnabled(enabled);
   }
-
   /**
    * Check if visual feedback is enabled
    */
   isVisualFeedbackEnabled(): boolean {
     return this.mcpController.isVisualFeedbackEnabled();
+  }
+
+  /**
+   * Register a custom function that can be called from tool steps
+   */
+  registerCustomFunction(customFunction: CustomFunction): void {
+    this.mcpController.registerCustomFunction(customFunction);
+  }
+
+  /**
+   * Register multiple custom functions
+   */
+  registerCustomFunctions(functions: CustomFunction[]): void {
+    this.mcpController.registerCustomFunctions(functions);
+  }
+
+  /**
+   * Get a registered custom function
+   */
+  getCustomFunction(functionName: string): CustomFunction | undefined {
+    return this.mcpController.getCustomFunction(functionName);
+  }
+
+  /**
+   * Get all registered custom functions
+   */
+  getAllCustomFunctions(): Map<string, CustomFunction> {
+    return this.mcpController.getAllCustomFunctions();
   }
 }

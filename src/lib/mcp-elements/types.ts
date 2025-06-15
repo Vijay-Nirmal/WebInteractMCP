@@ -16,13 +16,19 @@ export type ToolMode = 'normal' | 'buttonless' | 'silent';
  */
 export interface ToolAction {
   /** The type of action to perform */
-  type: 'click' | 'fillInput' | 'navigate' | 'selectOption';
+  type: 'click' | 'fillInput' | 'navigate' | 'selectOption' | 'executeFunction';
   /** The CSS selector for the target element */
   element: string;
   /** The value to use for the action (e.g., text for 'fillInput'). Can be parameterized. */
   value?: any;
   /** Delay in milliseconds before performing this action (for 'silent' mode) */
   delay?: number;
+  /** For 'executeFunction' type: the function to execute */
+  function?: CustomFunctionImplementation;
+  /** For 'executeFunction' type: the name of a registered function to execute */
+  functionName?: string;
+  /** Parameters to pass to the function */
+  functionParams?: Record<string, any>;
 }
 
 /**
@@ -103,4 +109,41 @@ export interface ToolStartConfig {
   toolId: string;
   /** Optional parameters to pass to the tool */
   params?: Record<string, any>;
+}
+
+/**
+ * Context object passed to custom functions during execution
+ */
+export interface CustomFunctionContext {
+  /** The target DOM element */
+  element: HTMLElement;
+  /** Parameters passed via functionParams in the action */
+  params: Record<string, any>;
+  /** Tool-level parameters passed when starting the tool */
+  toolParams: Record<string, any>;
+  /** Reference to the MCPElementsController instance */
+  controller: any; // Using any to avoid circular dependency
+  /** Debug logging function */
+  debugLog: (message: string, ...data: any[]) => void;
+  /** Currently active tool configuration */
+  activeTool: ToolConfiguration | null;
+  /** Current step index in the tool execution */
+  currentStepIndex: number;
+}
+
+/**
+ * Type definition for custom function implementations
+ */
+export type CustomFunctionImplementation = (context: CustomFunctionContext) => any | Promise<any>;
+
+/**
+ * Represents a custom function that can be executed as part of a tool step
+ */
+export interface CustomFunction {
+  /** The name of the function */
+  name: string;
+  /** The function implementation */
+  implementation: CustomFunctionImplementation;
+  /** Expected parameters for the function */
+  parameters?: Record<string, any>;
 }

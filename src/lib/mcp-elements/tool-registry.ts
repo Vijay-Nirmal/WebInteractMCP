@@ -134,7 +134,7 @@ export class ToolRegistry {
     if (!Array.isArray(config.steps) || config.steps.length === 0) {
       throw new Error(`Tool ${config.toolId} must have at least one step`);
     }
-
+    
     // Validate each step
     for (let i = 0; i < config.steps.length; i++) {
       const step = config.steps[i];
@@ -146,6 +146,21 @@ export class ToolRegistry {
       }
       if (config.mode === 'silent' && !step.action) {
         throw new Error(`Tool ${config.toolId}, step ${i}: action is required for silent mode`);
+      }
+
+      // Validate action if present
+      if (step.action) {
+        const validActionTypes = ['click', 'fillInput', 'navigate', 'selectOption', 'executeFunction'];
+        if (!validActionTypes.includes(step.action.type)) {
+          throw new Error(`Tool ${config.toolId}, step ${i}: invalid action type '${step.action.type}'`);
+        }
+
+        // Additional validation for executeFunction
+        if (step.action.type === 'executeFunction') {
+          if (!step.action.function && !step.action.functionName) {
+            throw new Error(`Tool ${config.toolId}, step ${i}: executeFunction action requires either 'function' or 'functionName'`);
+          }
+        }
       }
     }
   }

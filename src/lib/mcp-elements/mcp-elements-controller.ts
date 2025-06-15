@@ -5,7 +5,7 @@
 
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -18,6 +18,7 @@ export class MCPElementsController {
   private eventListeners: Map<MCPElementsEvent, Function[]> = new Map();
   private currentStepIndex: number = 0;
   private globalOptions: MCPElementsOptions;
+  private customFunctions: Map<string, CustomFunction> = new Map();
 
   /**
    * Creates a new MCPElementsController instance.
@@ -60,7 +61,6 @@ export class MCPElementsController {
   getGlobalOptions(): MCPElementsOptions {
     return { ...this.globalOptions };
   }
-
   /**
    * Updates global options.
    * @param options - Partial options to update.
@@ -70,6 +70,47 @@ export class MCPElementsController {
     if (options.enableVisualFeedback === true) {
       this.injectVisualFeedbackStyles();
     }
+  }
+
+  /**
+   * Registers a custom function that can be called from tool steps.
+   * @param customFunction - The custom function configuration.
+   */
+  registerCustomFunction(customFunction: CustomFunction): void {
+    this.customFunctions.set(customFunction.name, customFunction);
+    this.debugLog(`Registered custom function: ${customFunction.name}`);
+  }
+
+  /**
+   * Registers multiple custom functions.
+   * @param functions - Array of custom function configurations.
+   */
+  registerCustomFunctions(functions: CustomFunction[]): void {
+    functions.forEach(func => this.registerCustomFunction(func));
+  }
+
+  /**
+   * Unregisters a custom function.
+   * @param functionName - The name of the function to unregister.
+   */
+  unregisterCustomFunction(functionName: string): void {
+    this.customFunctions.delete(functionName);
+    this.debugLog(`Unregistered custom function: ${functionName}`);
+  }
+
+  /**
+   * Gets a registered custom function.
+   * @param functionName - The name of the function to retrieve.
+   * @returns The custom function configuration or undefined if not found.
+   */
+  getCustomFunction(functionName: string): CustomFunction | undefined {
+    return this.customFunctions.get(functionName);
+  }  /**
+   * Gets all registered custom functions.
+   * @returns Map of all registered custom functions.
+   */
+  getAllCustomFunctions(): Map<string, CustomFunction> {
+    return new Map(this.customFunctions);
   }
 
   /**
@@ -366,7 +407,7 @@ export class MCPElementsController {
         this.emit('step:show', { step, index: i, tool }); if (step.action) {
           this.debugLog('Performing action for step', i + 1);
           try {
-            await this.performAction(step.action, step.targetElement);
+            await this.performAction(step.action, step.targetElement, params);
           } catch (stepError) {
             const errorMessage = stepError instanceof Error ? stepError.message : String(stepError);
             console.error(`Error in step ${i + 1}:`, stepError);
@@ -495,7 +536,7 @@ export class MCPElementsController {
    * Performs an automated action on a DOM element.
    * @private
    */
-  private async performAction(action: ToolAction, targetElement: string): Promise<void> {
+  private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<void> {
     const effectiveOptions = this.activeTool ? this.getEffectiveOptions(this.activeTool) : this.globalOptions;
 
     this.debugLog('Performing action:', action.type, 'on element:', targetElement);
@@ -543,12 +584,17 @@ export class MCPElementsController {
           console.error('Element is not a select:', element);
         }
         break;
-      case 'navigate':
+        case 'navigate':
         this.debugLog('Navigating to:', action.value);
         // Show click effect if element is clickable (like a link)
         this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
         window.location.href = action.value || '';
+        break;
+
+      case 'executeFunction':
+        this.debugLog('Executing custom function:', action.functionName || 'inline function');
+        await this.executeCustomFunction(action, element, params);
         break;
 
       default:
@@ -558,7 +604,6 @@ export class MCPElementsController {
     // Add a small delay after each action (configurable)
     await new Promise(resolve => setTimeout(resolve, effectiveOptions.actionDelay));
   }
-
   /**
    * Wait for an element to be available in the DOM
    * @private
@@ -576,6 +621,58 @@ export class MCPElementsController {
 
     console.error(`Element not found after ${timeout}ms:`, selector);
     return null;
+  }
+  /**
+   * Executes a custom function as part of a tool action.
+   * @private
+   */
+ private async executeCustomFunction(action: ToolAction, targetElement: HTMLElement, toolParams: Record<string, any>): Promise<void> {
+    let functionToExecute: CustomFunctionImplementation | undefined;
+    
+    // Check if function is provided directly
+    if (action.function) {
+      functionToExecute = action.function as CustomFunctionImplementation;
+      this.debugLog('Using inline function');
+    } 
+    // Check if function name is provided and exists in registry
+    else if (action.functionName) {
+      const customFunction = this.customFunctions.get(action.functionName);
+      if (customFunction) {
+        functionToExecute = customFunction.implementation;
+        this.debugLog(`Using registered function: ${action.functionName}`);
+      } else {
+        throw new Error(`Custom function '${action.functionName}' not found in registry`);
+      }
+    } else {
+      throw new Error('No function or functionName provided for executeFunction action');
+    }
+
+    if (!functionToExecute) {
+      throw new Error('Function to execute is undefined');
+    }
+
+    try {
+      // Prepare function context with proper typing
+      const context: CustomFunctionContext = {
+        element: targetElement,
+        params: action.functionParams || {},
+        toolParams: toolParams,
+        controller: this,
+        debugLog: this.debugLog.bind(this),
+        activeTool: this.activeTool,
+        currentStepIndex: this.currentStepIndex
+      };
+
+      // Execute the function with context
+      const result = await Promise.resolve(functionToExecute.call(context, context));
+      
+      this.debugLog('Custom function executed successfully:', result);
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.debugLog('Error executing custom function:', errorMessage);
+      throw new Error(`Custom function execution failed: ${errorMessage}`);
+    }
   }
   /**
    * Initializes default event listeners.

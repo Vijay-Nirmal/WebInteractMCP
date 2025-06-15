@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MCPElementsService } from '../../services/mcp-elements.service';
-import { ToolConfiguration } from '../../../lib/mcp-elements';
+import { ToolConfiguration, CustomFunctionContext } from '../../../lib/mcp-elements';
 
 @Component({
   selector: 'app-mcp-controls',
@@ -50,6 +50,12 @@ import { ToolConfiguration } from '../../../lib/mcp-elements';
               (click)="demonstrateAutoQuestion()"
               [disabled]="isLoading">
               Auto Fill Question
+            </button>
+            <button 
+              class="mcp-btn demo" 
+              (click)="demonstrateCustomFunction()"
+              [disabled]="isLoading">
+              Custom Function Demo
             </button>            <button 
               class="mcp-btn secondary" 
               (click)="runDebugTest()"
@@ -498,6 +504,10 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     try {
       await this.mcpElementsService.initialize();
       this.serviceStatus = 'ready';
+      
+      // Register custom functions early in the lifecycle
+      this.registerCustomFunctions();
+      
       await this.loadAvailableTools();
       this.setupEventListeners();
       this.refreshDebugInfo();
@@ -542,8 +552,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
-  }
-  async demonstrateAutoQuestion() {
+  }  async demonstrateAutoQuestion() {
     this.isLoading = true;
     try {
       // First navigate to the ask question page if not already there
@@ -566,6 +575,88 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     } finally {
       this.isLoading = false;
     }
+  }
+  async demonstrateCustomFunction() {
+    this.isLoading = true;
+    try {
+      // Custom functions are already registered in ngOnInit
+      console.log('Starting custom function demo...');
+      await this.mcpElementsService.startTool('custom-function-demo');
+    } catch (error) {
+      console.error('Error in custom function demo:', error);
+      this.addEvent('error', `Custom function demo error: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private registerCustomFunctions() {
+    // Register sample custom functions
+    this.mcpElementsService.registerCustomFunctions([
+      {
+        name: 'showAlert',
+        implementation: function(context: CustomFunctionContext) {
+          const message = context.params['message'] || 'Hello from custom function!';
+          alert(`Custom Function Alert: ${message}`);
+          return { success: true, message: 'Alert shown' };
+        },
+        parameters: {
+          message: 'string - The message to show in the alert'
+        }
+      },
+      {
+        name: 'highlightElement',
+        implementation: function(context: CustomFunctionContext) {
+          const element = context.element;
+          const duration = context.params['duration'] || 3000;
+          const color = context.params['color'] || '#ff6b6b';
+          
+          // Store original styles
+          const originalStyle = element.style.cssText;
+          
+          // Apply highlight
+          element.style.background = color;
+          element.style.transition = 'all 0.3s ease';
+          element.style.transform = 'scale(1.05)';
+          element.style.boxShadow = `0 0 20px ${color}`;
+          
+          // Remove highlight after duration
+          setTimeout(() => {
+            element.style.cssText = originalStyle;
+          }, duration);
+          
+          return { success: true, message: `Element highlighted for ${duration}ms` };
+        },
+        parameters: {
+          duration: 'number - Duration in milliseconds (default: 3000)',
+          color: 'string - Highlight color (default: "#ff6b6b")'
+        }
+      },
+      {
+        name: 'collectFormData',
+        implementation: function(context: CustomFunctionContext) {
+          const formData: any = {};
+          const form = context.element.closest('form') || document;
+          
+          // Collect input data
+          const inputs = form.querySelectorAll('input, textarea, select');
+          inputs.forEach((input: any) => {
+            if (input.name || input.id) {
+              const key = input.name || input.id;
+              formData[key] = input.value;
+            }
+          });
+          
+          console.log('Collected form data:', formData);
+          context.debugLog('Custom function collected form data:', formData);
+          
+          return { success: true, data: formData, message: 'Form data collected' };
+        },
+        parameters: {}
+      }
+    ]);
+    
+    console.log('Custom functions registered successfully');
   }
 
   async startTool(toolId: string) {

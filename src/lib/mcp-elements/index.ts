@@ -14,7 +14,11 @@ export type {
   ToolStep,
   ToolConfiguration,
   MCPElementsEvent,
-  ToolStartConfig
+  ToolStartConfig,
+  CustomFunction,
+  CustomFunctionContext,
+  CustomFunctionImplementation,
+  MCPElementsOptions
 } from './types';
 
 // Import for default instance
