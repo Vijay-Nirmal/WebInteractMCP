@@ -101,7 +101,7 @@
       }
     ]
   },
-  {
+ {
     "toolId": "auto-question-demo",
     "title": "Automatic Question Creation Demo",
     "description": "Demonstrates automated question posting for demo purposes",
@@ -112,6 +112,37 @@
       "elementTimeout": 8000,
       "actionDelay": 1000,
       "highlightDuration": 3000
+    },
+    "parameterSchema": {
+      "parameters": {
+        "questionTitle": {
+          "type": "string",
+          "description": "The title of the question to be posted",
+          "required": true,
+          "minLength": 10,
+          "maxLength": 200,
+          "examples": ["How to implement TypeScript interfaces?", "What is the difference between let and var in JavaScript?"]
+        },
+        "questionBody": {
+          "type": "string",
+          "description": "The detailed body content of the question including code examples and context",
+          "required": true,
+          "minLength": 50,
+          "examples": ["I'm trying to understand TypeScript interfaces. Here's my code:\n\n```typescript\ninterface User {\n  name: string;\n  age: number;\n}\n```\n\nHow do I properly implement this interface in my classes?"]
+        },
+        "tags": {
+          "type": "string",
+          "description": "Comma-separated list of relevant tags for the question (e.g., 'javascript,typescript,react')",
+          "required": true,
+          "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$",
+          "examples": ["javascript,typescript", "react,javascript,frontend", "python,django,web-development"]
+        }
+      },
+      "required": ["questionTitle", "questionBody", "tags"],
+      "metadata": {
+        "version": "1.0",
+        "author": "AutoBot Development Team"
+      }
     },
     "steps": [
       {
@@ -259,13 +290,50 @@
           "element": "body"        }
       }
     ]
-  },
-  {
+  },  {
     "toolId": "custom-function-demo",
     "title": "Custom Function Demo",
     "description": "Demonstrates the execution of custom TypeScript/JavaScript functions as part of tool steps",
     "mode": "silent",
-    "steps": [
+    "parameterSchema": {
+      "parameters": {
+        "welcomeMessage": {
+          "type": "string",
+          "description": "Custom welcome message to display in the alert",
+          "required": false,
+          "defaultValue": "Welcome to the Custom Function Demo! This alert was triggered by a custom function executed as part of a tool step.",
+          "maxLength": 500,
+          "examples": ["Hello from the MCP Elements demo!", "Welcome to our interactive tour!"]
+        },
+        "highlightColor": {
+          "type": "string",
+          "description": "Hex color code for element highlighting (must include #)",
+          "required": false,
+          "defaultValue": "#4f46e5",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "examples": ["#ff0000", "#00ff00", "#0000ff", "#4f46e5"]
+        },
+        "highlightDuration": {
+          "type": "number",
+          "description": "Duration in milliseconds for the highlight effect",
+          "required": false,
+          "defaultValue": 4000,
+          "minimum": 1000,
+          "maximum": 10000,
+          "examples": [2000, 3000, 5000]
+        },
+        "enableConsoleLogging": {
+          "type": "boolean",
+          "description": "Whether to enable console logging during the demo",
+          "required": false,
+          "defaultValue": true,
+          "examples": [true, false]
+        }
+      },
+      "metadata": {
+        "version": "1.1"
+      }
+    },    "steps": [
       {
         "targetElement": "body",
         "content": "Starting custom function demonstration",
@@ -273,7 +341,7 @@
           "type": "executeFunction",
           "functionName": "showAlert",
           "functionParams": {
-            "message": "Welcome to the Custom Function Demo! This alert was triggered by a custom function executed as part of a tool step."
+            "message": "{{welcomeMessage}}"
           }
         }
       },
@@ -284,8 +352,8 @@
           "type": "executeFunction",
           "functionName": "highlightElement",
           "functionParams": {
-            "color": "#4f46e5",
-            "duration": 4000
+            "color": "{{highlightColor}}",
+            "duration": "{{highlightDuration}}"
           }
         }
       },
@@ -307,7 +375,9 @@
         "action": {
           "type": "executeFunction",
           "functionName": "collectFormData",
-          "functionParams": {}
+          "functionParams": {
+            "enableLogging": "{{enableConsoleLogging}}"
+          }
         }
       },
       {

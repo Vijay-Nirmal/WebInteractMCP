@@ -5,7 +5,7 @@
 
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -189,7 +189,7 @@ export class MCPElementsController {
       console.log(`[MCP Debug] ${message}`, ...data);
     }
   }
-  /**
+ /**
    * Starts a sequence of Tools.
    * @param toolsToStart - An array of objects, each with a toolId and optional parameters to pass to the tool.
    */
@@ -197,6 +197,27 @@ export class MCPElementsController {
     if (!Array.isArray(toolsToStart) || toolsToStart.length === 0) {
       console.warn('No tools provided to start');
       return;
+    }
+
+    // Validate parameters for all tools before starting
+    for (const toolConfig of toolsToStart) {
+      const validation = this.validateToolParameters(toolConfig.toolId, toolConfig.params || {});
+      if (!validation.isValid) {
+        const errorMsg = `Parameter validation failed for tool '${toolConfig.toolId}': ${validation.errors.join(', ')}`;
+        console.error(errorMsg);
+        this.emit('cancel', { 
+          tool: this.registry.getToolById(toolConfig.toolId), 
+          error: errorMsg,
+          validationErrors: validation.errors 
+        });
+        return;
+      }
+      if (validation.warnings.length > 0) {
+        console.warn(`Parameter validation warnings for tool '${toolConfig.toolId}':`, validation.warnings);
+      }
+
+      // Apply default values to parameters
+      toolConfig.params = this.applyParameterDefaults(toolConfig.toolId, toolConfig.params || {});
     }
 
     // Stop any currently running tool
@@ -1101,5 +1122,236 @@ export class MCPElementsController {
    */
   getAvailableThemes(): string[] {
     return ['default', 'dark', 'success', 'warning', 'error'];
+  }
+
+  /**
+   * Gets the parameter schema for a specific tool.
+   * @param toolId - The ID of the tool.
+   * @returns The parameter schema or undefined if the tool doesn't exist or has no schema.
+   */
+  getToolParameterSchema(toolId: string): ToolParameterSchema | undefined {
+    const tool = this.registry.getToolById(toolId);
+    return tool?.parameterSchema;
+  }
+
+  /**
+   * Validates parameters against a tool's parameter schema.
+   * @param toolId - The ID of the tool.
+   * @param params - The parameters to validate.
+   * @returns Validation result with success flag and error messages.
+   */
+  validateToolParameters(toolId: string, params: Record<string, any>): {
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  } {
+    const tool = this.registry.getToolById(toolId);
+    const result = {
+      isValid: true,
+      errors: [] as string[],
+      warnings: [] as string[]
+    };
+
+    if (!tool) {
+      result.isValid = false;
+      result.errors.push(`Tool with ID '${toolId}' not found`);
+      return result;
+    }
+
+    if (!tool.parameterSchema) {
+      // No schema defined, assume all parameters are valid
+      this.debugLog(`Tool '${toolId}' has no parameter schema defined`);
+      return result;
+    }
+
+    const schema = tool.parameterSchema;
+
+    // Check required parameters
+    if (schema.required) {
+      for (const requiredParam of schema.required) {
+        if (!(requiredParam in params)) {
+          result.isValid = false;
+          result.errors.push(`Required parameter '${requiredParam}' is missing`);
+        }
+      }
+    }
+
+    // Validate each provided parameter
+    for (const [paramName, paramValue] of Object.entries(params)) {
+      const paramDef = schema.parameters[paramName];
+      
+      if (!paramDef) {
+        result.warnings.push(`Parameter '${paramName}' is not defined in the schema`);
+        continue;
+      }
+
+      const validationResult = this.validateParameterValue(paramName, paramValue, paramDef);
+      if (!validationResult.isValid) {
+        result.isValid = false;
+        result.errors.push(...validationResult.errors);
+      }
+      if (validationResult.warnings.length > 0) {
+        result.warnings.push(...validationResult.warnings);
+      }
+    }
+
+    // Check for missing required parameters defined in individual parameter definitions
+    for (const [paramName, paramDef] of Object.entries(schema.parameters)) {
+      if (paramDef.required && !(paramName in params)) {
+        if (paramDef.defaultValue !== undefined) {
+          result.warnings.push(`Required parameter '${paramName}' is missing but has a default value`);
+        } else {
+          result.isValid = false;
+          result.errors.push(`Required parameter '${paramName}' is missing`);
+        }
+      }
+    }
+
+    this.debugLog(`Parameter validation for tool '${toolId}':`, result);
+    return result;
+  }
+
+  /**
+   * Validates a single parameter value against its definition.
+   * @private
+   * @param paramName - The name of the parameter.
+   * @param value - The value to validate.
+   * @param definition - The parameter definition.
+   * @returns Validation result.
+   */
+  private validateParameterValue(paramName: string, value: any, definition: ParameterDefinition): {
+    isValid: boolean;
+    errors: string[];
+    warnings: string[];
+  } {
+    const result = {
+      isValid: true,
+      errors: [] as string[],
+      warnings: [] as string[]
+    };
+
+    // Type validation
+    const actualType = Array.isArray(value) ? 'array' : typeof value;
+    if (actualType !== definition.type) {
+      result.isValid = false;
+      result.errors.push(`Parameter '${paramName}' expected type '${definition.type}' but got '${actualType}'`);
+      return result; // No point in further validation if type is wrong
+    }
+
+    // String-specific validations
+    if (definition.type === 'string' && typeof value === 'string') {
+      if (definition.minLength !== undefined && value.length < definition.minLength) {
+        result.isValid = false;
+        result.errors.push(`Parameter '${paramName}' must be at least ${definition.minLength} characters long`);
+      }
+      if (definition.maxLength !== undefined && value.length > definition.maxLength) {
+        result.isValid = false;
+        result.errors.push(`Parameter '${paramName}' must be at most ${definition.maxLength} characters long`);
+      }
+      if (definition.pattern) {
+        if (Array.isArray(definition.pattern)) {
+          if (!definition.pattern.includes(value)) {
+            result.isValid = false;
+            result.errors.push(`Parameter '${paramName}' must be one of: ${definition.pattern.join(', ')}`);
+          }
+        } else if (typeof definition.pattern === 'string') {
+          const regex = new RegExp(definition.pattern);
+          if (!regex.test(value)) {
+            result.isValid = false;
+            result.errors.push(`Parameter '${paramName}' must match pattern: ${definition.pattern}`);
+          }
+        }
+      }
+    }
+
+    // Number-specific validations
+    if (definition.type === 'number' && typeof value === 'number') {
+      if (definition.minimum !== undefined && value < definition.minimum) {
+        result.isValid = false;
+        result.errors.push(`Parameter '${paramName}' must be at least ${definition.minimum}`);
+      }
+      if (definition.maximum !== undefined && value > definition.maximum) {
+        result.isValid = false;
+        result.errors.push(`Parameter '${paramName}' must be at most ${definition.maximum}`);
+      }
+    }
+
+    // Array-specific validations
+    if (definition.type === 'array' && Array.isArray(value)) {
+      if (definition.items) {
+        for (let i = 0; i < value.length; i++) {
+          const itemResult = this.validateParameterValue(`${paramName}[${i}]`, value[i], definition.items);
+          if (!itemResult.isValid) {
+            result.isValid = false;
+            result.errors.push(...itemResult.errors);
+          }
+          result.warnings.push(...itemResult.warnings);
+        }
+      }
+    }
+
+    // Object-specific validations
+    if (definition.type === 'object' && typeof value === 'object' && value !== null) {
+      if (definition.properties) {
+        for (const [propName, propDef] of Object.entries(definition.properties)) {
+          if (propName in value) {
+            const propResult = this.validateParameterValue(`${paramName}.${propName}`, value[propName], propDef);
+            if (!propResult.isValid) {
+              result.isValid = false;
+              result.errors.push(...propResult.errors);
+            }
+            result.warnings.push(...propResult.warnings);
+          } else if ((propDef as any).required) {
+            result.isValid = false;
+            result.errors.push(`Required property '${propName}' is missing from parameter '${paramName}'`);
+          }
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Gets all available tools with their parameter schemas for MCP server discovery.
+   * @returns Map of tool configurations with parameter schemas.
+   */
+  getToolsWithParameterSchemas(): Map<string, { tool: ToolConfiguration; hasParameters: boolean }> {
+    const tools = this.registry.getAllTools();
+    const result = new Map<string, { tool: ToolConfiguration; hasParameters: boolean }>();
+
+    for (const [toolId, tool] of tools) {
+      result.set(toolId, {
+        tool,
+        hasParameters: tool.parameterSchema !== undefined && Object.keys(tool.parameterSchema.parameters).length > 0
+      });
+    }
+
+    return result;
+  }
+
+  /**
+   * Applies default values to parameters based on the tool's parameter schema.
+   * @param toolId - The ID of the tool.
+   * @param params - The input parameters.
+   * @returns Parameters with default values applied.
+   */
+  applyParameterDefaults(toolId: string, params: Record<string, any>): Record<string, any> {
+    const tool = this.registry.getToolById(toolId);
+    if (!tool?.parameterSchema) {
+      return { ...params };
+    }
+
+    const result = { ...params };
+    const schema = tool.parameterSchema;
+
+    for (const [paramName, paramDef] of Object.entries(schema.parameters)) {
+      if (!(paramName in result) && paramDef.defaultValue !== undefined) {
+        result[paramName] = paramDef.defaultValue;
+        this.debugLog(`Applied default value for parameter '${paramName}':`, paramDef.defaultValue);
+      }
+    }
+
+    return result;
   }
 }

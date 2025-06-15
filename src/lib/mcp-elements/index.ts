@@ -19,7 +19,9 @@ export type {
   CustomFunctionContext,
   CustomFunctionImplementation,
   MCPElementsOptions,
-  VisualEffectStyles
+  VisualEffectStyles,
+  ParameterDefinition,
+  ToolParameterSchema
 } from './types';
 
 // Import for default instance

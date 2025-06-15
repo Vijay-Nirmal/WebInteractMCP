@@ -565,7 +565,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       const questionData = {
         questionTitle: 'How to implement TypeScript interfaces effectively?',
         questionBody: 'I am working on a TypeScript project and want to understand the best practices for implementing interfaces. What are the key considerations for designing clean and maintainable interfaces?',
-        tags: 'typescript, interfaces, best-practices'
+        tags: 'typescript,interfaces,best-practices'
       };
       
       console.log('Starting auto question demo with data:', questionData);

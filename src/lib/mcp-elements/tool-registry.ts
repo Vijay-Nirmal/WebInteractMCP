@@ -113,6 +113,73 @@ export class ToolRegistry {
   }
 
   /**
+   * Gets tools that have parameter schemas defined.
+   * @returns A map of tools that have parameter schemas.
+   */
+  getToolsWithParameterSchemas(): Map<string, ToolConfiguration> {
+    const toolsWithSchemas = new Map<string, ToolConfiguration>();
+
+    for (const [toolId, tool] of this.tools) {
+      if (tool.parameterSchema && Object.keys(tool.parameterSchema.parameters).length > 0) {
+        toolsWithSchemas.set(toolId, tool);
+      }
+    }
+
+    return toolsWithSchemas;
+  }
+
+  /**
+   * Gets parameter schema for a specific tool.
+   * @param toolId - The ID of the tool.
+   * @returns The parameter schema or undefined if not found.
+   */
+  getParameterSchema(toolId: string): any {
+    const tool = this.tools.get(toolId);
+    return tool?.parameterSchema;
+  }
+
+  /**
+   * Gets a summary of all tools with their parameter information for MCP server discovery.
+   * @returns Array of tool summaries including parameter information.
+   */
+  getToolsSummaryForMCP(): Array<{
+    toolId: string;
+    title: string;
+    description: string;
+    mode: string;
+    hasParameters: boolean;
+    parameterCount: number;
+    parameterSchema?: any;
+  }> {
+    const summary: Array<{
+      toolId: string;
+      title: string;
+      description: string;
+      mode: string;
+      hasParameters: boolean;
+      parameterCount: number;
+      parameterSchema?: any;
+    }> = [];
+
+    for (const [toolId, tool] of this.tools) {
+      const hasParameters = tool.parameterSchema !== undefined;
+      const parameterCount = hasParameters ? Object.keys(tool.parameterSchema!.parameters).length : 0;
+
+      summary.push({
+        toolId: tool.toolId,
+        title: tool.title,
+        description: tool.description,
+        mode: tool.mode,
+        hasParameters,
+        parameterCount,
+        parameterSchema: tool.parameterSchema
+      });
+    }
+
+    return summary;
+  }
+
+  /**
    * Validates a tool configuration.
    * @private
    * @param config - The tool configuration to validate.

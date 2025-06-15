@@ -4,6 +4,51 @@
  */
 
 /**
+ * Defines the type and constraints for a tool parameter
+ */
+export interface ParameterDefinition {
+  /** The data type of the parameter */
+  type: 'string' | 'number' | 'boolean' | 'array' | 'object';
+  /** Human-readable description of what this parameter does */
+  description: string;
+  /** Whether this parameter is required (default: false) */
+  required?: boolean;
+  /** Default value for the parameter */
+  defaultValue?: any;
+  /** For string types: minimum length */
+  minLength?: number;
+  /** For string types: maximum length */
+  maxLength?: number;
+  /** For string/array types: pattern or allowed values */
+  pattern?: string | string[];
+  /** For number types: minimum value */
+  minimum?: number;
+  /** For number types: maximum value */
+  maximum?: number;
+  /** For array types: type of array items */
+  items?: ParameterDefinition;
+  /** For object types: properties definition */
+  properties?: Record<string, ParameterDefinition>;
+  /** Example value(s) for documentation */
+  examples?: any[];
+}
+
+/**
+ * Schema definition for tool parameters used by MCP server
+ */
+export interface ToolParameterSchema {
+  /** Map of parameter names to their definitions */
+  parameters: Record<string, ParameterDefinition>;
+  /** List of required parameter names */
+  required?: string[];
+  /** Additional metadata about the parameters */
+  metadata?: {
+    /** Version of the parameter schema */
+    version?: string;
+  };
+}
+
+/**
  * Configuration for customizing visual effect styles
  */
 export interface VisualEffectStyles {
@@ -133,6 +178,8 @@ export interface ToolConfiguration {
   steps: ToolStep[];
   /** Override global options for this specific tool */
   options?: Partial<MCPElementsOptions>;
+  /** Parameter schema for MCP server integration - defines expected parameters and their types */
+  parameterSchema?: ToolParameterSchema;
 }
 
 /**
