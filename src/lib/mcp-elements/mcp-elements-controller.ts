@@ -3,7 +3,7 @@
  * @description The main controller for managing and running MCP Elements Tools
  */
 
-import { Tour, Shepherd, ShepherdBase } from 'shepherd.js';
+import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
 import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions } from './types';
 
@@ -17,7 +17,6 @@ export class MCPElementsController {
   private toolQueue: ToolStartConfig[] = [];
   private eventListeners: Map<MCPElementsEvent, Function[]> = new Map();
   private currentStepIndex: number = 0;
-  private currentParams: Record<string, any> = {};
   private globalOptions: MCPElementsOptions;
 
   /**
@@ -128,7 +127,6 @@ export class MCPElementsController {
     this.activeTool = null;
     this.toolQueue = [];
     this.currentStepIndex = 0;
-    this.currentParams = {};
 
     this.emit('cancel', { tool: currentTool });
   }
@@ -225,7 +223,6 @@ export class MCPElementsController {
     }
 
     this.activeTool = tool;
-    this.currentParams = params;
     this.currentStepIndex = 0;
 
     this.debugLog(`Starting tool: ${tool.title} (${tool.mode} mode)`, { params });
