@@ -4,6 +4,69 @@
  */
 
 /**
+ * Configuration for customizing visual effect styles
+ */
+export interface VisualEffectStyles {
+  /** Styles for the click ripple effect */
+  clickRipple?: {
+    /** Background color for the ripple (default: 'rgba(59, 130, 246, 0.6)') */
+    backgroundColor?: string;
+    /** Size of the ripple in pixels (default: 20) */
+    size?: number;
+    /** Animation duration in seconds (default: 0.6) */
+    duration?: number;
+    /** Border radius for the ripple (default: '50%') */
+    borderRadius?: string;
+  };
+  /** Styles for the glow/highlight effect */
+  highlight?: {
+    /** Primary glow color (default: 'rgba(59, 130, 246, 0.5)') */
+    primaryColor?: string;
+    /** Secondary glow color (default: 'rgba(59, 130, 246, 0.8)') */
+    secondaryColor?: string;
+    /** Tertiary glow color (default: 'rgba(59, 130, 246, 0.6)') */
+    tertiaryColor?: string;
+    /** Animation duration in seconds (default: 2) */
+    duration?: number;
+    /** Primary blur radius in pixels (default: 5) */
+    primaryBlur?: number;
+    /** Secondary blur radius in pixels (default: 20) */
+    secondaryBlur?: number;
+    /** Tertiary blur radius in pixels (default: 30) */
+    tertiaryBlur?: number;
+  };
+  /** Styles for the pulse effect */
+  pulse?: {
+    /** Animation duration in seconds (default: 1) */
+    duration?: number;
+    /** Scale factor for the pulse (default: 1.05) */
+    scale?: number;
+    /** Opacity during pulse (default: 0.8) */
+    opacity?: number;
+  };
+  /** Styles for the typing indicator effect */
+  typing?: {
+    /** Background gradient for the shimmer effect */
+    shimmerGradient?: string;
+    /** Animation duration in seconds (default: 1.5) */
+    duration?: number;
+    /** Shimmer opacity (default: 0.2) */
+    opacity?: number;
+  };
+  /** Styles for the focus ring effect */
+  focusRing?: {
+    /** Outline color (default: 'rgba(59, 130, 246, 0.8)') */
+    color?: string;
+    /** Outline width in pixels (default: 2) */
+    width?: number;
+    /** Outline offset in pixels (default: 2) */
+    offset?: number;
+    /** Border radius in pixels (default: 4) */
+    borderRadius?: number;
+  };
+}
+
+/**
  * The execution mode for a Tool.
  * - `normal`: Standard ShepherdJS tour with next/back buttons.
  * - `buttonless`: No buttons, steps advance automatically after a specified delay.
@@ -94,6 +157,8 @@ export interface MCPElementsOptions {
   actionDelay: number;
   /** Default delay in milliseconds for buttonless mode steps (default: 3000) */
   defaultButtonlessDelay: number;
+  /** Custom styling configuration for visual effects */
+  visualEffectStyles?: VisualEffectStyles;
 }
 
 /**

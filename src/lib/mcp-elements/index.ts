@@ -18,7 +18,8 @@ export type {
   CustomFunction,
   CustomFunctionContext,
   CustomFunctionImplementation,
-  MCPElementsOptions
+  MCPElementsOptions,
+  VisualEffectStyles
 } from './types';
 
 // Import for default instance

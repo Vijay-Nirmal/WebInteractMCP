@@ -5,7 +5,7 @@
 
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -19,13 +19,15 @@ export class MCPElementsController {
   private currentStepIndex: number = 0;
   private globalOptions: MCPElementsOptions;
   private customFunctions: Map<string, CustomFunction> = new Map();
+  private customStyles: VisualEffectStyles = {};
+  private styleElementId: string = 'mcp-visual-feedback-styles';
 
   /**
    * Creates a new MCPElementsController instance.
    * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor.
    * @param options - Global configuration options for the controller.
    */
-  constructor(private shepherdOptions: any = {}, options: Partial<MCPElementsOptions> = {}) {
+ constructor(private shepherdOptions: any = {}, options: Partial<MCPElementsOptions> = {}) {
     this.registry = new ToolRegistry();
 
     // Set default options
@@ -41,6 +43,11 @@ export class MCPElementsController {
       defaultButtonlessDelay: 3000,
       ...options
     };
+
+    // Initialize custom styles from options
+    if (options.visualEffectStyles) {
+      this.customStyles = { ...options.visualEffectStyles };
+    }
 
     this.initializeEventListeners();
     this.injectVisualFeedbackStyles();
@@ -61,15 +68,63 @@ export class MCPElementsController {
   getGlobalOptions(): MCPElementsOptions {
     return { ...this.globalOptions };
   }
-  /**
+ /**
    * Updates global options.
    * @param options - Partial options to update.
    */
   updateGlobalOptions(options: Partial<MCPElementsOptions>): void {
     this.globalOptions = { ...this.globalOptions, ...options };
+    
+    // Update custom styles if provided
+    if (options.visualEffectStyles) {
+      this.customStyles = { ...this.customStyles, ...options.visualEffectStyles };
+    }
+    
     if (options.enableVisualFeedback === true) {
       this.injectVisualFeedbackStyles();
     }
+  }
+
+  /**
+   * Updates the visual effect styles and regenerates the CSS.
+   * @param styles - Partial visual effect styles to update.
+   */
+  updateVisualEffectStyles(styles: Partial<VisualEffectStyles>): void {
+    this.customStyles = { ...this.customStyles, ...styles };
+    this.injectVisualFeedbackStyles();
+    this.debugLog('Updated visual effect styles:', this.customStyles);
+  }
+
+  /**
+   * Gets the current visual effect styles.
+   * @returns The current visual effect styles.
+   */
+  getVisualEffectStyles(): VisualEffectStyles {
+    return { ...this.customStyles };
+  }
+
+  /**
+   * Resets visual effect styles to default values.
+   */
+  resetVisualEffectStyles(): void {
+    this.customStyles = {};
+    this.injectVisualFeedbackStyles();
+    this.debugLog('Reset visual effect styles to defaults');
+  }
+
+  /**
+   * Sets a specific style property for a visual effect.
+   * @param effect - The visual effect to modify.
+   * @param property - The property to set.
+   * @param value - The value to set.
+   */
+  setVisualEffectProperty(effect: keyof VisualEffectStyles, property: string, value: any): void {
+    if (!this.customStyles[effect]) {
+      this.customStyles[effect] = {};
+    }
+    (this.customStyles[effect] as any)[property] = value;
+    this.injectVisualFeedbackStyles();
+    this.debugLog(`Set ${effect}.${property} to:`, value);
   }
 
   /**
@@ -685,18 +740,63 @@ export class MCPElementsController {
     this.eventListeners.set('cancel', []);
     this.eventListeners.set('step:show', []);
   }
-  /**
+ /**
    * Injects CSS styles for visual feedback animations.
    * @private
    */
   private injectVisualFeedbackStyles(): void {
     if (!this.globalOptions.enableVisualFeedback) return;
 
-    const styleId = 'mcp-visual-feedback-styles';
-    if (document.getElementById(styleId)) return; // Already injected
+    // Remove existing styles if they exist
+    const existingStyle = document.getElementById(this.styleElementId);
+    if (existingStyle) {
+      existingStyle.remove();
+    }
+
+    // Get style values with defaults
+    const clickRipple = {
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      size: 20,
+      duration: 0.6,
+      borderRadius: '50%',
+      ...this.customStyles.clickRipple
+    };
+
+    const highlight = {
+      primaryColor: 'rgba(59, 130, 246, 0.5)',
+      secondaryColor: 'rgba(59, 130, 246, 0.8)',
+      tertiaryColor: 'rgba(59, 130, 246, 0.6)',
+      duration: 2,
+      primaryBlur: 5,
+      secondaryBlur: 20,
+      tertiaryBlur: 30,
+      ...this.customStyles.highlight
+    };
+
+    const pulse = {
+      duration: 1,
+      scale: 1.05,
+      opacity: 0.8,
+      ...this.customStyles.pulse
+    };
+
+    const typing = {
+      shimmerGradient: 'linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent)',
+      duration: 1.5,
+      opacity: 0.2,
+      ...this.customStyles.typing
+    };
+
+    const focusRing = {
+      color: 'rgba(59, 130, 246, 0.8)',
+      width: 2,
+      offset: 2,
+      borderRadius: 4,
+      ...this.customStyles.focusRing
+    };
 
     const style = document.createElement('style');
-    style.id = styleId;
+    style.id = this.styleElementId;
     style.textContent = `
       @keyframes mcpClickRipple {
         0% {
@@ -711,10 +811,10 @@ export class MCPElementsController {
 
       @keyframes mcpGlow {
         0%, 100% { 
-          box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); 
+          box-shadow: 0 0 ${highlight.primaryBlur}px ${highlight.primaryColor}; 
         }
         50% { 
-          box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6); 
+          box-shadow: 0 0 ${highlight.secondaryBlur}px ${highlight.secondaryColor}, 0 0 ${highlight.tertiaryBlur}px ${highlight.tertiaryColor}; 
         }
       }
 
@@ -724,22 +824,27 @@ export class MCPElementsController {
           opacity: 1;
         }
         50% { 
-          transform: scale(1.05);
-          opacity: 0.8;
+          transform: scale(${pulse.scale});
+          opacity: ${pulse.opacity};
         }
+      }
+
+      @keyframes mcpTypingShimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
       }
 
       .mcp-click-ripple {
         position: absolute;
-        border-radius: 50%;
-        background: rgba(59, 130, 246, 0.6);
-        animation: mcpClickRipple 0.6s ease-out;
+        border-radius: ${clickRipple.borderRadius};
+        background: ${clickRipple.backgroundColor};
+        animation: mcpClickRipple ${clickRipple.duration}s ease-out;
         pointer-events: none;
         z-index: 9999;
-        width: 20px;
-        height: 20px;
-        margin-left: -10px;
-        margin-top: -10px;
+        width: ${clickRipple.size}px;
+        height: ${clickRipple.size}px;
+        margin-left: -${clickRipple.size / 2}px;
+        margin-top: -${clickRipple.size / 2}px;
       }
 
       .mcp-typing-indicator {
@@ -754,32 +859,29 @@ export class MCPElementsController {
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
-        animation: mcpTypingShimmer 1.5s infinite;
+        background: ${typing.shimmerGradient};
+        animation: mcpTypingShimmer ${typing.duration}s infinite;
         pointer-events: none;
       }
 
-      @keyframes mcpTypingShimmer {
-        0% { transform: translateX(-100%); }
-        100% { transform: translateX(100%); }
-      }
-
       .mcp-highlight {
-        animation: mcpGlow 2s ease-in-out infinite;
+        animation: mcpGlow ${highlight.duration}s ease-in-out infinite;
         transition: all 0.3s ease;
       }
 
       .mcp-pulse {
-        animation: mcpPulse 1s ease-in-out infinite;
+        animation: mcpPulse ${pulse.duration}s ease-in-out infinite;
       }
 
       .mcp-focus-ring {
-        outline: 2px solid rgba(59, 130, 246, 0.8);
-        outline-offset: 2px;
-        border-radius: 4px;
+        outline: ${focusRing.width}px solid ${focusRing.color};
+        outline-offset: ${focusRing.offset}px;
+        border-radius: ${focusRing.borderRadius}px;
       }
     `;
     document.head.appendChild(style);
+
+    this.debugLog('Injected visual feedback styles with custom configuration');
   }  /**
    * Shows a click visual effect on an element.
    * @private
@@ -787,6 +889,17 @@ export class MCPElementsController {
   private showClickEffect(element: HTMLElement, options?: MCPElementsOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
+
+    const clickRipple = {
+      size: 20,
+      duration: 0.6,
+      ...this.customStyles.clickRipple
+    };
+
+    const pulse = {
+      duration: 1,
+      ...this.customStyles.pulse
+    };
 
     const rect = element.getBoundingClientRect();
     const ripple = document.createElement('div');
@@ -799,11 +912,15 @@ export class MCPElementsController {
     // Add pulse effect to the target element
     element.classList.add('mcp-pulse');
 
+    // Use custom duration for cleanup
+    const cleanupDuration = Math.max(clickRipple.duration * 1000, pulse.duration * 1000);
     setTimeout(() => {
       ripple.remove();
       element.classList.remove('mcp-pulse');
-    }, effectiveOptions.clickEffectDuration);
-  }  /**
+    }, cleanupDuration);
+  }
+  
+  /**
    * Shows typing animation on an input element.
    * @private
    */
@@ -842,12 +959,18 @@ export class MCPElementsController {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
+    // Use custom highlight duration if specified
+    const highlight = {
+      duration: 2,
+      ...this.customStyles.highlight
+    };
+    const effectiveDuration = duration || (highlight.duration * 1000);
+
     element.classList.add('mcp-highlight');
     setTimeout(() => {
       element.classList.remove('mcp-highlight');
-    }, duration);
-  }
-  /**
+    }, effectiveDuration);
+  }  /**
    * Shows a focus effect on an element.
    * @private
    */
@@ -875,5 +998,108 @@ export class MCPElementsController {
    */
   public isVisualFeedbackEnabled(): boolean {
     return this.globalOptions.enableVisualFeedback;
+  }
+
+  /**
+   * Applies a predefined theme to the visual effects.
+   * @param theme - The theme name to apply.
+   */
+  applyVisualEffectTheme(theme: 'default' | 'dark' | 'success' | 'warning' | 'error' | 'custom'): void {
+    let themeStyles: VisualEffectStyles = {};
+
+    switch (theme) {
+      case 'dark':
+        themeStyles = {
+          clickRipple: {
+            backgroundColor: 'rgba(255, 255, 255, 0.3)',
+          },
+          highlight: {
+            primaryColor: 'rgba(156, 163, 175, 0.5)',
+            secondaryColor: 'rgba(156, 163, 175, 0.8)',
+            tertiaryColor: 'rgba(156, 163, 175, 0.6)',
+          },
+          focusRing: {
+            color: 'rgba(156, 163, 175, 0.8)',
+          },
+          typing: {
+            shimmerGradient: 'linear-gradient(90deg, transparent, rgba(156, 163, 175, 0.2), transparent)',
+          }
+        };
+        break;
+
+      case 'success':
+        themeStyles = {
+          clickRipple: {
+            backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          },
+          highlight: {
+            primaryColor: 'rgba(34, 197, 94, 0.5)',
+            secondaryColor: 'rgba(34, 197, 94, 0.8)',
+            tertiaryColor: 'rgba(34, 197, 94, 0.6)',
+          },
+          focusRing: {
+            color: 'rgba(34, 197, 94, 0.8)',
+          },
+          typing: {
+            shimmerGradient: 'linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.2), transparent)',
+          }
+        };
+        break;
+
+      case 'warning':
+        themeStyles = {
+          clickRipple: {
+            backgroundColor: 'rgba(251, 191, 36, 0.6)',
+          },
+          highlight: {
+            primaryColor: 'rgba(251, 191, 36, 0.5)',
+            secondaryColor: 'rgba(251, 191, 36, 0.8)',
+            tertiaryColor: 'rgba(251, 191, 36, 0.6)',
+          },
+          focusRing: {
+            color: 'rgba(251, 191, 36, 0.8)',
+          },
+          typing: {
+            shimmerGradient: 'linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.2), transparent)',
+          }
+        };
+        break;
+
+      case 'error':
+        themeStyles = {
+          clickRipple: {
+            backgroundColor: 'rgba(239, 68, 68, 0.6)',
+          },
+          highlight: {
+            primaryColor: 'rgba(239, 68, 68, 0.5)',
+            secondaryColor: 'rgba(239, 68, 68, 0.8)',
+            tertiaryColor: 'rgba(239, 68, 68, 0.6)',
+          },
+          focusRing: {
+            color: 'rgba(239, 68, 68, 0.8)',
+          },
+          typing: {
+            shimmerGradient: 'linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), transparent)',
+          }
+        };
+        break;
+
+      case 'default':
+      default:
+        // Reset to default styles (empty object will use defaults)
+        themeStyles = {};
+        break;
+    }
+
+    this.updateVisualEffectStyles(themeStyles);
+    this.debugLog(`Applied ${theme} theme to visual effects`);
+  }
+
+  /**
+   * Gets a list of available predefined themes.
+   * @returns Array of available theme names.
+   */
+  getAvailableThemes(): string[] {
+    return ['default', 'dark', 'success', 'warning', 'error'];
   }
 }
