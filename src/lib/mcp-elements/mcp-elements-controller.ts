@@ -12,7 +12,7 @@ import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAct
  */
 export class MCPElementsController {
   private registry: ToolRegistry;
-  private shepherdTour: any = null;
+  private shepherdTour: Shepherd.Tour | null = null;
   private activeTool: ToolConfiguration | null = null;
   private toolQueue: ToolStartConfig[] = [];
   private eventListeners: Map<MCPElementsEvent, Function[]> = new Map();
@@ -202,10 +202,11 @@ export class MCPElementsController {
   private executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): void {
     const steps = this.prepareSteps(tool, params);
     
-    this.shepherdTour = new (Shepherd as any).Tour({
+    this.shepherdTour = new Shepherd.Tour({
       useModalOverlay: true,
       ...this.shepherdOptions
-    });    steps.forEach((step, index) => {
+    });
+    steps.forEach((step, index) => {
       this.shepherdTour!.addStep({
         id: `step-${index}`, // Explicitly set ID for consistency
         title: tool.title,
@@ -229,10 +230,11 @@ export class MCPElementsController {
   private executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): void {
     const steps = this.prepareSteps(tool, params);
     
-    this.shepherdTour = new (Shepherd as any).Tour({
+    this.shepherdTour = new Shepherd.Tour({
       useModalOverlay: true,
       ...this.shepherdOptions
-    });    steps.forEach((step, index) => {
+    });
+    steps.forEach((step, index) => {
       this.shepherdTour!.addStep({
         id: `step-${index}`, // Explicitly set ID to match index
         title: tool.title,
@@ -247,7 +249,7 @@ export class MCPElementsController {
     });
 
     // Set up auto-advance with delays
-    this.shepherdTour.on('show', (event: any) => {
+    this.shepherdTour!.on('show', (event: any) => {
       try {
         const currentStep = this.shepherdTour!.getCurrentStep();
         if (!currentStep || !currentStep.id) {
@@ -394,7 +396,9 @@ export class MCPElementsController {
    * @private
    */
   private setupTourEventHandlers(): void {
-    if (!this.shepherdTour) return;    this.shepherdTour.on('show', (event: any) => {
+    if (!this.shepherdTour) return;
+    
+    this.shepherdTour.on('show', (event: any) => {
       this.emit('step:show', {
         step: this.activeTool?.steps[this.currentStepIndex],
         index: this.currentStepIndex,
@@ -416,10 +420,12 @@ export class MCPElementsController {
       this.toolQueue = []; // Clear queue on cancel
     });
   }
+  
   /**
    * Performs an automated action on a DOM element.
    * @private
-   */  private async performAction(action: ToolAction, targetElement: string): Promise<void> {
+   */
+  private async performAction(action: ToolAction, targetElement: string): Promise<void> {
     console.log('Performing action:', action.type, 'on element:', targetElement);
     
     // Wait for element to be available
@@ -449,7 +455,6 @@ export class MCPElementsController {
           // Use typing animation for visual feedback
           await this.showTypingEffect(element, action.value || '');
           
-          // Additional events to ensure Angular detects the change
           element.dispatchEvent(new Event('blur', { bubbles: true }));
         } else {
           console.error('Element is not an input or textarea:', element);
@@ -659,7 +664,6 @@ export class MCPElementsController {
     // Type character by character
     for (let i = 0; i <= text.length; i++) {
       element.value = text.substring(0, i);
-      element.dispatchEvent(new Event('input', { bubbles: true }));
       
       // Random typing speed between 50-150ms per character
       const delay = Math.random() * 100 + 50;

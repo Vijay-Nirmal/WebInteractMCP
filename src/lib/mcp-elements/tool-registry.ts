@@ -18,9 +18,9 @@ export class ToolRegistry {
   /**
    * Loads tool configurations from a source.
    * @param source - The source of the configurations.
-   * Can be an array of configurations, a URL to a JSON file, or a function that returns a promise of configurations.
+   * Can be an array of configurations, a URL to a JSON file.
    */
-  async loadTools(source: ToolConfiguration[] | string | (() => Promise<ToolConfiguration[]>)): Promise<void> {
+  async loadTools(source: ToolConfiguration[] | string): Promise<void> {
     let configurations: ToolConfiguration[] = [];
 
     try {
@@ -38,12 +38,8 @@ export class ToolRegistry {
         const text = await response.text();
         console.log('Received response:', text.substring(0, 200) + '...');
         configurations = JSON.parse(text);
-      } else if (typeof source === 'function') {
-        // Function that returns a promise of configurations
-        console.log('Loading tools from function');
-        configurations = await source();
       } else {
-        throw new Error('Invalid source type. Expected array, string (URL), or function.');
+        throw new Error('Invalid source type. Expected array or string (URL).');
       }
 
       console.log('Parsed configurations:', configurations.length, 'tools');      // Validate and store configurations
