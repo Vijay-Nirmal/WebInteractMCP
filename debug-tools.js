@@ -1,5 +1,5 @@
 // Temporary debug script to test tool loading
-fetch('/assets/mcp-tools.json')
+fetch('/mcp-tools.json')
   .then(response => {
     console.log('Fetch response status:', response.status);
     console.log('Response headers:', [...response.headers.entries()]);
