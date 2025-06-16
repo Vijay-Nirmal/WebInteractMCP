@@ -18,9 +18,9 @@ import { CommonModule } from '@angular/common';
               <label class="form-label">Title</label>
               <p class="form-description">
                 Be specific and imagine you're asking a question to another person.
-              </p>
-              <input 
+              </p>              <input 
                 type="text" 
+                id="question-title"
                 class="form-input title-input"
                 placeholder="e.g., Is there an R function for finding the index of an element in a vector?"
                 maxlength="150">
@@ -51,8 +51,8 @@ import { CommonModule } from '@angular/common';
                 <button class="toolbar-btn" title="Numbered list">
                   1. List
                 </button>
-              </div>
-              <textarea 
+              </div>              <textarea 
+                id="question-body"
                 class="form-textarea body-textarea"
                 placeholder="Introduce the problem and expand on what you put in the title..."
                 rows="15">
@@ -63,9 +63,9 @@ import { CommonModule } from '@angular/common';
               <label class="form-label">Tags</label>
               <p class="form-description">
                 Add up to 5 tags to describe what your question is about. Start typing to see suggestions.
-              </p>
-              <input 
+              </p>              <input 
                 type="text" 
+                id="question-tags"
                 class="form-input tags-input"
                 placeholder="e.g. (javascript angular typescript)">
               <div class="tags-suggestions">
@@ -77,8 +77,7 @@ import { CommonModule } from '@angular/common';
               </div>
             </div>
             
-            <div class="form-actions">
-              <button class="btn btn-primary post-question-btn">
+            <div class="form-actions">              <button class="btn btn-primary post-question-btn submit-question">
                 Post your question
               </button>
               <button class="btn btn-outline">

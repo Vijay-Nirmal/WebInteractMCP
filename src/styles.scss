@@ -1,5 +1,8 @@
 /* Stack Overflow Clone Global Styles */
 
+/* Import Shepherd.js styles for MCP Elements */
+@import 'shepherd.js/dist/css/shepherd.css';
+
 /* Reset and base styles */
 * {
   box-sizing: border-box;
@@ -428,5 +431,78 @@ pre code {
   
   .question-content {
     padding-left: 0;
+  }
+}
+
+/* Custom MCP Elements / Shepherd.js Styling */
+.autobot-shepherd {
+  .shepherd-modal-overlay-container {
+    z-index: 9999;
+  }
+  
+  .shepherd-element {
+    z-index: 10000;
+    max-width: 400px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    border: none;
+  }
+  
+  .shepherd-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 8px 8px 0 0;
+    font-weight: 600;
+  }
+  
+  .shepherd-text {
+    padding: 20px;
+    line-height: 1.6;
+    color: #374151;
+  }
+  
+  .shepherd-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+  }
+  
+  .shepherd-button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .shepherd-button-primary {
+    background: #3b82f6;
+    color: white;
+  }
+  
+  .shepherd-button-primary:hover {
+    background: #2563eb;
+  }
+  
+  .shepherd-button-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #d1d5db;
+  }
+  
+  .shepherd-button-secondary:hover {
+    background: #e5e7eb;
+  }
+  
+  .shepherd-arrow {
+    border-color: #667eea;
+  }
+  
+  .shepherd-arrow:before {
+    border-color: #667eea;
   }
 }
