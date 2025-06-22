@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.SemanticKernel;
+﻿using Microsoft.SemanticKernel;
 
 // Load configuration
 var configuration = new ConfigurationBuilder()
@@ -9,60 +7,75 @@ var configuration = new ConfigurationBuilder()
     .AddUserSecrets<Program>(optional: true)
     .Build();
 
+// Create web application builder
+var builder = WebApplication.CreateBuilder(args);
+
 // Configure logging
-using var loggerFactory = LoggerFactory.Create(builder =>
+builder.Logging.AddConsole();
+builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+// Add services
+builder.Services.AddCors(options =>
 {
-    builder.AddConsole();
-    builder.SetMinimumLevel(LogLevel.Information);
+    options.AddPolicy("AllowAngularApp", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
-var logger = loggerFactory.CreateLogger("SemanticKernel");
 
 // Get OpenRouter configuration
 var openRouterApiKey = configuration["OpenRouter:ApiKey"];
 var openRouterModelId = configuration["OpenRouter:ModelId"];
 
-if (string.IsNullOrEmpty(openRouterApiKey) || openRouterApiKey == "YOUR_OPENROUTER_API_KEY")
+builder.Services.AddSingleton<Kernel>(serviceProvider =>
 {
-    logger.LogError("Please set your OpenRouter API key in appsettings.json");
-    return;
-}
-
-if (string.IsNullOrEmpty(openRouterModelId))
-{
-    logger.LogError("Please set your OpenRouter Model ID in appsettings.json");
-    return;
-}
-
-logger.LogInformation("Initializing Semantic Kernel with OpenRouter...");
-
-try
-{
-    // Create the kernel with OpenRouter integration
-    var kernel = Kernel.CreateBuilder()
+    return Kernel.CreateBuilder()
         .AddOpenAIChatCompletion(
             modelId: openRouterModelId,
             apiKey: openRouterApiKey,
             serviceId: "OpenRouter",
-            httpClient: new HttpClient { BaseAddress = new Uri("https://openrouter.ai/api/v1/") }
+            endpoint: new Uri("https://openrouter.ai/api/v1/")
         )
         .Build();
+});
 
-    logger.LogInformation("Semantic Kernel initialized successfully.");
-    logger.LogInformation($"Using model: {openRouterModelId}");
+builder.Services.AddSingleton<IChatService, SemanticKernelChatService>();
 
-    // Example: Simple completion
-    logger.LogInformation("Sending a test prompt to OpenRouter...");
-    var prompt = "Explain what Semantic Kernel is in one short paragraph.";
-    
-    var result = await kernel.InvokePromptAsync(prompt);
+var app = builder.Build();
 
-    logger.LogInformation("Response received:");
-    logger.LogInformation(result.ToString());
-}
-catch (Exception ex)
+// Configure the HTTP request pipeline
+app.UseCors("AllowAngularApp");
+
+// Add health check endpoint
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+
+// Add chat endpoint
+app.MapPost("/api/chat", async (ChatRequest request, IChatService chatService) =>
 {
-    logger.LogError(ex, "An error occurred while using Semantic Kernel with OpenRouter");
-}
+    try
+    {
+        var response = await chatService.GetResponseAsync(request.Message);
+        return Results.Ok(new ChatResponse(response));
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error processing chat request");
+        return Results.Problem("An error occurred while processing your request");
+    }
+});
 
-logger.LogInformation("Press any key to exit...");
-Console.ReadKey();
+app.Logger.LogInformation("Chat server starting...");
+
+app.Run();
+
+// Models
+public record ChatRequest(string Message);
+public record ChatResponse(string Response);
+
+// Chat service interface
+public interface IChatService
+{
+    Task<string> GetResponseAsync(string message);
+}
