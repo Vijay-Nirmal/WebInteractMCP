@@ -180,6 +180,14 @@ export interface ToolConfiguration {
   options?: Partial<MCPElementsOptions>;
   /** Parameter schema for MCP server integration - defines expected parameters and their types */
   parameterSchema?: ToolParameterSchema;
+  /** Whether the tool performs destructive actions */
+  destructive?: boolean;
+  /** Whether the tool is idempotent */
+  idempotent?: boolean;
+  /** Whether the tool operates in an open-world context */
+  openWorld?: boolean;
+  /** Whether the tool is read-only */
+  readOnly?: boolean;
 }
 
 /**
