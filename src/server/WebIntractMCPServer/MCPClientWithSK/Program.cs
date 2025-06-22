@@ -1,4 +1,5 @@
-﻿using Microsoft.SemanticKernel;
+﻿using MCPClientWithSK;
+using Microsoft.SemanticKernel;
 
 // Load configuration
 var configuration = new ConfigurationBuilder()
@@ -70,12 +71,3 @@ app.Logger.LogInformation("Chat server starting...");
 
 app.Run();
 
-// Models
-public record ChatRequest(string Message);
-public record ChatResponse(string Response);
-
-// Chat service interface
-public interface IChatService
-{
-    Task<string> GetResponseAsync(string message);
-}
