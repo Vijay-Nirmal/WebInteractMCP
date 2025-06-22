@@ -44,6 +44,9 @@ public class SemanticKernelChatService : IChatService
 // Models
 public record ChatRequest(string Message);
 public record ChatResponse(string Response);
+public record PlanRequest(string Goal, string? SessionId = null);
+public record PlanResponse(string Plan);
+public record ToolsResponse(IEnumerable<string> Tools);
 
 // Chat service interface
 public interface IChatService

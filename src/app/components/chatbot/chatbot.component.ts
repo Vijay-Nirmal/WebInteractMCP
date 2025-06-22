@@ -50,28 +50,58 @@ export interface ChatMessage {
                 </div>
               </div>
             }
-          </div>
-          
-          <div class="input-container">
-            <input 
-              type="text" 
-              [(ngModel)]="currentMessage" 
-              (keyup.enter)="sendMessage()"
-              placeholder="Type your message..."
-              [disabled]="isLoading()"
-              class="message-input"
-            />
-            <button 
-              (click)="sendMessage()" 
-              [disabled]="!currentMessage.trim() || isLoading()"
-              class="send-button"
-            >
-              @if (isLoading()) {
-                <span class="loading-spinner"></span>
-              } @else {
-                📤
-              }
-            </button>
+          </div>          <div class="input-container">
+            <div class="quick-actions" *ngIf="!isLoading()">
+              <button 
+                class="quick-action-btn"
+                (click)="sendQuickMessage('Show me available tools')"
+                title="View Available Tools"
+              >
+                🛠️
+              </button>
+              <button 
+                class="quick-action-btn"
+                (click)="sendQuickMessage('Help me create a project plan')"
+                title="Create Project Plan"
+              >
+                📋
+              </button>
+              <button 
+                class="quick-action-btn"
+                (click)="sendQuickMessage('Analyze some data for me')"
+                title="Data Analysis"
+              >
+                📊
+              </button>
+              <button 
+                class="quick-action-btn"
+                (click)="sendQuickMessage('Help me with coding')"
+                title="Code Assistance"
+              >
+                💻
+              </button>
+            </div>
+            <div class="input-row">
+              <input 
+                type="text" 
+                [(ngModel)]="currentMessage" 
+                (keyup.enter)="sendMessage()"
+                placeholder="Type your message..."
+                [disabled]="isLoading()"
+                class="message-input"
+              />
+              <button 
+                (click)="sendMessage()" 
+                [disabled]="!currentMessage.trim() || isLoading()"
+                class="send-button"
+              >
+                @if (isLoading()) {
+                  <span class="loading-spinner"></span>
+                } @else {
+                  📤
+                }
+              </button>
+            </div>
           </div>
         </div>
       }
@@ -233,15 +263,46 @@ export interface ChatMessage {
 
     .typing-indicator span:nth-child(3) {
       animation-delay: 0.4s;
-    }
-
-    .input-container {
+    }    .input-container {
       padding: 16px;
       border-top: 1px solid #e9ecef;
       display: flex;
+      flex-direction: column;
       gap: 8px;
       background: #f8f9fa;
       border-radius: 0 0 12px 12px;
+    }
+
+    .quick-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .quick-action-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: rgba(102, 126, 234, 0.1);
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(102, 126, 234, 0.2);
+    }
+
+    .quick-action-btn:hover {
+      background: rgba(102, 126, 234, 0.2);
+      transform: scale(1.1);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
     }
 
     .message-input {
@@ -354,7 +415,6 @@ export class ChatbotComponent implements OnInit {
     this.checkServerStatus();
     this.addWelcomeMessage();
   }
-
   private async checkServerStatus() {
     try {
       await firstValueFrom(this.http.get('http://localhost:5000/health'));
@@ -363,11 +423,10 @@ export class ChatbotComponent implements OnInit {
       this.isOnline.set(false);
     }
   }
-
   private addWelcomeMessage() {
     const welcomeMessage: ChatMessage = {
       id: this.generateId(),
-      content: "Hello! I'm your AI assistant powered by Semantic Kernel. How can I help you today?",
+      content: "Hello! I'm your AI assistant powered by Semantic Kernel with advanced agentic capabilities. I can help you with:\n\n🔍 Web search and information retrieval\n💻 Code analysis and generation\n📋 Task planning and management\n📊 Data analysis and visualization\n🌤️ Weather information\n💭 Context-aware conversations\n\nHow can I assist you today?",
       isUser: false,
       timestamp: new Date()
     };
@@ -377,7 +436,6 @@ export class ChatbotComponent implements OnInit {
   toggleChat() {
     this.isExpanded.update(expanded => !expanded);
   }
-
   async sendMessage() {
     if (!this.currentMessage.trim() || this.isLoading()) return;
 
@@ -439,6 +497,11 @@ export class ChatbotComponent implements OnInit {
     } finally {
       this.isLoading.set(false);
     }
+  }
+
+  sendQuickMessage(message: string) {
+    this.currentMessage = message;
+    this.sendMessage();
   }
 
   private scrollToBottom() {

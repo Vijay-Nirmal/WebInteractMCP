@@ -1,12 +1,6 @@
 ﻿using MCPClientWithSK;
+using MCPClientWithSK.Services;
 using Microsoft.SemanticKernel;
-
-// Load configuration
-var configuration = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false)
-    .AddEnvironmentVariables()
-    .AddUserSecrets<Program>(optional: true)
-    .Build();
 
 // Create web application builder
 var builder = WebApplication.CreateBuilder(args);
@@ -20,29 +14,52 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:4201")
               .AllowAnyMethod()
               .AllowAnyHeader();
     });
 });
 
 // Get OpenRouter configuration
-var openRouterApiKey = configuration["OpenRouter:ApiKey"];
-var openRouterModelId = configuration["OpenRouter:ModelId"];
+var openRouterApiKey = builder.Configuration["OpenRouter:ApiKey"] ?? throw new InvalidOperationException("OpenRouter API key not configured");
+var openRouterModelId = builder.Configuration["OpenRouter:ModelId"] ?? throw new InvalidOperationException("OpenRouter Model ID not configured");
+
+// Validate configuration
+if (openRouterApiKey == "YOUR_OPENROUTER_API_KEY")
+{
+    throw new InvalidOperationException("Please configure your OpenRouter API key. Use: dotnet user-secrets set \"OpenRouter:ApiKey\" \"your-actual-api-key\"");
+}
 
 builder.Services.AddSingleton<Kernel>(serviceProvider =>
 {
-    return Kernel.CreateBuilder()
-        .AddOpenAIChatCompletion(
-            modelId: openRouterModelId,
-            apiKey: openRouterApiKey,
-            serviceId: "OpenRouter",
-            endpoint: new Uri("https://openrouter.ai/api/v1/")
-        )
-        .Build();
+    var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+    
+    try
+    {
+        logger.LogInformation("Configuring Semantic Kernel with OpenRouter");
+        logger.LogInformation("Model ID: {ModelId}", openRouterModelId);
+        
+        return Kernel.CreateBuilder()
+            .AddOpenAIChatCompletion(
+                modelId: openRouterModelId,
+                apiKey: openRouterApiKey,
+                serviceId: "OpenRouter",
+                endpoint: new Uri("https://openrouter.ai/api/v1"),
+                httpClient: new HttpClient()
+            )
+            .Build();
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Failed to configure Semantic Kernel");
+        throw;
+    }
 });
 
-builder.Services.AddSingleton<IChatService, SemanticKernelChatService>();
+// Register services for the enhanced agentic implementation
+builder.Services.AddSingleton<IMemoryService, InMemoryMemoryService>();
+builder.Services.AddSingleton<IAgentService, AgenticSemanticKernelService>();
+builder.Services.AddSingleton<IChatService, EnhancedChatService>();
 
 var app = builder.Build();
 
@@ -67,7 +84,65 @@ app.MapPost("/api/chat", async (ChatRequest request, IChatService chatService) =
     }
 });
 
-app.Logger.LogInformation("Chat server starting...");
+// Add planning endpoint
+app.MapPost("/api/plan", async (PlanRequest request, IAgentService agentService) =>
+{
+    try
+    {
+        var plan = await agentService.ExecutePlanAsync(request.Goal, request.SessionId);
+        return Results.Ok(new PlanResponse(plan));
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error creating execution plan");
+        return Results.Problem("An error occurred while creating the execution plan");
+    }
+});
+
+// Add tools endpoint
+app.MapGet("/api/tools", async (IAgentService agentService) =>
+{
+    try
+    {
+        var tools = await agentService.GetAvailableToolsAsync();
+        return Results.Ok(new ToolsResponse(tools));
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error retrieving available tools");
+        return Results.Problem("An error occurred while retrieving available tools");
+    }
+});
+
+// Add session management endpoint
+app.MapDelete("/api/session/{sessionId}", async (string sessionId, IAgentService agentService) =>
+{
+    try
+    {
+        await agentService.ClearSessionAsync(sessionId);
+        return Results.Ok(new { Message = $"Session {sessionId} cleared successfully" });
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error clearing session {SessionId}", sessionId);
+        return Results.Problem($"An error occurred while clearing session {sessionId}");
+    }
+});
+
+// Add plugin test endpoint
+app.MapGet("/api/test-plugin", async (IAgentService agentService) =>
+{
+    try
+    {
+        var result = await agentService.TestPlannerPluginAsync();
+        return Results.Ok(new { TestResult = result });
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogError(ex, "Error testing plugin");
+        return Results.Problem("An error occurred while testing the plugin");
+    }
+});
 
 app.Run();
 
