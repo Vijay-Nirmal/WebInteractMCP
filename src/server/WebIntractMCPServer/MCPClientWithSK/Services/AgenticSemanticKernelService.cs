@@ -58,7 +58,7 @@ public class AgenticSemanticKernelService : IAgentService
             var executionSettings = new OpenAIPromptExecutionSettings
             {
                 ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                Temperature = 0.7,
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
                 MaxTokens = 2000
             };
 
