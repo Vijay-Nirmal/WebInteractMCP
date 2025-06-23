@@ -10,6 +10,7 @@ builder.Logging.AddConsole();
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 // Add services
+builder.Services.AddHostedService<McpPluginInitilizer>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
@@ -60,6 +61,7 @@ builder.Services.AddSingleton<Kernel>(serviceProvider =>
 builder.Services.AddSingleton<IMemoryService, InMemoryMemoryService>();
 builder.Services.AddSingleton<IAgentService, AgenticSemanticKernelService>();
 builder.Services.AddSingleton<IChatService, EnhancedChatService>();
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 

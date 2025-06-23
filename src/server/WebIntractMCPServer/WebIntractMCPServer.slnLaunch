@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "McpServerAndSK",
+    "Projects": [
+      {
+        "Path": "WebIntractMCPServer\\WebIntractMCPServer.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "MCPClientWithSK\\MCPClientWithSK.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

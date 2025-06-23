@@ -1,7 +1,6 @@
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
-using MCPClientWithSK.Plugins;
 
 namespace MCPClientWithSK.Services;
 
@@ -22,7 +21,6 @@ public class AgenticSemanticKernelService : IAgentService
         _chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
         _memoryService = memoryService;
         _logger = logger;
-        _kernel.ImportPluginFromType<PlannerPlugin>("Planner");
     }
     
     public async Task<string> ProcessMessageAsync(string message, string? sessionId = null, CancellationToken cancellationToken = default)
@@ -41,7 +39,7 @@ public class AgenticSemanticKernelService : IAgentService
             var chatHistory = new ChatHistory();
             
             // Add system message with agent instructions
-            chatHistory.AddSystemMessage(GetSystemPrompt(intent, context));
+            // chatHistory.AddSystemMessage(GetSystemPrompt(intent, context));
             
             // Add conversation history
             var history = await _memoryService.GetConversationHistoryAsync(sessionId, 5);
@@ -57,8 +55,8 @@ public class AgenticSemanticKernelService : IAgentService
             // Configure execution settings for function calling
             var executionSettings = new OpenAIPromptExecutionSettings
             {
-                ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+                FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(autoInvoke: true),
+                // ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
                 MaxTokens = 2000
             };
 
@@ -89,23 +87,8 @@ public class AgenticSemanticKernelService : IAgentService
             sessionId ??= Guid.NewGuid().ToString();
             _logger.LogInformation("Creating execution plan for goal: {Goal}", goal);
 
-            var planningPrompt = $@"
-You are an AI planning agent. Break down the following goal into a step-by-step plan.
-Each step should be actionable and specific. Consider what tools and resources might be needed.
-
-Goal: {goal}
-
-Provide a detailed execution plan with numbered steps. For each step, indicate:
-1. What needs to be done
-2. What tools or functions might be needed
-3. Expected outcomes
-4. Dependencies on previous steps
-
-Plan:";
-
             var chatHistory = new ChatHistory();
-            chatHistory.AddSystemMessage("You are an expert AI planning assistant. Create detailed, actionable plans.");
-            chatHistory.AddUserMessage(planningPrompt);
+            chatHistory.AddSystemMessage("You are an expert AI assistant who can use tools to responde to users.");
 
             var executionSettings = new OpenAIPromptExecutionSettings
             {
