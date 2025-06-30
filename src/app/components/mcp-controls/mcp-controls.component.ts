@@ -3,6 +3,28 @@ import { CommonModule } from '@angular/common';
 import { MCPElementsService } from '../../services/mcp-elements.service';
 import { ToolConfiguration, CustomFunctionContext } from '../../../lib/mcp-elements';
 
+function refReplacer() {
+  let m = new Map(), v= new Map(), init: any = null;
+
+  // in TypeScript add "this: any" param to avoid compliation errors - as follows
+  //    return function (this: any, field: any, value: any) {
+  return function(this: any, field: any, value: any) {
+    let p= m.get(this) + (Array.isArray(this) ? `[${field}]` : '.' + field); 
+    let isComplex= value===Object(value)
+    
+    if (isComplex) m.set(value, p);  
+    
+    let pp = v.get(value)||'';
+    let path = p.replace(/undefined\.\.?/,'');
+    let val = pp ? `#REF:${pp[0]=='[' ? '$':'$.'}${pp}` : value;
+    
+    !init ? (init=value) : (val===init ? val="#REF:$" : 0);
+    if(!pp && isComplex) v.set(value, path);
+   
+    return val;
+  }
+}
+
 @Component({
   selector: 'app-mcp-controls',
   standalone: true,
@@ -56,7 +78,20 @@ import { ToolConfiguration, CustomFunctionContext } from '../../../lib/mcp-eleme
               (click)="demonstrateCustomFunction()"
               [disabled]="isLoading">
               Custom Function Demo
-            </button>            <button 
+            </button>
+            <button 
+              class="mcp-btn demo" 
+              (click)="demonstrateReturnValues()"
+              [disabled]="isLoading">
+              Return Values Demo
+            </button>
+            <button 
+              class="mcp-btn demo" 
+              (click)="demonstrateToolLevelReturnValues()"
+              [disabled]="isLoading">
+              Tool-Level Return Demo
+            </button>
+            <button 
               class="mcp-btn secondary" 
               (click)="runDebugTest()"
               [disabled]="isLoading">
@@ -73,7 +108,8 @@ import { ToolConfiguration, CustomFunctionContext } from '../../../lib/mcp-eleme
               (click)="reloadTools()"
               [disabled]="isLoading">
               Reload Tools
-            </button>            <button 
+            </button>
+            <button 
               class="mcp-btn danger" 
               (click)="stopCurrentTool()"
               [disabled]="isLoading">
@@ -590,6 +626,62 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     }
   }
 
+  async demonstrateReturnValues() {
+    this.isLoading = true;
+    try {
+      console.log('Starting return values demo...');
+      
+      // Register return value provider functions first
+      this.registerReturnValueProviders();
+      
+      // Start the return value demo tool
+      await this.mcpElementsService.startTool('return-value-demo', {
+        initialValue: 'Demo Starting!'
+      });
+      
+      // After a short delay, show the return values
+      setTimeout(() => {
+        const lastToolReturnValues = this.mcpElementsService.getLastToolReturnValues();
+        const lastStepReturnValue = this.mcpElementsService.getLastStepReturnValue();
+
+        console.log('All step return values:', lastToolReturnValues);
+        console.log('Last step return value:', lastStepReturnValue);
+
+        alert(`Return Values Demo Completed!\n\nAll step return values: ${JSON.stringify(lastToolReturnValues, refReplacer(), 2)}\n\nLast step return value: ${lastStepReturnValue ? JSON.stringify(lastStepReturnValue, refReplacer(), 2) : 'undefined'}\n\nCheck console for detailed output.`);
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Error in return values demo:', error);
+      this.addEvent('error', `Return values demo error: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async demonstrateToolLevelReturnValues() {
+    this.isLoading = true;
+    try {
+      console.log('Starting tool-level return values demo...');
+      
+      // Register both step-level and tool-level return value providers
+      this.registerReturnValueProviders();
+      this.registerToolLevelReturnValueProviders();
+      
+      // Start the tool-level return value demo tool
+      const result = await this.mcpElementsService.startTool('tool-level-return-demo', {
+        toolName: 'Tool Level Demo Example',
+        priority: 5
+      });
+      
+      alert(`Tool-Level Return Values Demo Completed!\n\nResult: ${JSON.stringify(result.map(x => { x.success, x.returnValue, x.error }), null, 2)}\n\nCheck console for detailed output.`);
+    } catch (error) {
+      console.error('Error in tool-level return values demo:', error);
+      this.addEvent('error', `Tool-level return values demo error: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   private registerCustomFunctions() {
     // Register sample custom functions
     this.mcpElementsService.registerCustomFunctions([
@@ -653,10 +745,164 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           return { success: true, data: formData, message: 'Form data collected' };
         },
         parameters: {}
+      },
+      {
+        name: 'logMessage',
+        implementation: function(context: CustomFunctionContext) {
+          const message = context.params['message'] || 'Log message';
+          const timestamp = new Date().toISOString();
+          
+          console.log(`[${timestamp}] ${message}`);
+          context.debugLog('logMessage function called:', message);
+          
+          return { 
+            success: true, 
+            message: message,
+            timestamp: timestamp,
+            stepIndex: context.currentStepIndex
+          };
+        },
+        parameters: {
+          message: 'string - The message to log'
+        }
+      },
+      {
+        name: 'processData',
+        implementation: function(context: CustomFunctionContext) {
+          const inputData = context.params['inputData'] || 'default data';
+          const previousValue = context.previousStepReturnValue;
+          
+          const processed = {
+            original: inputData,
+            processed: inputData.toUpperCase() + '_PROCESSED',
+            previousStep: previousValue,
+            processedAt: new Date().toISOString()
+          };
+          
+          console.log('processData function result:', processed);
+          context.debugLog('processData function called with:', { inputData, previousValue });
+          
+          // This return value will be used as the step's return value
+          return processed;
+        },
+        parameters: {
+          inputData: 'string - The data to process'
+        }
       }
     ]);
     
     console.log('Custom functions registered successfully');
+  }
+
+  private registerReturnValueProviders() {
+    // Register return value provider functions
+    this.mcpElementsService.registerReturnValueProviders([
+      {
+        name: 'calculateNextValue',
+        implementation: function(context) {
+          const multiplier = context.stepParams?.['multiplier'] || 1;
+          const previousValue = context.previousStepReturnValue || 'No previous value';
+          const result = `Calculated: ${previousValue} * ${multiplier}`;
+          
+          console.log('calculateNextValue provider called:', {
+            multiplier,
+            previousValue,
+            result
+          });
+          
+          return result;
+        },
+        parameters: {
+          multiplier: 'number - Multiplier for the calculation'
+        }
+      },
+      {
+        name: 'combineAllValues',
+        implementation: function(context) {
+          // Get all previous step return values from the controller
+          const allValues = context.controller.getLastToolReturnValues();
+          const combined = {
+            summary: 'All steps completed',
+            stepCount: allValues.length,
+            values: allValues,
+            timestamp: new Date().toISOString()
+          };
+          
+          console.log('combineAllValues provider called:', combined);
+          return combined;
+        },
+        parameters: {}
+      }
+    ]);
+    
+    console.log('Return value providers registered successfully');
+  }
+
+  private registerToolLevelReturnValueProviders() {
+    // Register tool-level return value provider functions
+    this.mcpElementsService.registerReturnValueProviders([
+      {
+        name: 'generateToolSummary',
+        implementation: function(context) {
+          const includeMetrics = context.toolParams['includeMetrics'] || false;
+          const format = context.toolParams['format'] || 'simple';
+          
+          const summary: any = {
+            toolName: context.activeTool?.title || 'Unknown Tool',
+            toolId: context.activeTool?.toolId || 'unknown',
+            executionSummary: {
+              success: context.toolExecutionSuccess,
+              stepsExecuted: context.stepsExecuted,
+              totalSteps: context.activeTool?.steps.length || 0,
+              error: context.toolExecutionError?.message
+            },
+            stepResults: context.allStepReturnValues,
+            lastStepResult: context.lastStepReturnValue,
+            timestamp: new Date().toISOString(),
+            format: format
+          };
+          
+          if (includeMetrics) {
+            summary.metrics = {
+              successRate: context.toolExecutionSuccess ? 100 : 0,
+              completionPercentage: context.activeTool?.steps.length ? 
+                Math.round(((context.stepsExecuted || 0) / context.activeTool.steps.length) * 100) : 0,
+              hasStepResults: (context.allStepReturnValues || []).length > 0
+            };
+          }
+          
+          console.log('generateToolSummary provider called:', summary);
+          return summary;
+        },
+        parameters: {
+          includeMetrics: 'boolean - Whether to include execution metrics',
+          format: 'string - Format of the summary (simple|detailed)'
+        }
+      },
+      {
+        name: 'combineToolResults',
+        implementation: function(context) {
+          const result = {
+            message: 'Tool execution completed with custom tool-level return value',
+            originalLastStepValue: context.lastStepReturnValue,
+            allStepValues: context.allStepReturnValues,
+            toolOverride: true,
+            executionInfo: {
+              toolId: context.activeTool?.toolId,
+              success: context.toolExecutionSuccess,
+              stepsExecuted: context.stepsExecuted,
+              timestamp: new Date().toISOString()
+            }
+          };
+          
+          console.log('combineToolResults provider called:', result);
+          return result;
+        },
+        parameters: {}
+      }
+    ]);
+    
+    console.log('Tool-level return value providers registered successfully');
   }
 
   async startTool(toolId: string) {

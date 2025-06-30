@@ -5,7 +5,7 @@
 
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition, ReturnValueProviderFunction, ReturnValueProvider, ExecutionResult, ReturnValueContext, SuccessfulExecutionResult, FailedExecutionResult } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -19,6 +19,8 @@ export class MCPElementsController {
   private currentStepIndex: number = 0;
   private globalOptions: MCPElementsOptions;
   private customFunctions: Map<string, CustomFunction> = new Map();
+  private returnValueProviders: Map<string, ReturnValueProviderFunction> = new Map();
+  private stepReturnValues: ExecutionResult[] = [];
   private customStyles: VisualEffectStyles = {};
   private styleElementId: string = 'mcp-visual-feedback-styles';
 
@@ -169,6 +171,50 @@ export class MCPElementsController {
   }
 
   /**
+   * Registers a return value provider function that can be called from tool steps.
+   * @param provider - The return value provider configuration.
+   */
+  registerReturnValueProvider(provider: ReturnValueProviderFunction): void {
+    this.returnValueProviders.set(provider.name, provider);
+    this.debugLog(`Registered return value provider: ${provider.name}`);
+  }
+
+  /**
+   * Registers multiple return value provider functions.
+   * @param providers - Array of return value provider configurations.
+   */
+  registerReturnValueProviders(providers: ReturnValueProviderFunction[]): void {
+    providers.forEach(provider => this.registerReturnValueProvider(provider));
+  }
+
+  /**
+   * Unregisters a return value provider function.
+   * @param providerName - The name of the provider to unregister.
+   */
+  unregisterReturnValueProvider(providerName: string): void {
+    this.returnValueProviders.delete(providerName);
+    this.debugLog(`Unregistered return value provider: ${providerName}`);
+  }
+
+  /**
+   * Gets a registered return value provider function.
+   * @param providerName - The name of the provider to retrieve.
+   * @returns The return value provider configuration or undefined if not found.
+   */
+  getReturnValueProvider(providerName: string): ReturnValueProviderFunction | undefined {
+    return this.returnValueProviders.get(providerName);
+  }
+
+  /**
+   * Gets all registered return value provider functions.
+   * @returns Map of all registered return value providers.
+   */
+  getAllReturnValueProviders(): Map<string, ReturnValueProviderFunction> {
+    return new Map(this.returnValueProviders);
+  }
+
+
+  /**
    * Gets the effective options for a tool (merges global and tool-specific options).
    * @private
    * @param tool - The tool configuration.
@@ -189,14 +235,16 @@ export class MCPElementsController {
       console.log(`[MCP Debug] ${message}`, ...data);
     }
   }
- /**
+
+  /**
    * Starts a sequence of Tools.
    * @param toolsToStart - An array of objects, each with a toolId and optional parameters to pass to the tool.
+   * @returns Promise that resolves with an array of ExecutionResult from each tool execution.
    */
-  start(toolsToStart: ToolStartConfig[]): void {
+  async start(toolsToStart: ToolStartConfig[]): Promise<ExecutionResult[]> {
     if (!Array.isArray(toolsToStart) || toolsToStart.length === 0) {
       console.warn('No tools provided to start');
-      return;
+      return [];
     }
 
     // Validate parameters for all tools before starting
@@ -210,7 +258,12 @@ export class MCPElementsController {
           error: errorMsg,
           validationErrors: validation.errors 
         });
-        return;
+        return [{ 
+          success: false, 
+          error: new Error(errorMsg), 
+          returnValue: undefined, 
+          allReturnValues: [] 
+        }];
       }
       if (validation.warnings.length > 0) {
         console.warn(`Parameter validation warnings for tool '${toolConfig.toolId}':`, validation.warnings);
@@ -228,8 +281,14 @@ export class MCPElementsController {
 
     this.debugLog('Starting tool sequence', toolsToStart.map(t => t.toolId));
 
-    // Start the first tool
-    this.executeNextTool();
+    const results: ExecutionResult[] = [];
+    while (this.toolQueue.length > 0) {
+      const { toolId, params = {} } = this.toolQueue.shift()!;
+      const result = await this.executeTool(toolId, params);
+      results.push(result);
+    }
+
+    return results;
   }
   /**
    * Stops the currently active tool and clears the queue.
@@ -314,13 +373,13 @@ export class MCPElementsController {
    * Executes the next tool in the queue.
    * @private
    */
-  private executeNextTool(): void {
+  private async executeNextTool(): Promise<void> {
     if (this.toolQueue.length === 0) {
       return;
     }
 
     const { toolId, params = {} } = this.toolQueue.shift()!;
-    this.executeTool(toolId, params);
+    await this.executeTool(toolId, params);
   }
 
   /**
@@ -328,147 +387,169 @@ export class MCPElementsController {
    * @private
    * @param toolId - The ID of the tool to execute.
    * @param params - Optional parameters to pass to the tool.
+   * @returns Promise that resolves with the tool execution result.
    */
-  private executeTool(toolId: string, params: Record<string, any> = {}): void {
+  private async executeTool(toolId: string, params: Record<string, any> = {}): Promise<ExecutionResult> {
     this.debugLog(`Looking for tool: ${toolId}`);
     const tool = this.registry.getToolById(toolId);
     if (!tool) {
       console.error(`Tool with ID '${toolId}' not found`);
       this.debugLog('Available tools:', Array.from(this.registry.getAllTools().keys()));
-      this.executeNextTool(); // Try next tool in queue
-      return;
+      const error = new Error(`Tool with ID '${toolId}' not found`);
+      return { success: false, error, returnValue: undefined, allReturnValues: [] };
     }
 
     this.activeTool = tool;
     this.currentStepIndex = 0;
+    this.stepReturnValues = []; // Reset step return values for new tool
 
     this.debugLog(`Starting tool: ${tool.title} (${tool.mode} mode)`, { params });
     this.emit('start', { tool, params });
 
     try {
+      let result: ExecutionResult;
       switch (tool.mode) {
         case 'normal':
-          this.executeNormalMode(tool, params);
+          result = await this.executeNormalMode(tool, params);
           break;
         case 'buttonless':
-          this.executeButtonlessMode(tool, params);
+          result = await this.executeButtonlessMode(tool, params);
           break;
         case 'silent':
-          this.executeSilentMode(tool, params);
+          result = await this.executeSilentMode(tool, params);
           break;
         default:
-          console.error(`Unknown tool mode: ${tool.mode}`);
-          this.executeNextTool();
+          const error = new Error(`Unknown tool mode: ${tool.mode}`);
+          console.error(error.message);
+          this.emit('cancel', { tool, error });
+          return { success: false, error, returnValue: undefined, allReturnValues: [] };
       }
+      return result;
     } catch (error) {
       console.error('Error executing tool:', error);
       this.emit('cancel', { tool, error });
-      this.executeNextTool();
+      return { 
+        success: false, 
+        error: error instanceof Error ? error : new Error(String(error)), 
+        returnValue: undefined,
+        allReturnValues: [...this.stepReturnValues]
+      };
     }
   }
   /**
    * Executes a tool in normal mode (with buttons).
    * @private
    */
-  private executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): void {
+  private async executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
     const steps = this.prepareSteps(tool, params);
 
-    this.shepherdTour = new (new ShepherdBase()).Tour({
-      useModalOverlay: true,
-      ...this.shepherdOptions
-    }) as Tour;
-    steps.forEach((step, index) => {
-      this.shepherdTour!.addStep({
-        id: `step-${index}`, // Explicitly set ID for consistency
-        title: tool.title,
-        text: step.content,
-        attachTo: {
-          element: step.targetElement,
-          on: 'bottom'
-        },
-        buttons: this.createStepButtons(index, steps.length),
-        ...step.shepherdOptions
-      });
-    });
+    return new Promise((resolve) => {
+      this.shepherdTour = new (new ShepherdBase()).Tour({
+        useModalOverlay: true,
+        ...this.shepherdOptions
+      }) as Tour;
 
-    this.setupTourEventHandlers();
-    this.shepherdTour!.start();
+      steps.forEach((step, index) => {
+        this.shepherdTour!.addStep({
+          id: `step-${index}`, // Explicitly set ID for consistency
+          title: tool.title,
+          text: step.content,
+          attachTo: {
+            element: step.targetElement,
+            on: 'bottom'
+          },
+          buttons: this.createStepButtons(index, steps.length),
+          ...step.shepherdOptions
+        });
+      });
+
+      // Set up event handlers with return value support
+      this.setupTourEventHandlersWithReturnValues(resolve);
+      this.shepherdTour!.start();
+    });
   }
 
   /**
    * Executes a tool in buttonless mode (auto-advancing).
    * @private
    */
-  private executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): void {
+  private async executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
     const steps = this.prepareSteps(tool, params);
     const effectiveOptions = this.getEffectiveOptions(tool);
 
-    this.shepherdTour = new (new ShepherdBase()).Tour({
-      useModalOverlay: true,
-      ...this.shepherdOptions
-    }) as Tour;
-    steps.forEach((step, index) => {
-      this.shepherdTour!.addStep({
-        id: `step-${index}`, // Explicitly set ID to match index
-        title: tool.title,
-        text: step.content,
-        attachTo: {
-          element: step.targetElement,
-          on: 'bottom'
-        },
-        buttons: [], // No buttons in buttonless mode
-        ...step.shepherdOptions
+    return new Promise((resolve) => {
+      this.shepherdTour = new (new ShepherdBase()).Tour({
+        useModalOverlay: true,
+        ...this.shepherdOptions
+      }) as Tour;
+
+      steps.forEach((step, index) => {
+        this.shepherdTour!.addStep({
+          id: `step-${index}`, // Explicitly set ID to match index
+          title: tool.title,
+          text: step.content,
+          attachTo: {
+            element: step.targetElement,
+            on: 'bottom'
+          },
+          buttons: [], // No buttons in buttonless mode
+          ...step.shepherdOptions
+        });
       });
-    });
 
-    // Set up auto-advance with delays
-    this.shepherdTour!.on('show', (event: any) => {
-      try {
-        const currentStep = this.shepherdTour!.getCurrentStep();
-        if (!currentStep || !currentStep.id) {
-          console.warn('No current step found for buttonless mode');
-          return;
-        }
-
-        // Extract index from step ID (format: "step-0", "step-1", etc.)
-        const stepIndexMatch = currentStep.id.match(/step-(\d+)/);
-        if (!stepIndexMatch) {
-          console.warn('Could not parse step index from ID:', currentStep.id);
-          return;
-        }
-
-        const stepIndex = parseInt(stepIndexMatch[1], 10);
-        const step = steps[stepIndex];
-
-        if (!step) {
-          console.warn('Step not found at index:', stepIndex);
-          return;
-        }
-
-        const delay = step.delay || effectiveOptions.defaultButtonlessDelay;
-
-        setTimeout(() => {
-          if (this.shepherdTour && this.activeTool) {
-            if (stepIndex < steps.length - 1) {
-              this.shepherdTour.next();
-            } else {
-              this.shepherdTour.complete();
-            }
+      // Set up auto-advance with delays and return value calculation
+      this.shepherdTour!.on('show', async (event: any) => {
+        try {
+          const currentStep = this.shepherdTour!.getCurrentStep();
+          if (!currentStep || !currentStep.id) {
+            console.warn('No current step found for buttonless mode');
+            return;
           }
-        }, delay);
-      } catch (error) {
-        console.error('Error in buttonless mode auto-advance:', error);
-      }
-    });
 
-    this.setupTourEventHandlers();
-    this.shepherdTour.start();
+          // Extract index from step ID (format: "step-0", "step-1", etc.)
+          const stepIndexMatch = currentStep.id.match(/step-(\d+)/);
+          if (!stepIndexMatch) {
+            console.warn('Could not parse step index from ID:', currentStep.id);
+            return;
+          }
+
+          const stepIndex = parseInt(stepIndexMatch[1], 10);
+          const step = steps[stepIndex];
+
+          if (!step) {
+            console.warn('Step not found at index:', stepIndex);
+            return;
+          }
+
+          // Calculate return value for the current step
+          const stepReturnValue = await this.calculateStepReturnValue(step, params, stepIndex, undefined);
+          this.stepReturnValues[stepIndex] = stepReturnValue;
+
+          const delay = step.delay || effectiveOptions.defaultButtonlessDelay;
+
+          setTimeout(() => {
+            if (this.shepherdTour && this.activeTool) {
+              if (stepIndex < steps.length - 1) {
+                this.shepherdTour.next();
+              } else {
+                this.shepherdTour.complete();
+              }
+            }
+          }, delay);
+        } catch (error) {
+          console.error('Error in buttonless mode auto-advance:', error);
+        }
+      });
+
+      this.setupTourEventHandlersWithReturnValues(resolve);
+      this.shepherdTour.start();
+    });
   }
   /**
    * Executes a tool in silent mode (no UI, automated actions).
    * @private
    */
-  private async executeSilentMode(tool: ToolConfiguration, params: Record<string, any>): Promise<void> {
+  private async executeSilentMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
     const steps = this.prepareSteps(tool, params);
     const effectiveOptions = this.getEffectiveOptions(tool);
 
@@ -480,13 +561,22 @@ export class MCPElementsController {
         this.currentStepIndex = i;
 
         this.debugLog(`Executing step ${i + 1}/${steps.length}:`, step);
-        this.emit('step:show', { step, index: i, tool }); if (step.action) {
+        this.emit('step:show', { step, index: i, tool });
+
+        let stepResult: ExecutionResult = { success: true, allReturnValues: [] };
+        let actionResult: any = undefined;
+
+        if (step.action) {
           this.debugLog('Performing action for step', i + 1);
           try {
-            await this.performAction(step.action, step.targetElement, params);
+            actionResult = await this.performAction(step.action, step.targetElement, params);
+            stepResult.returnValue = actionResult;
+            stepResult.success = true;
           } catch (stepError) {
             const errorMessage = stepError instanceof Error ? stepError.message : String(stepError);
             console.error(`Error in step ${i + 1}:`, stepError);
+            stepResult.success = false;
+            stepResult.error = stepError instanceof Error ? stepError : new Error(errorMessage);
 
             // Check if we should stop on failure (step-level or tool-level)
             const shouldStop = step.stopOnFailure !== undefined ? step.stopOnFailure : effectiveOptions.stopOnFailure;
@@ -500,19 +590,176 @@ export class MCPElementsController {
           this.debugLog('No action defined for step', i + 1);
         }
 
+        // Calculate step return value
+        const stepReturnValue = await this.calculateStepReturnValue(step, params, i, actionResult, stepResult);
+        this.stepReturnValues.push(stepReturnValue);
+
+        this.debugLog(`Step ${i + 1} completed with return value:`, stepReturnValue);
+
         // Delay between actions to ensure DOM updates (configurable)
         const actionDelay = step.action?.delay || effectiveOptions.actionDelay;
         await new Promise(resolve => setTimeout(resolve, actionDelay));
       }
 
       this.debugLog('Silent mode tool completed successfully');
-      this.emit('complete', { tool });
-      this.executeNextTool();
+      
+      const toolResult = await this.calculateToolReturnValue(tool, params, steps.length, true);
+      
+      this.emit('complete', { tool, result: toolResult });
+      return toolResult;
     } catch (error) {
       console.error('Error executing silent mode tool:', error);
-      this.emit('cancel', { tool, error });
-      this.executeNextTool();
+      
+      const toolResult = await this.calculateToolReturnValue(tool, params, this.currentStepIndex + 1, false, error instanceof Error ? error : new Error(String(error)));
+      
+      this.emit('cancel', { tool, error, result: toolResult });
+      return toolResult;
     }
+  }
+
+  /**
+   * Calculates the return value for a step based on its configuration.
+   * @private
+   * @param step - The step configuration.
+   * @param toolParams - Tool-level parameters.
+   * @param stepIndex - The current step index.
+   * @returns The calculated return value.
+   */
+  private async calculateStepReturnValue(
+    step: ToolStep,
+    toolParams: Record<string, any>, 
+    stepIndex: number,
+    actionResult?: any,
+    currentResult: ExecutionResult = SuccessfulExecutionResult
+  ): Promise<ExecutionResult> {
+    if (currentResult.success === false) {
+      return currentResult;
+    }
+
+    if (step.action?.type === 'executeFunction' && !step.returnValue) {
+      return { success: true, returnValue: actionResult, allReturnValues: [] };
+    }
+
+    if (!step.returnValue) {
+      return SuccessfulExecutionResult;
+    }
+
+    const returnValueConfig = step.returnValue;
+
+    // If there's a hardcoded value, return it
+    if (returnValueConfig.value !== undefined) {
+      return { success: true, returnValue: this.substituteParams(returnValueConfig.value, toolParams), allReturnValues: this.stepReturnValues };
+    }
+
+    // If there's a provider function, call it
+    if (returnValueConfig.provider || returnValueConfig.providerName) {
+      const provider = returnValueConfig.provider || 
+                     (returnValueConfig.providerName ? 
+                      this.returnValueProviders.get(returnValueConfig.providerName)?.implementation : 
+                      undefined);
+
+      if (!provider) {
+        console.warn(`Return value provider not found: ${returnValueConfig.providerName}`);
+        return FailedExecutionResult();
+      }
+
+      const targetElement = await this.waitForElement(step.targetElement);
+      if (!targetElement) {
+        console.warn(`Target element not found for return value calculation: ${step.targetElement}`);
+        return FailedExecutionResult();
+      }
+
+      const context: ReturnValueContext = {
+        element: targetElement,
+        stepParams: returnValueConfig.providerParams || {},
+        toolParams,
+        controller: this,
+        debugLog: this.debugLog.bind(this),
+        activeTool: this.activeTool,
+        currentStepIndex: stepIndex,
+        previousStepReturnValue: stepIndex > 0 ? this.stepReturnValues[stepIndex - 1] : undefined,
+        actionResult: actionResult
+      };
+
+      try {
+        const result = await provider(context);
+        return { success: true, returnValue: result, allReturnValues: this.stepReturnValues };
+      } catch (error) {
+        console.error('Error executing return value provider:', error);
+        return FailedExecutionResult(error instanceof Error ? error : new Error(String(error)));
+      }
+    }
+
+    return SuccessfulExecutionResult;
+  }
+
+  /**
+   * Calculates the tool-level return value based on the tool configuration.
+   * @private
+   * @param tool - The tool configuration.
+   * @param toolParams - Tool-level parameters.
+   * @param stepsExecuted - Number of steps executed.
+   * @param toolExecutionSuccess - Whether the tool executed successfully.
+   * @param toolExecutionError - Any error that occurred during tool execution.
+   * @returns The calculated tool-level return value.
+   */
+  private async calculateToolReturnValue(
+    tool: ToolConfiguration, 
+    toolParams: Record<string, any>, 
+    stepsExecuted: number,
+    toolExecutionSuccess: boolean,
+    toolExecutionError?: Error
+  ): Promise<ExecutionResult> {
+    if (!tool.returnValue) {
+      // No tool-level return value specified, use last step's return value
+      return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+    }
+
+    const returnValueConfig = tool.returnValue;
+
+    // If there's a hardcoded value, return it
+    if (returnValueConfig.value !== undefined) {
+      return { success: true, returnValue: this.substituteParams(returnValueConfig.value, toolParams), allReturnValues: this.stepReturnValues };
+    }
+
+    // If there's a provider function, call it
+    if (returnValueConfig.provider || returnValueConfig.providerName) {
+      const provider = returnValueConfig.provider || 
+                     (returnValueConfig.providerName ? 
+                      this.returnValueProviders.get(returnValueConfig.providerName)?.implementation : 
+                      undefined);
+
+      if (!provider) {
+        console.warn(`Tool return value provider not found: ${returnValueConfig.providerName}`);
+        // Fallback to last step's return value
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+      }
+
+      const context: ReturnValueContext = {
+        toolParams,
+        controller: this,
+        debugLog: this.debugLog.bind(this),
+        activeTool: tool,
+        stepsExecuted,
+        allStepReturnValues: [...this.stepReturnValues],
+        lastStepReturnValue: this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult,
+        toolExecutionSuccess,
+        toolExecutionError
+      };
+
+      try {
+        const result = await provider(context);
+        this.debugLog('Tool return value provider result:', result);
+        return { success: true, returnValue: result, allReturnValues: this.stepReturnValues };
+      } catch (error) {
+        console.error('Error executing tool return value provider:', error);
+        // Fallback to last step's return value
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+      }
+    }
+
+    // Fallback to last step's return value
+    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
   }
 
   /**
@@ -579,40 +826,81 @@ export class MCPElementsController {
   }
 
   /**
-   * Sets up event handlers for the Shepherd tour.
+   * Sets up event handlers for the Shepherd tour with return value support.
    * @private
    */
-  private setupTourEventHandlers(): void {
+  private setupTourEventHandlersWithReturnValues(resolve: (result: ExecutionResult) => void): void {
     if (!this.shepherdTour) return;
 
-    this.shepherdTour.on('show', (event: any) => {
+    this.shepherdTour.on('show', async (event: any) => {
       this.emit('step:show', {
         step: this.activeTool?.steps[this.currentStepIndex],
         index: this.currentStepIndex,
         tool: this.activeTool
       });
+
+      // For normal mode, calculate return value when step is shown
+      if (this.activeTool?.mode === 'normal') {
+        const step = this.activeTool.steps[this.currentStepIndex];
+        if (step) {
+          const stepReturnValue = await this.calculateStepReturnValue(step, {}, this.currentStepIndex, undefined);
+          this.stepReturnValues[this.currentStepIndex] = stepReturnValue;
+        }
+      }
     });
 
-    this.shepherdTour.on('complete', () => {
-      this.emit('complete', { tool: this.activeTool });
+    this.shepherdTour.on('complete', async () => {
+      // Calculate tool-level return value (might override last step's return value)
+      const toolReturnValue = await this.calculateToolReturnValue(
+        this.activeTool!, 
+        {}, // Tool params not available in Shepherd context, could be enhanced
+        this.stepReturnValues.length, 
+        true
+      );
+      
+      const toolResult: ExecutionResult = {
+        success: true,
+        returnValue: toolReturnValue,
+        allReturnValues: [...this.stepReturnValues]
+      };
+
+      this.emit('complete', { tool: this.activeTool, result: toolResult });
       this.activeTool = null;
       this.shepherdTour = null;
-      this.executeNextTool();
+      resolve(toolResult);
     });
 
-    this.shepherdTour.on('cancel', () => {
-      this.emit('cancel', { tool: this.activeTool });
+    this.shepherdTour.on('cancel', async () => {
+      // Calculate tool-level return value even on cancel
+      const toolReturnValue = await this.calculateToolReturnValue(
+        this.activeTool!, 
+        {}, // Tool params not available in Shepherd context
+        this.stepReturnValues.length, 
+        false,
+        new Error('Tool cancelled by user')
+      );
+      
+      const toolResult: ExecutionResult = {
+        success: false,
+        error: new Error('Tool cancelled by user'),
+        returnValue: toolReturnValue,
+        allReturnValues: [...this.stepReturnValues]
+      };
+
+      this.emit('cancel', { tool: this.activeTool, result: toolResult });
       this.activeTool = null;
       this.shepherdTour = null;
       this.toolQueue = []; // Clear queue on cancel
+      resolve(toolResult);
     });
   }
 
   /**
    * Performs an automated action on a DOM element.
    * @private
+   * @returns The result of the action (e.g., clicked element, filled value, function return value).
    */
-  private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<void> {
+  private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<any> {
     const effectiveOptions = this.activeTool ? this.getEffectiveOptions(this.activeTool) : this.globalOptions;
 
     this.debugLog('Performing action:', action.type, 'on element:', targetElement);
@@ -621,10 +909,14 @@ export class MCPElementsController {
     const element = await this.waitForElement(targetElement, effectiveOptions.elementTimeout);
     if (!element) {
       throw new Error(`Element not found: ${targetElement}`);
-    } this.debugLog('Element found:', element);
+    }
+
+    this.debugLog('Element found:', element);
 
     // Highlight the target element before performing action
     this.highlightElement(element, effectiveOptions.highlightDuration, effectiveOptions);
+
+    let actionResult: any = undefined;
 
     switch (action.type) {
       case 'click':
@@ -634,18 +926,22 @@ export class MCPElementsController {
         // Small delay to let visual effect show
         await new Promise(resolve => setTimeout(resolve, 200));
         element.click();
+        actionResult = { clicked: true, element: targetElement };
         break;
+
       case 'fillInput':
         this.debugLog('Filling input with value:', action.value);
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           // Use typing animation for visual feedback
           await this.showTypingEffect(element, action.value || '', effectiveOptions);
-
           element.dispatchEvent(new Event('blur', { bubbles: true }));
+          actionResult = { filled: true, value: action.value, element: targetElement };
         } else {
           console.error('Element is not an input or textarea:', element);
+          throw new Error(`Element ${targetElement} is not an input or textarea`);
         }
         break;
+
       case 'selectOption':
         this.debugLog('Selecting option with value:', action.value);
         if (element instanceof HTMLSelectElement) {
@@ -656,21 +952,25 @@ export class MCPElementsController {
 
           element.value = action.value || '';
           element.dispatchEvent(new Event('change', { bubbles: true }));
+          actionResult = { selected: true, value: action.value, element: targetElement };
         } else {
           console.error('Element is not a select:', element);
+          throw new Error(`Element ${targetElement} is not a select element`);
         }
         break;
-        case 'navigate':
+
+      case 'navigate':
         this.debugLog('Navigating to:', action.value);
         // Show click effect if element is clickable (like a link)
         this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
         window.location.href = action.value || '';
+        actionResult = { navigated: true, url: action.value };
         break;
 
       case 'executeFunction':
         this.debugLog('Executing custom function:', action.functionName || 'inline function');
-        await this.executeCustomFunction(action, element, params);
+        actionResult = await this.executeCustomFunction(action, element, params);
         break;
 
       default:
@@ -679,6 +979,8 @@ export class MCPElementsController {
 
     // Add a small delay after each action (configurable)
     await new Promise(resolve => setTimeout(resolve, effectiveOptions.actionDelay));
+    
+    return actionResult;
   }
   /**
    * Wait for an element to be available in the DOM
@@ -701,8 +1003,9 @@ export class MCPElementsController {
   /**
    * Executes a custom function as part of a tool action.
    * @private
+   * @returns The return value from the custom function.
    */
- private async executeCustomFunction(action: ToolAction, targetElement: HTMLElement, toolParams: Record<string, any>): Promise<void> {
+  private async executeCustomFunction(action: ToolAction, targetElement: HTMLElement, toolParams: Record<string, any>): Promise<any> {
     let functionToExecute: CustomFunctionImplementation | undefined;
     
     // Check if function is provided directly
@@ -736,7 +1039,8 @@ export class MCPElementsController {
         controller: this,
         debugLog: this.debugLog.bind(this),
         activeTool: this.activeTool,
-        currentStepIndex: this.currentStepIndex
+        currentStepIndex: this.currentStepIndex,
+        previousStepReturnValue: this.currentStepIndex > 0 ? this.stepReturnValues[this.currentStepIndex - 1] : undefined
       };
 
       // Execute the function with context
@@ -1353,5 +1657,21 @@ export class MCPElementsController {
     }
 
     return result;
+  }
+
+  /**
+   * Gets the return values from the last executed tool.
+   * @returns Array of return values from each step of the last tool.
+   */
+  getLastToolReturnValues(): ExecutionResult[] {
+    return [...this.stepReturnValues];
+  }
+
+  /**
+   * Gets the return value from the last step of the last executed tool.
+   * @returns The return value from the last step, or undefined if no steps were executed.
+   */
+  getLastStepReturnValue(): ExecutionResult | undefined {
+    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : undefined;
   }
 }

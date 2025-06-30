@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction } from '../../lib/mcp-elements';
+import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, ExecutionResult } from '../../lib/mcp-elements';
 
 /**
  * Angular service for integrating MCP Elements with the AutoBot application
@@ -79,7 +79,7 @@ export class MCPElementsService {
    */
   async startWelcomeTour(): Promise<void> {
     await this.ensureInitialized();
-    this.mcpController.start([{ toolId: 'stack-overflow-welcome' }]);
+    await this.mcpController.start([{ toolId: 'stack-overflow-welcome' }]);
   }
 
   /**
@@ -87,7 +87,7 @@ export class MCPElementsService {
    */
   async startAskQuestionGuide(): Promise<void> {
     await this.ensureInitialized();
-    this.mcpController.start([{ toolId: 'ask-question-guide' }]);
+    await this.mcpController.start([{ toolId: 'ask-question-guide' }]);
   }
 
   /**
@@ -95,7 +95,7 @@ export class MCPElementsService {
    */
   async startUserInteractionTour(): Promise<void> {
     await this.ensureInitialized();
-    this.mcpController.start([{ toolId: 'user-interaction-tour' }]);
+    await this.mcpController.start([{ toolId: 'user-interaction-tour' }]);
   }
 
   /**
@@ -103,7 +103,7 @@ export class MCPElementsService {
    */
   async startSearchAndFilterGuide(): Promise<void> {
     await this.ensureInitialized();
-    this.mcpController.start([{ toolId: 'search-and-filter' }]);
+    await this.mcpController.start([{ toolId: 'search-and-filter' }]);
   }
   /**
    * Demonstrate automatic question creation
@@ -132,7 +132,7 @@ export class MCPElementsService {
     }
     
     console.log('Starting auto question demo on /ask page');
-    this.mcpController.start([{
+    await this.mcpController.start([{
       toolId: 'auto-question-demo',
       params: questionData
     }]);
@@ -141,9 +141,9 @@ export class MCPElementsService {
   /**
    * Start a custom tool by ID with optional parameters
    */
-  async startTool(toolId: string, params?: Record<string, any>): Promise<void> {
+  async startTool(toolId: string, params?: Record<string, any>): Promise<ExecutionResult[]> {
     await this.ensureInitialized();
-    this.mcpController.start([{ toolId, params }]);
+    return await this.mcpController.start([{ toolId, params }]);
   }
 
   /**
@@ -151,7 +151,23 @@ export class MCPElementsService {
    */
   async startToolSequence(tools: ToolStartConfig[]): Promise<void> {
     await this.ensureInitialized();
-    this.mcpController.start(tools);
+    await this.mcpController.start(tools);
+  }
+
+  /**
+   * Start a custom tool by ID with optional parameters and return execution results
+   */
+  async startToolWithResults(toolId: string, params?: Record<string, any>): Promise<ExecutionResult[]> {
+    await this.ensureInitialized();
+    return await this.mcpController.start([{ toolId, params }]);
+  }
+
+  /**
+   * Start a sequence of tools and return execution results
+   */
+  async startToolSequenceWithResults(tools: ToolStartConfig[]): Promise<ExecutionResult[]> {
+    await this.ensureInitialized();
+    return await this.mcpController.start(tools);
   }
 
   /**
@@ -366,5 +382,47 @@ export class MCPElementsService {
    */
   getAllCustomFunctions(): Map<string, CustomFunction> {
     return this.mcpController.getAllCustomFunctions();
+  }
+
+  /**
+   * Register a return value provider function
+   */
+  registerReturnValueProvider(provider: ReturnValueProviderFunction): void {
+    this.mcpController.registerReturnValueProvider(provider);
+  }
+
+  /**
+   * Register multiple return value provider functions
+   */
+  registerReturnValueProviders(providers: ReturnValueProviderFunction[]): void {
+    this.mcpController.registerReturnValueProviders(providers);
+  }
+
+  /**
+   * Get a registered return value provider function
+   */
+  getReturnValueProvider(providerName: string): ReturnValueProviderFunction | undefined {
+    return this.mcpController.getReturnValueProvider(providerName);
+  }
+
+  /**
+   * Get all registered return value provider functions
+   */
+  getAllReturnValueProviders(): Map<string, ReturnValueProviderFunction> {
+    return this.mcpController.getAllReturnValueProviders();
+  }
+
+  /**
+   * Get the return values from the last executed tool
+   */
+  getLastToolReturnValues(): ExecutionResult[] {
+    return this.mcpController.getLastToolReturnValues();
+  }
+
+  /**
+   * Get the return value from the last step of the last executed tool
+   */
+  getLastStepReturnValue(): ExecutionResult | undefined {
+    return this.mcpController.getLastStepReturnValue();
   }
 }

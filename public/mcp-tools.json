@@ -333,7 +333,8 @@
       "metadata": {
         "version": "1.1"
       }
-    },    "steps": [
+    },
+    "steps": [
       {
         "targetElement": "body",
         "content": "Starting custom function demonstration",
@@ -388,6 +389,169 @@
           "functionName": "showAlert",
           "functionParams": {
             "message": "Custom Function Demo completed! Check the console for logged data from the collectFormData function."
+          }
+        }
+      }
+    ]
+  },
+  {
+    "toolId": "return-value-demo",
+    "title": "Return Value Demonstration",
+    "description": "Demonstrates how return values work between steps and as tool results",
+    "mode": "silent",
+    "parameterSchema": {
+      "parameters": {
+        "initialValue": {
+          "type": "string",
+          "description": "Initial value to start the demo with",
+          "required": false,
+          "defaultValue": "Hello World",
+          "examples": ["Hello World", "Test Value", "Demo Data"]
+        }
+      },
+      "metadata": {
+        "version": "1.0",
+        "author": "AutoBot Development Team"
+      }
+    },
+    "steps": [
+      {
+        "targetElement": "body",
+        "content": "Step 1: Set a hardcoded return value",
+        "returnValue": {
+          "value": "Step 1 completed with static value"
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "logMessage",
+          "functionParams": {
+            "message": "Step 1 executing with initial value: {{initialValue}}"
+          }
+        }
+      },
+      {
+        "targetElement": "app-header",
+        "content": "Step 2: Use a provider function to calculate return value",
+        "returnValue": {
+          "providerName": "calculateNextValue",
+          "providerParams": {
+            "multiplier": 2
+          }
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "logMessage",
+          "functionParams": {
+            "message": "Step 2 executing, previous step returned: {{previousValue}}"
+          }
+        }
+      },
+      {
+        "targetElement": "app-left-sidebar",
+        "content": "Step 3: Return value from executeFunction action",
+        "action": {
+          "type": "executeFunction",
+          "functionName": "processData",
+          "functionParams": {
+            "inputData": "{{initialValue}}"
+          }
+        }
+      },
+      {
+        "targetElement": ".btn-primary",
+        "content": "Step 4: Final step combining all previous return values",
+        "returnValue": {
+          "providerName": "combineAllValues"
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "logMessage",
+          "functionParams": {
+            "message": "Final step executing"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "toolId": "tool-level-return-demo",
+    "title": "Tool-Level Return Value Demo",
+    "description": "Demonstrates tool-level return values that override step return values",
+    "mode": "silent",
+    "parameterSchema": {
+      "parameters": {
+        "toolName": {
+          "type": "string",
+          "description": "Name of the tool for demonstration",
+          "required": false,
+          "defaultValue": "Tool Level Demo",
+          "examples": ["Demo Tool", "Sample Tool", "Test Tool"]
+        },
+        "priority": {
+          "type": "number",
+          "description": "Priority level for the tool",
+          "required": false,
+          "defaultValue": 1,
+          "minimum": 1,
+          "maximum": 10,
+          "examples": [1, 5, 10]
+        }
+      },
+      "metadata": {
+        "version": "1.0",
+        "author": "AutoBot Development Team"
+      }
+    },
+    "returnValue": {
+      "providerName": "generateToolSummary",
+      "providerParams": {
+        "includeMetrics": true,
+        "format": "detailed"
+      }
+    },
+    "steps": [
+      {
+        "targetElement": "body",
+        "content": "Step 1: This step returns a simple value",
+        "returnValue": {
+          "value": "Step 1 result: Basic execution"
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "logMessage",
+          "functionParams": {
+            "message": "Step 1 of tool-level return demo: {{toolName}}"
+          }
+        }
+      },
+      {
+        "targetElement": "app-header",
+        "content": "Step 2: This step uses a provider function",
+        "returnValue": {
+          "providerName": "calculateNextValue",
+          "providerParams": {
+            "multiplier": 3
+          }
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "logMessage",
+          "functionParams": {
+            "message": "Step 2 executing with priority: {{priority}}"
+          }
+        }
+      },
+      {
+        "targetElement": "app-left-sidebar",
+        "content": "Step 3: This step's return value will be overridden by tool-level return",
+        "returnValue": {
+          "value": "Step 3 result: This will be overridden by tool-level return value"
+        },
+        "action": {
+          "type": "executeFunction",
+          "functionName": "processData",
+          "functionParams": {
+            "inputData": "Final step data for {{toolName}}"
           }
         }
       }

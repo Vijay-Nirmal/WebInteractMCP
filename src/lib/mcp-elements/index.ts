@@ -21,7 +21,11 @@ export type {
   MCPElementsOptions,
   VisualEffectStyles,
   ParameterDefinition,
-  ToolParameterSchema
+  ToolParameterSchema,
+  ReturnValueProviderFunction,
+  ReturnValueProvider,
+  ExecutionResult,
+  ReturnValueContext
 } from './types';
 
 // Import for default instance

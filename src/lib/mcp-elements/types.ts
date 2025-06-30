@@ -155,6 +155,8 @@ export interface ToolStep {
   shepherdOptions?: any;
   /** Whether to stop execution if this step fails (default: false) */
   stopOnFailure?: boolean;
+  /** Configuration for the return value from this step */
+  returnValue?: ReturnValue;
 }
 
 /**
@@ -180,6 +182,8 @@ export interface ToolConfiguration {
   options?: Partial<MCPElementsOptions>;
   /** Parameter schema for MCP server integration - defines expected parameters and their types */
   parameterSchema?: ToolParameterSchema;
+  /** Configuration for the tool-level return value (overrides last step's return value) */
+  returnValue?: ReturnValue;
   /** Whether the tool performs destructive actions */
   destructive?: boolean;
   /** Whether the tool is idempotent */
@@ -249,6 +253,8 @@ export interface CustomFunctionContext {
   activeTool: ToolConfiguration | null;
   /** Current step index in the tool execution */
   currentStepIndex: number;
+  /** Return value from the previous step (if any) */
+  previousStepReturnValue?: ExecutionResult;
 }
 
 /**
@@ -267,3 +273,101 @@ export interface CustomFunction {
   /** Expected parameters for the function */
   parameters?: Record<string, any>;
 }
+
+/**
+ * Context object passed to return value provider functions
+ * Contains all available information from both step and tool execution contexts
+ */
+export interface ReturnValueContext {
+  /** Tool-level parameters passed when starting the tool */
+  toolParams: Record<string, any>;
+  /** Reference to the MCPElementsController instance */
+  controller: any; // Using any to avoid circular dependency
+  /** Debug logging function */
+  debugLog: (message: string, ...data: any[]) => void;
+  /** Currently active tool configuration */
+  activeTool: ToolConfiguration | null;
+  
+  // Step-level context (available when called from a step)
+  /** The target DOM element (available for step-level providers) */
+  element?: HTMLElement;
+  /** Parameters passed to the current step (available for step-level providers) */
+  stepParams?: Record<string, any>;
+  /** Current step index in the tool execution (available for step-level providers) */
+  currentStepIndex?: number;
+  /** Return value from the previous step (available for step-level providers) */
+  previousStepReturnValue?: ExecutionResult;
+  /** Action result from the current step (available for step-level providers) */
+  actionResult?: any;
+  
+  // Tool-level context (available when called from tool completion)
+  /** Total number of steps executed (available for tool-level providers) */
+  stepsExecuted?: number;
+  /** Return values from all executed steps (available for tool-level providers) */
+  allStepReturnValues?: ExecutionResult[];
+  /** Return value from the last step (available for tool-level providers) */
+  lastStepReturnValue?: ExecutionResult;
+  /** Whether the tool executed successfully (available for tool-level providers) */
+  toolExecutionSuccess?: boolean;
+  /** Any error that occurred during tool execution (available for tool-level providers) */
+  toolExecutionError?: Error;
+}
+
+/**
+ * Type definition for return value provider functions
+ * Unified type that works for both step-level and tool-level providers
+ */
+export type ReturnValueProvider = (context: ReturnValueContext) => any | Promise<any>;
+
+/**
+ * Represents a return value provider function that can be registered and used in steps or tools
+ */
+export interface ReturnValueProviderFunction {
+  /** The name of the provider function */
+  name: string;
+  /** The provider function implementation */
+  implementation: ReturnValueProvider;
+  /** Expected parameters for the provider function */
+  parameters?: Record<string, any>;
+  /** Whether this provider is intended for step-level or tool-level use (optional metadata) */
+  scope?: 'step' | 'tool' | 'both';
+}
+
+/**
+ * Configuration for return values (used by both steps and tools)
+ */
+export interface ReturnValue {
+  /** Static/hardcoded return value */
+  value?: any;
+  /** Function to compute the return value dynamically */
+  provider?: ReturnValueProvider;
+  /** Name of a registered function to compute the return value */
+  providerName?: string;
+  /** Parameters to pass to the provider function */
+  providerParams?: Record<string, any>;
+}
+
+/**
+ * Result of executing a tool or step (unified interface)
+ */
+export interface ExecutionResult {
+  /** Whether the execution was successful */
+  success: boolean;
+  /** Any error that occurred during execution */
+  error?: Error;
+  /** Return value from the execution (last step for tools, step result for steps) */
+  returnValue?: any;
+  /** All return values from executed steps (for tools) or single value array (for steps) */
+  allReturnValues?: any[];
+}
+
+export const SuccessfulExecutionResult: ExecutionResult = {
+  success: true
+};
+
+export const FailedExecutionResult: (error?: Error | unknown) => ExecutionResult = (error?) => {
+  return {
+    success: false,
+    error: error as any || new Error('Execution failed')
+  };
+};
