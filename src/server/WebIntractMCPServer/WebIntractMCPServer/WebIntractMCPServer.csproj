@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.StackExchangeRedis" Version="9.0.6" />
     <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.2.0-preview.3" />
   </ItemGroup>
 

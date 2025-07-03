@@ -16,6 +16,7 @@
     "@angular/forms": "^20.0.0",
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
+    "@microsoft/signalr": "^8.0.7",
     "rxjs": "~7.8.0",
     "shepherd.js": "^14.5.0",
     "tslib": "^2.3.0",

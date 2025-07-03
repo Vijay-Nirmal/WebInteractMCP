@@ -3,11 +3,7 @@ namespace MCPClientWithSK.Services;
 public interface IAgentService
 {
     Task<string> ProcessMessageAsync(string message, string? sessionId = null, CancellationToken cancellationToken = default);
-    Task<string> ExecutePlanAsync(string goal, string? sessionId = null, CancellationToken cancellationToken = default);
-    Task<IEnumerable<string>> GetAvailableToolsAsync();
-    Task<string> AnalyzeUserIntentAsync(string message);
     Task ClearSessionAsync(string sessionId);
-    Task<string> TestPlannerPluginAsync();
 }
 
 public interface IMemoryService

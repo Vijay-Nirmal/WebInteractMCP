@@ -86,36 +86,6 @@ app.MapPost("/api/chat", async (ChatRequest request, IChatService chatService) =
     }
 });
 
-// Add planning endpoint
-app.MapPost("/api/plan", async (PlanRequest request, IAgentService agentService) =>
-{
-    try
-    {
-        var plan = await agentService.ExecutePlanAsync(request.Goal, request.SessionId);
-        return Results.Ok(new PlanResponse(plan));
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Error creating execution plan");
-        return Results.Problem("An error occurred while creating the execution plan");
-    }
-});
-
-// Add tools endpoint
-app.MapGet("/api/tools", async (IAgentService agentService) =>
-{
-    try
-    {
-        var tools = await agentService.GetAvailableToolsAsync();
-        return Results.Ok(new ToolsResponse(tools));
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Error retrieving available tools");
-        return Results.Problem("An error occurred while retrieving available tools");
-    }
-});
-
 // Add session management endpoint
 app.MapDelete("/api/session/{sessionId}", async (string sessionId, IAgentService agentService) =>
 {
@@ -128,21 +98,6 @@ app.MapDelete("/api/session/{sessionId}", async (string sessionId, IAgentService
     {
         app.Logger.LogError(ex, "Error clearing session {SessionId}", sessionId);
         return Results.Problem($"An error occurred while clearing session {sessionId}");
-    }
-});
-
-// Add plugin test endpoint
-app.MapGet("/api/test-plugin", async (IAgentService agentService) =>
-{
-    try
-    {
-        var result = await agentService.TestPlannerPluginAsync();
-        return Results.Ok(new { TestResult = result });
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Error testing plugin");
-        return Results.Problem("An error occurred while testing the plugin");
     }
 });
 
