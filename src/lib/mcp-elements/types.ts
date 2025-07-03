@@ -4,6 +4,268 @@
  */
 
 /**
+ * Optional annotations for the client. The client can use annotations to inform how objects are used or displayed
+ */
+export interface Annotations {
+  /**
+   * Describes who the intended customer of this object or data is.
+   *
+   * It can include multiple entries to indicate content useful for multiple audiences (e.g., `["user", "assistant"]`).
+   */
+  audience?: Role[];
+
+  /**
+   * Describes how important this data is for operating the server.
+   *
+   * A value of 1 means "most important," and indicates that the data is
+   * effectively required, while 0 means "least important," and indicates that
+   * the data is entirely optional.
+   *
+   * @TJS-type number
+   * @minimum 0
+   * @maximum 1
+   */
+  priority?: number;
+
+  /**
+   * The moment the resource was last modified, as an ISO 8601 formatted string.
+   *
+   * Should be an ISO 8601 formatted string (e.g., "2025-01-12T15:00:58Z").
+   *
+   * Examples: last activity timestamp in an open file, timestamp when the resource
+   * was attached, etc.
+   */
+  lastModified?: string;
+}
+
+/**
+ * Role types for annotations
+ */
+export type Role = 'user' | 'assistant';
+
+/**
+ * Text provided to or from an LLM.
+ */
+export interface TextContent {
+  type: "text";
+
+  /**
+   * The text content of the message.
+   */
+  text: string;
+
+  /**
+   * Optional annotations for the client.
+   */
+  annotations?: Annotations;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+/**
+ * An image provided to or from an LLM.
+ */
+export interface ImageContent {
+  type: "image";
+
+  /**
+   * The base64-encoded image data.
+   *
+   * @format byte
+   */
+  data: string;
+
+  /**
+   * The MIME type of the image. Different providers may support different image types.
+   */
+  mimeType: string;
+
+  /**
+   * Optional annotations for the client.
+   */
+  annotations?: Annotations;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+/**
+ * Audio provided to or from an LLM.
+ */
+export interface AudioContent {
+  type: "audio";
+
+  /**
+   * The base64-encoded audio data.
+   *
+   * @format byte
+   */
+  data: string;
+
+  /**
+   * The MIME type of the audio. Different providers may support different audio types.
+   */
+  mimeType: string;
+
+  /**
+   * Optional annotations for the client.
+   */
+  annotations?: Annotations;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+/**
+ * The contents of a specific resource or sub-resource.
+ */
+export interface ResourceContents {
+  /**
+   * The URI of this resource.
+   *
+   * @format uri
+   */
+  uri: string;
+  /**
+   * The MIME type of this resource, if known.
+   */
+  mimeType?: string;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+export interface TextResourceContents extends ResourceContents {
+  /**
+   * The text of the item. This must only be set if the item can actually be represented as text (not binary data).
+   */
+  text: string;
+}
+
+export interface BlobResourceContents extends ResourceContents {
+  /**
+   * A base64-encoded string representing the binary data of the item.
+   *
+   * @format byte
+   */
+  blob: string;
+}
+
+/**
+ * A resource, which can have various types.
+ */
+export interface Resource {
+  /**
+   * The URI of this resource.
+   *
+   * @format uri
+   */
+  uri: string;
+
+  /**
+   * A human-readable name for this resource.
+   */
+  name?: string;
+
+  /**
+   * A description of what this resource represents.
+   */
+  description?: string;
+
+  /**
+   * The MIME type of this resource, if known.
+   */
+  mimeType?: string;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+/**
+ * A resource that the server is capable of reading, included in a prompt or tool call result.
+ *
+ * Note: resource links returned by tools are not guaranteed to appear in the results of `resources/list` requests.
+ */
+export interface ResourceLink extends Resource {
+  type: "resource_link";
+}
+
+/**
+ * The contents of a resource, embedded into a prompt or tool call result.
+ *
+ * It is up to the client how best to render embedded resources for the benefit
+ * of the LLM and/or the user.
+ */
+export interface EmbeddedResource {
+  type: "resource";
+  resource: TextResourceContents | BlobResourceContents;
+
+  /**
+   * Optional annotations for the client.
+   */
+  annotations?: Annotations;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+export type ContentBlock =
+  | TextContent
+  | ImageContent
+  | AudioContent
+  | ResourceLink
+  | EmbeddedResource;
+
+/**
+ * The server's response to a tool call.
+ */
+export interface CallToolResult {
+  /**
+   * A list of content objects that represent the unstructured result of the tool call.
+   */
+  content: ContentBlock[];
+
+  /**
+   * An optional JSON object that represents the structured result of the tool call.
+   */
+  structuredContent?: { [key: string]: unknown };
+
+  /**
+   * Whether the tool call ended in an error.
+   *
+   * If not set, this is assumed to be false (the call was successful).
+   *
+   * Any errors that originate from the tool SHOULD be reported inside the result
+   * object, with `isError` set to true, _not_ as an MCP protocol-level error
+   * response. Otherwise, the LLM would not be able to see that an error occurred
+   * and self-correct.
+   *
+   * However, any errors in _finding_ the tool, an error indicating that the
+   * server does not support tool calls, or any other exceptional conditions,
+   * should be reported as an MCP error response.
+   */
+  isError?: boolean;
+
+  /**
+   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
+   */
+  _meta?: { [key: string]: unknown };
+}
+
+/**
  * Defines the type and constraints for a tool parameter
  */
 export interface ParameterDefinition {
@@ -254,13 +516,13 @@ export interface CustomFunctionContext {
   /** Current step index in the tool execution */
   currentStepIndex: number;
   /** Return value from the previous step (if any) */
-  previousStepReturnValue?: ExecutionResult;
+  previousStepReturnValue?: CallToolResult;
 }
 
 /**
  * Type definition for custom function implementations
  */
-export type CustomFunctionImplementation = (context: CustomFunctionContext) => any | Promise<any>;
+export type CustomFunctionImplementation = (context: CustomFunctionContext) => CallToolResult | Promise<CallToolResult>;
 
 /**
  * Represents a custom function that can be executed as part of a tool step
@@ -296,17 +558,15 @@ export interface ReturnValueContext {
   /** Current step index in the tool execution (available for step-level providers) */
   currentStepIndex?: number;
   /** Return value from the previous step (available for step-level providers) */
-  previousStepReturnValue?: ExecutionResult;
+  previousStepReturnValue?: CallToolResult;
   /** Action result from the current step (available for step-level providers) */
-  actionResult?: any;
+  actionResult?: CallToolResult;
   
   // Tool-level context (available when called from tool completion)
   /** Total number of steps executed (available for tool-level providers) */
   stepsExecuted?: number;
-  /** Return values from all executed steps (available for tool-level providers) */
-  allStepReturnValues?: ExecutionResult[];
   /** Return value from the last step (available for tool-level providers) */
-  lastStepReturnValue?: ExecutionResult;
+  lastStepReturnValue?: CallToolResult;
   /** Whether the tool executed successfully (available for tool-level providers) */
   toolExecutionSuccess?: boolean;
   /** Any error that occurred during tool execution (available for tool-level providers) */
@@ -317,7 +577,7 @@ export interface ReturnValueContext {
  * Type definition for return value provider functions
  * Unified type that works for both step-level and tool-level providers
  */
-export type ReturnValueProvider = (context: ReturnValueContext) => any | Promise<any>;
+export type ReturnValueProvider = (context: ReturnValueContext) => CallToolResult | Promise<CallToolResult>;
 
 /**
  * Represents a return value provider function that can be registered and used in steps or tools
@@ -348,26 +608,53 @@ export interface ReturnValue {
 }
 
 /**
- * Result of executing a tool or step (unified interface)
+ * Helper function to create a successful CallToolResult
  */
-export interface ExecutionResult {
-  /** Whether the execution was successful */
-  success: boolean;
-  /** Any error that occurred during execution */
-  error?: Error;
-  /** Return value from the execution (last step for tools, step result for steps) */
-  returnValue?: any;
-  /** All return values from executed steps (for tools) or single value array (for steps) */
-  allReturnValues?: any[];
-}
-
-export const SuccessfulExecutionResult: ExecutionResult = {
-  success: true
+export const createSuccessResult = (content?: string | ContentBlock[], structuredContent?: { [key: string]: unknown }): CallToolResult => {
+  let contentArray: ContentBlock[];
+  
+  if (!content) {
+    contentArray = [{ type: "text", text: "Operation completed successfully" }];
+  } else if (typeof content === 'string') {
+    contentArray = [{ type: "text", text: content }];
+  } else {
+    contentArray = content;
+  }
+  
+  return {
+    content: contentArray,
+    structuredContent,
+    isError: false
+  };
 };
 
-export const FailedExecutionResult: (error?: Error | unknown) => ExecutionResult = (error?) => {
+/**
+ * Helper function to create an error CallToolResult
+ */
+export const createErrorResult = (error: Error | string, structuredContent?: { [key: string]: unknown }): CallToolResult => {
+  const errorMessage = error instanceof Error ? error.message : error;
+  const errorDetails = error instanceof Error ? { 
+    name: error.name, 
+    message: error.message, 
+    stack: error.stack 
+  } : { message: errorMessage };
+  
   return {
-    success: false,
-    error: error as any || new Error('Execution failed')
+    content: [{ type: "text", text: `Error: ${errorMessage}` }],
+    structuredContent: structuredContent || { error: errorDetails },
+    isError: true
   };
+};
+
+/**
+ * Default successful result constant
+ */
+export const SuccessfulCallToolResult: CallToolResult = createSuccessResult();
+
+/**
+ * Helper function to create a failed result
+ */
+export const FailedCallToolResult = (error?: Error | unknown): CallToolResult => {
+  const errorObj = error instanceof Error ? error : new Error(String(error || 'Operation failed'));
+  return createErrorResult(errorObj);
 };

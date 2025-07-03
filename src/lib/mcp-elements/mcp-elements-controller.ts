@@ -5,7 +5,7 @@
 
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition, ReturnValueProviderFunction, ReturnValueProvider, ExecutionResult, ReturnValueContext, SuccessfulExecutionResult, FailedExecutionResult } from './types';
+import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition, ReturnValueProviderFunction, ReturnValueProvider, CallToolResult, ReturnValueContext, SuccessfulCallToolResult, FailedCallToolResult, createSuccessResult, createErrorResult } from './types';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -20,7 +20,7 @@ export class MCPElementsController {
   private globalOptions: MCPElementsOptions;
   private customFunctions: Map<string, CustomFunction> = new Map();
   private returnValueProviders: Map<string, ReturnValueProviderFunction> = new Map();
-  private stepReturnValues: ExecutionResult[] = [];
+  private stepReturnValues: CallToolResult[] = [];
   private customStyles: VisualEffectStyles = {};
   private styleElementId: string = 'mcp-visual-feedback-styles';
 
@@ -239,9 +239,9 @@ export class MCPElementsController {
   /**
    * Starts a sequence of Tools.
    * @param toolsToStart - An array of objects, each with a toolId and optional parameters to pass to the tool.
-   * @returns Promise that resolves with an array of ExecutionResult from each tool execution.
+   * @returns Promise that resolves with an array of CallToolResult from each tool execution.
    */
-  async start(toolsToStart: ToolStartConfig[]): Promise<ExecutionResult[]> {
+  async start(toolsToStart: ToolStartConfig[]): Promise<CallToolResult[]> {
     if (!Array.isArray(toolsToStart) || toolsToStart.length === 0) {
       console.warn('No tools provided to start');
       return [];
@@ -258,12 +258,7 @@ export class MCPElementsController {
           error: errorMsg,
           validationErrors: validation.errors 
         });
-        return [{ 
-          success: false, 
-          error: new Error(errorMsg), 
-          returnValue: undefined, 
-          allReturnValues: [] 
-        }];
+        return [createErrorResult(errorMsg)];
       }
       if (validation.warnings.length > 0) {
         console.warn(`Parameter validation warnings for tool '${toolConfig.toolId}':`, validation.warnings);
@@ -281,7 +276,7 @@ export class MCPElementsController {
 
     this.debugLog('Starting tool sequence', toolsToStart.map(t => t.toolId));
 
-    const results: ExecutionResult[] = [];
+    const results: CallToolResult[] = [];
     while (this.toolQueue.length > 0) {
       const { toolId, params = {} } = this.toolQueue.shift()!;
       const result = await this.executeTool(toolId, params);
@@ -389,14 +384,14 @@ export class MCPElementsController {
    * @param params - Optional parameters to pass to the tool.
    * @returns Promise that resolves with the tool execution result.
    */
-  private async executeTool(toolId: string, params: Record<string, any> = {}): Promise<ExecutionResult> {
+  private async executeTool(toolId: string, params: Record<string, any> = {}): Promise<CallToolResult> {
     this.debugLog(`Looking for tool: ${toolId}`);
     const tool = this.registry.getToolById(toolId);
     if (!tool) {
       console.error(`Tool with ID '${toolId}' not found`);
       this.debugLog('Available tools:', Array.from(this.registry.getAllTools().keys()));
       const error = new Error(`Tool with ID '${toolId}' not found`);
-      return { success: false, error, returnValue: undefined, allReturnValues: [] };
+      return createErrorResult(error);
     }
 
     this.activeTool = tool;
@@ -407,7 +402,7 @@ export class MCPElementsController {
     this.emit('start', { tool, params });
 
     try {
-      let result: ExecutionResult;
+      let result: CallToolResult;
       switch (tool.mode) {
         case 'normal':
           result = await this.executeNormalMode(tool, params);
@@ -422,25 +417,20 @@ export class MCPElementsController {
           const error = new Error(`Unknown tool mode: ${tool.mode}`);
           console.error(error.message);
           this.emit('cancel', { tool, error });
-          return { success: false, error, returnValue: undefined, allReturnValues: [] };
+          return createErrorResult(error);
       }
       return result;
     } catch (error) {
       console.error('Error executing tool:', error);
       this.emit('cancel', { tool, error });
-      return { 
-        success: false, 
-        error: error instanceof Error ? error : new Error(String(error)), 
-        returnValue: undefined,
-        allReturnValues: [...this.stepReturnValues]
-      };
+      return createErrorResult(error instanceof Error ? error : new Error(String(error)));
     }
   }
   /**
    * Executes a tool in normal mode (with buttons).
    * @private
    */
-  private async executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
+  private async executeNormalMode(tool: ToolConfiguration, params: Record<string, any>): Promise<CallToolResult> {
     const steps = this.prepareSteps(tool, params);
 
     return new Promise((resolve) => {
@@ -473,7 +463,7 @@ export class MCPElementsController {
    * Executes a tool in buttonless mode (auto-advancing).
    * @private
    */
-  private async executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
+  private async executeButtonlessMode(tool: ToolConfiguration, params: Record<string, any>): Promise<CallToolResult> {
     const steps = this.prepareSteps(tool, params);
     const effectiveOptions = this.getEffectiveOptions(tool);
 
@@ -549,7 +539,7 @@ export class MCPElementsController {
    * Executes a tool in silent mode (no UI, automated actions).
    * @private
    */
-  private async executeSilentMode(tool: ToolConfiguration, params: Record<string, any>): Promise<ExecutionResult> {
+  private async executeSilentMode(tool: ToolConfiguration, params: Record<string, any>): Promise<CallToolResult> {
     const steps = this.prepareSteps(tool, params);
     const effectiveOptions = this.getEffectiveOptions(tool);
 
@@ -563,20 +553,18 @@ export class MCPElementsController {
         this.debugLog(`Executing step ${i + 1}/${steps.length}:`, step);
         this.emit('step:show', { step, index: i, tool });
 
-        let stepResult: ExecutionResult = { success: true, allReturnValues: [] };
-        let actionResult: any = undefined;
+        let stepResult: CallToolResult;
+        let actionResult: CallToolResult | undefined = undefined;
 
         if (step.action) {
           this.debugLog('Performing action for step', i + 1);
           try {
             actionResult = await this.performAction(step.action, step.targetElement, params);
-            stepResult.returnValue = actionResult;
-            stepResult.success = true;
+            stepResult = actionResult; // performAction now returns CallToolResult directly
           } catch (stepError) {
             const errorMessage = stepError instanceof Error ? stepError.message : String(stepError);
             console.error(`Error in step ${i + 1}:`, stepError);
-            stepResult.success = false;
-            stepResult.error = stepError instanceof Error ? stepError : new Error(errorMessage);
+            stepResult = createErrorResult(stepError instanceof Error ? stepError : new Error(errorMessage));
 
             // Check if we should stop on failure (step-level or tool-level)
             const shouldStop = step.stopOnFailure !== undefined ? step.stopOnFailure : effectiveOptions.stopOnFailure;
@@ -588,6 +576,7 @@ export class MCPElementsController {
           }
         } else {
           this.debugLog('No action defined for step', i + 1);
+          stepResult = createSuccessResult(`Step ${i + 1} completed (no action)`, { skipped: true });
         }
 
         // Calculate step return value
@@ -629,26 +618,27 @@ export class MCPElementsController {
     step: ToolStep,
     toolParams: Record<string, any>, 
     stepIndex: number,
-    actionResult?: any,
-    currentResult: ExecutionResult = SuccessfulExecutionResult
-  ): Promise<ExecutionResult> {
-    if (currentResult.success === false) {
+    actionResult?: CallToolResult,
+    currentResult: CallToolResult = SuccessfulCallToolResult
+  ): Promise<CallToolResult> {
+    if (currentResult.isError === true) {
       return currentResult;
     }
 
     if (step.action?.type === 'executeFunction' && !step.returnValue) {
-      return { success: true, returnValue: actionResult, allReturnValues: [] };
+      return actionResult || createSuccessResult("Function executed successfully");
     }
 
     if (!step.returnValue) {
-      return SuccessfulExecutionResult;
+      return SuccessfulCallToolResult;
     }
 
     const returnValueConfig = step.returnValue;
 
     // If there's a hardcoded value, return it
     if (returnValueConfig.value !== undefined) {
-      return { success: true, returnValue: this.substituteParams(returnValueConfig.value, toolParams), allReturnValues: this.stepReturnValues };
+      const substitutedValue = this.substituteParams(returnValueConfig.value, toolParams);
+      return createSuccessResult("Step completed with hardcoded value", { value: substitutedValue });
     }
 
     // If there's a provider function, call it
@@ -660,13 +650,13 @@ export class MCPElementsController {
 
       if (!provider) {
         console.warn(`Return value provider not found: ${returnValueConfig.providerName}`);
-        return FailedExecutionResult();
+        return createErrorResult(`Return value provider not found: ${returnValueConfig.providerName}`);
       }
 
       const targetElement = await this.waitForElement(step.targetElement);
       if (!targetElement) {
         console.warn(`Target element not found for return value calculation: ${step.targetElement}`);
-        return FailedExecutionResult();
+        return createErrorResult(`Target element not found for return value calculation: ${step.targetElement}`);
       }
 
       const context: ReturnValueContext = {
@@ -683,14 +673,14 @@ export class MCPElementsController {
 
       try {
         const result = await provider(context);
-        return { success: true, returnValue: result, allReturnValues: this.stepReturnValues };
+        return result; // Provider should return CallToolResult directly
       } catch (error) {
         console.error('Error executing return value provider:', error);
-        return FailedExecutionResult(error instanceof Error ? error : new Error(String(error)));
+        return createErrorResult(error instanceof Error ? error : new Error(String(error)));
       }
     }
 
-    return SuccessfulExecutionResult;
+    return SuccessfulCallToolResult;
   }
 
   /**
@@ -709,17 +699,18 @@ export class MCPElementsController {
     stepsExecuted: number,
     toolExecutionSuccess: boolean,
     toolExecutionError?: Error
-  ): Promise<ExecutionResult> {
+  ): Promise<CallToolResult> {
     if (!tool.returnValue) {
       // No tool-level return value specified, use last step's return value
-      return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+      return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
     }
 
     const returnValueConfig = tool.returnValue;
 
     // If there's a hardcoded value, return it
     if (returnValueConfig.value !== undefined) {
-      return { success: true, returnValue: this.substituteParams(returnValueConfig.value, toolParams), allReturnValues: this.stepReturnValues };
+      const substitutedValue = this.substituteParams(returnValueConfig.value, toolParams);
+      return createSuccessResult("Tool completed with hardcoded value", { value: substitutedValue });
     }
 
     // If there's a provider function, call it
@@ -732,7 +723,7 @@ export class MCPElementsController {
       if (!provider) {
         console.warn(`Tool return value provider not found: ${returnValueConfig.providerName}`);
         // Fallback to last step's return value
-        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
       }
 
       const context: ReturnValueContext = {
@@ -741,8 +732,7 @@ export class MCPElementsController {
         debugLog: this.debugLog.bind(this),
         activeTool: tool,
         stepsExecuted,
-        allStepReturnValues: [...this.stepReturnValues],
-        lastStepReturnValue: this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult,
+        lastStepReturnValue: this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult,
         toolExecutionSuccess,
         toolExecutionError
       };
@@ -750,16 +740,16 @@ export class MCPElementsController {
       try {
         const result = await provider(context);
         this.debugLog('Tool return value provider result:', result);
-        return { success: true, returnValue: result, allReturnValues: this.stepReturnValues };
+        return result; // Provider should return CallToolResult directly
       } catch (error) {
         console.error('Error executing tool return value provider:', error);
         // Fallback to last step's return value
-        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
       }
     }
 
     // Fallback to last step's return value
-    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulExecutionResult;
+    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
   }
 
   /**
@@ -829,7 +819,7 @@ export class MCPElementsController {
    * Sets up event handlers for the Shepherd tour with return value support.
    * @private
    */
-  private setupTourEventHandlersWithReturnValues(resolve: (result: ExecutionResult) => void): void {
+  private setupTourEventHandlersWithReturnValues(resolve: (result: CallToolResult) => void): void {
     if (!this.shepherdTour) return;
 
     this.shepherdTour.on('show', async (event: any) => {
@@ -858,16 +848,10 @@ export class MCPElementsController {
         true
       );
       
-      const toolResult: ExecutionResult = {
-        success: true,
-        returnValue: toolReturnValue,
-        allReturnValues: [...this.stepReturnValues]
-      };
-
-      this.emit('complete', { tool: this.activeTool, result: toolResult });
+      this.emit('complete', { tool: this.activeTool, result: toolReturnValue });
       this.activeTool = null;
       this.shepherdTour = null;
-      resolve(toolResult);
+      resolve(toolReturnValue);
     });
 
     this.shepherdTour.on('cancel', async () => {
@@ -880,27 +864,22 @@ export class MCPElementsController {
         new Error('Tool cancelled by user')
       );
       
-      const toolResult: ExecutionResult = {
-        success: false,
-        error: new Error('Tool cancelled by user'),
-        returnValue: toolReturnValue,
-        allReturnValues: [...this.stepReturnValues]
-      };
-
-      this.emit('cancel', { tool: this.activeTool, result: toolResult });
+      const cancelledResult = createErrorResult('Tool cancelled by user');
+      
+      this.emit('cancel', { tool: this.activeTool, result: cancelledResult });
       this.activeTool = null;
       this.shepherdTour = null;
       this.toolQueue = []; // Clear queue on cancel
-      resolve(toolResult);
+      resolve(cancelledResult);
     });
   }
 
   /**
    * Performs an automated action on a DOM element.
    * @private
-   * @returns The result of the action (e.g., clicked element, filled value, function return value).
+   * @returns The result of the action as a CallToolResult.
    */
-  private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<any> {
+  private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<CallToolResult> {
     const effectiveOptions = this.activeTool ? this.getEffectiveOptions(this.activeTool) : this.globalOptions;
 
     this.debugLog('Performing action:', action.type, 'on element:', targetElement);
@@ -916,7 +895,7 @@ export class MCPElementsController {
     // Highlight the target element before performing action
     this.highlightElement(element, effectiveOptions.highlightDuration, effectiveOptions);
 
-    let actionResult: any = undefined;
+    let actionResult: CallToolResult;
 
     switch (action.type) {
       case 'click':
@@ -926,7 +905,10 @@ export class MCPElementsController {
         // Small delay to let visual effect show
         await new Promise(resolve => setTimeout(resolve, 200));
         element.click();
-        actionResult = { clicked: true, element: targetElement };
+        actionResult = createSuccessResult('Element clicked successfully', { 
+          clicked: true, 
+          element: targetElement 
+        });
         break;
 
       case 'fillInput':
@@ -935,7 +917,11 @@ export class MCPElementsController {
           // Use typing animation for visual feedback
           await this.showTypingEffect(element, action.value || '', effectiveOptions);
           element.dispatchEvent(new Event('blur', { bubbles: true }));
-          actionResult = { filled: true, value: action.value, element: targetElement };
+          actionResult = createSuccessResult('Input filled successfully', { 
+            filled: true, 
+            value: action.value, 
+            element: targetElement 
+          });
         } else {
           console.error('Element is not an input or textarea:', element);
           throw new Error(`Element ${targetElement} is not an input or textarea`);
@@ -952,7 +938,11 @@ export class MCPElementsController {
 
           element.value = action.value || '';
           element.dispatchEvent(new Event('change', { bubbles: true }));
-          actionResult = { selected: true, value: action.value, element: targetElement };
+          actionResult = createSuccessResult('Option selected successfully', { 
+            selected: true, 
+            value: action.value, 
+            element: targetElement 
+          });
         } else {
           console.error('Element is not a select:', element);
           throw new Error(`Element ${targetElement} is not a select element`);
@@ -965,7 +955,10 @@ export class MCPElementsController {
         this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
         window.location.href = action.value || '';
-        actionResult = { navigated: true, url: action.value };
+        actionResult = createSuccessResult('Navigation completed successfully', { 
+          navigated: true, 
+          url: action.value 
+        });
         break;
 
       case 'executeFunction':
@@ -1005,7 +998,7 @@ export class MCPElementsController {
    * @private
    * @returns The return value from the custom function.
    */
-  private async executeCustomFunction(action: ToolAction, targetElement: HTMLElement, toolParams: Record<string, any>): Promise<any> {
+  private async executeCustomFunction(action: ToolAction, targetElement: HTMLElement, toolParams: Record<string, any>): Promise<CallToolResult> {
     let functionToExecute: CustomFunctionImplementation | undefined;
     
     // Check if function is provided directly
@@ -1020,14 +1013,16 @@ export class MCPElementsController {
         functionToExecute = customFunction.implementation;
         this.debugLog(`Using registered function: ${action.functionName}`);
       } else {
-        throw new Error(`Custom function '${action.functionName}' not found in registry`);
+        const errorMsg = `Custom function '${action.functionName}' not found in registry`;
+        return createErrorResult(errorMsg);
       }
     } else {
-      throw new Error('No function or functionName provided for executeFunction action');
+      const errorMsg = 'No function or functionName provided for executeFunction action';
+      return createErrorResult(errorMsg);
     }
 
     if (!functionToExecute) {
-      throw new Error('Function to execute is undefined');
+      return createErrorResult('Function to execute is undefined');
     }
 
     try {
@@ -1047,11 +1042,11 @@ export class MCPElementsController {
       const result = await Promise.resolve(functionToExecute.call(context, context));
       
       this.debugLog('Custom function executed successfully:', result);
-      return result;
+      return result; // Function should return CallToolResult directly
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.debugLog('Error executing custom function:', errorMessage);
-      throw new Error(`Custom function execution failed: ${errorMessage}`);
+      return createErrorResult(`Custom function execution failed: ${errorMessage}`);
     }
   }
   /**
@@ -1663,7 +1658,7 @@ export class MCPElementsController {
    * Gets the return values from the last executed tool.
    * @returns Array of return values from each step of the last tool.
    */
-  getLastToolReturnValues(): ExecutionResult[] {
+  getLastToolReturnValues(): CallToolResult[] {
     return [...this.stepReturnValues];
   }
 
@@ -1671,7 +1666,7 @@ export class MCPElementsController {
    * Gets the return value from the last step of the last executed tool.
    * @returns The return value from the last step, or undefined if no steps were executed.
    */
-  getLastStepReturnValue(): ExecutionResult | undefined {
+  getLastStepReturnValue(): CallToolResult | undefined {
     return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : undefined;
   }
 }

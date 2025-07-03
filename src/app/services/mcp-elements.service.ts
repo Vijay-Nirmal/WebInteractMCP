@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, ExecutionResult } from '../../lib/mcp-elements';
+import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult } from '../../lib/mcp-elements';
 
 /**
  * Angular service for integrating MCP Elements with the AutoBot application
@@ -141,7 +141,7 @@ export class MCPElementsService {
   /**
    * Start a custom tool by ID with optional parameters
    */
-  async startTool(toolId: string, params?: Record<string, any>): Promise<ExecutionResult[]> {
+  async startTool(toolId: string, params?: Record<string, any>): Promise<CallToolResult[]> {
     await this.ensureInitialized();
     return await this.mcpController.start([{ toolId, params }]);
   }
@@ -157,7 +157,7 @@ export class MCPElementsService {
   /**
    * Start a custom tool by ID with optional parameters and return execution results
    */
-  async startToolWithResults(toolId: string, params?: Record<string, any>): Promise<ExecutionResult[]> {
+  async startToolWithResults(toolId: string, params?: Record<string, any>): Promise<CallToolResult[]> {
     await this.ensureInitialized();
     return await this.mcpController.start([{ toolId, params }]);
   }
@@ -165,7 +165,7 @@ export class MCPElementsService {
   /**
    * Start a sequence of tools and return execution results
    */
-  async startToolSequenceWithResults(tools: ToolStartConfig[]): Promise<ExecutionResult[]> {
+  async startToolSequenceWithResults(tools: ToolStartConfig[]): Promise<CallToolResult[]> {
     await this.ensureInitialized();
     return await this.mcpController.start(tools);
   }
@@ -415,14 +415,14 @@ export class MCPElementsService {
   /**
    * Get the return values from the last executed tool
    */
-  getLastToolReturnValues(): ExecutionResult[] {
+  getLastToolReturnValues(): CallToolResult[] {
     return this.mcpController.getLastToolReturnValues();
   }
 
   /**
    * Get the return value from the last step of the last executed tool
    */
-  getLastStepReturnValue(): ExecutionResult | undefined {
+  getLastStepReturnValue(): CallToolResult | undefined {
     return this.mcpController.getLastStepReturnValue();
   }
 }

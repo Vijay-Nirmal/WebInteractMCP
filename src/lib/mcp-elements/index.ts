@@ -24,9 +24,19 @@ export type {
   ToolParameterSchema,
   ReturnValueProviderFunction,
   ReturnValueProvider,
-  ExecutionResult,
-  ReturnValueContext
+  CallToolResult,
+  ReturnValueContext,
+  ContentBlock,
+  TextContent,
+  ImageContent,
+  AudioContent,
+  ResourceLink,
+  EmbeddedResource,
+  Annotations
 } from './types';
+
+// Export helper functions
+export { createSuccessResult, createErrorResult, SuccessfulCallToolResult, FailedCallToolResult } from './types';
 
 // Import for default instance
 import { MCPElementsController } from './mcp-elements-controller';

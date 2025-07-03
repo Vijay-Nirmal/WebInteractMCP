@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MCPElementsService } from '../../services/mcp-elements.service';
-import { ToolConfiguration, CustomFunctionContext } from '../../../lib/mcp-elements';
+import { ToolConfiguration, CustomFunctionContext, createSuccessResult, createErrorResult } from '../../../lib/mcp-elements';
 
 function refReplacer() {
   let m = new Map(), v= new Map(), init: any = null;
@@ -673,7 +673,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
         priority: 5
       });
       
-      alert(`Tool-Level Return Values Demo Completed!\n\nResult: ${JSON.stringify(result.map(x => { x.success, x.returnValue, x.error }), null, 2)}\n\nCheck console for detailed output.`);
+      alert(`Tool-Level Return Values Demo Completed!\n\nResult: ${JSON.stringify(result.map(x => ({ isError: x.isError, content: x.content, structuredContent: x.structuredContent })), null, 2)}\n\nCheck console for detailed output.`);
     } catch (error) {
       console.error('Error in tool-level return values demo:', error);
       this.addEvent('error', `Tool-level return values demo error: ${error}`);
@@ -690,7 +690,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
         implementation: function(context: CustomFunctionContext) {
           const message = context.params['message'] || 'Hello from custom function!';
           alert(`Custom Function Alert: ${message}`);
-          return { success: true, message: 'Alert shown' };
+          return createSuccessResult('Alert shown successfully', { message });
         },
         parameters: {
           message: 'string - The message to show in the alert'
@@ -717,7 +717,11 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
             element.style.cssText = originalStyle;
           }, duration);
           
-          return { success: true, message: `Element highlighted for ${duration}ms` };
+          return createSuccessResult(`Element highlighted for ${duration}ms`, { 
+            duration, 
+            color, 
+            elementTag: element.tagName 
+          });
         },
         parameters: {
           duration: 'number - Duration in milliseconds (default: 3000)',
@@ -742,7 +746,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           console.log('Collected form data:', formData);
           context.debugLog('Custom function collected form data:', formData);
           
-          return { success: true, data: formData, message: 'Form data collected' };
+          return createSuccessResult('Form data collected successfully', formData);
         },
         parameters: {}
       },
@@ -755,12 +759,11 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           console.log(`[${timestamp}] ${message}`);
           context.debugLog('logMessage function called:', message);
           
-          return { 
-            success: true, 
+          return createSuccessResult('Message logged successfully', { 
             message: message,
             timestamp: timestamp,
             stepIndex: context.currentStepIndex
-          };
+          });
         },
         parameters: {
           message: 'string - The message to log'
@@ -783,7 +786,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           context.debugLog('processData function called with:', { inputData, previousValue });
           
           // This return value will be used as the step's return value
-          return processed;
+          return createSuccessResult('Data processed successfully', processed);
         },
         parameters: {
           inputData: 'string - The data to process'
@@ -810,7 +813,13 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
             result
           });
           
-          return result;
+          return createSuccessResult(result, { 
+            calculation: { 
+              multiplier, 
+              previousValue: previousValue, 
+              result 
+            } 
+          });
         },
         parameters: {
           multiplier: 'number - Multiplier for the calculation'
@@ -829,7 +838,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           };
           
           console.log('combineAllValues provider called:', combined);
-          return combined;
+          return createSuccessResult('All step values combined successfully', combined);
         },
         parameters: {}
       }
@@ -847,6 +856,9 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           const includeMetrics = context.toolParams['includeMetrics'] || false;
           const format = context.toolParams['format'] || 'simple';
           
+          // Get all step return values from the controller since allStepReturnValues is no longer in context
+          const allStepReturnValues = context.controller.getLastToolReturnValues();
+          
           const summary: any = {
             toolName: context.activeTool?.title || 'Unknown Tool',
             toolId: context.activeTool?.toolId || 'unknown',
@@ -856,7 +868,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
               totalSteps: context.activeTool?.steps.length || 0,
               error: context.toolExecutionError?.message
             },
-            stepResults: context.allStepReturnValues,
+            stepResults: allStepReturnValues,
             lastStepResult: context.lastStepReturnValue,
             timestamp: new Date().toISOString(),
             format: format
@@ -867,12 +879,12 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
               successRate: context.toolExecutionSuccess ? 100 : 0,
               completionPercentage: context.activeTool?.steps.length ? 
                 Math.round(((context.stepsExecuted || 0) / context.activeTool.steps.length) * 100) : 0,
-              hasStepResults: (context.allStepReturnValues || []).length > 0
+              hasStepResults: allStepReturnValues.length > 0
             };
           }
           
           console.log('generateToolSummary provider called:', summary);
-          return summary;
+          return createSuccessResult('Tool summary generated successfully', summary);
         },
         parameters: {
           includeMetrics: 'boolean - Whether to include execution metrics',
@@ -882,10 +894,13 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       {
         name: 'combineToolResults',
         implementation: function(context) {
+          // Get all step return values from the controller
+          const allStepReturnValues = context.controller.getLastToolReturnValues();
+          
           const result = {
             message: 'Tool execution completed with custom tool-level return value',
             originalLastStepValue: context.lastStepReturnValue,
-            allStepValues: context.allStepReturnValues,
+            allStepValues: allStepReturnValues,
             toolOverride: true,
             executionInfo: {
               toolId: context.activeTool?.toolId,
@@ -896,7 +911,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           };
           
           console.log('combineToolResults provider called:', result);
-          return result;
+          return createSuccessResult('Tool results combined successfully', result);
         },
         parameters: {}
       }
