@@ -5,6 +5,8 @@ using ModelContextProtocol.Server;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using WebIntractMCPServer;
+using WebIntractMCPServer.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +16,23 @@ builder.Services.AddOpenApi();
 builder.Services.AddMcpServer()
     .WithHttpTransport();
     // .WithWebIntractMcpTools();
+
+// Add SignalR
+builder.Services.AddSignalR();
+
+// Add CORS for SignalR
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder
+            .WithOrigins("http://localhost:4200") // Angular dev server
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddHostedService<McpServerInitilizer>();
 
 var app = builder.Build();
@@ -24,7 +43,13 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+// Use CORS
+app.UseCors("CorsPolicy");
+
 app.MapMcp();
+
+// Map SignalR hub
+app.MapHub<McpToolsHub>("/mcptools");
 
 app.Run();
 
@@ -37,11 +62,13 @@ public sealed class McpServerInitilizer : BackgroundService
     };
     private readonly IOptions<McpServerOptions> _serverOptions;
     private readonly IOptions<HttpServerTransportOptions> _transportOptions;
+    private readonly IServiceProvider _serviceProvider;
 
-    public McpServerInitilizer(IOptions<McpServerOptions> serverOptions, IOptions<HttpServerTransportOptions> transportOptions)
+    public McpServerInitilizer(IOptions<McpServerOptions> serverOptions, IOptions<HttpServerTransportOptions> transportOptions, IServiceProvider serviceProvider)
     {
         _serverOptions = serverOptions;
         _transportOptions = transportOptions;
+        _serviceProvider = serviceProvider;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -78,7 +105,7 @@ public sealed class McpServerInitilizer : BackgroundService
                     OpenWorldHint = item.OpenWorld,
                     ReadOnlyHint = item.ReadOnly
                 }
-            }));
+            }, _serviceProvider.GetRequiredService<IHubContext<McpToolsHub>>()));
         }
     }
 }

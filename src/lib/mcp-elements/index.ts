@@ -6,6 +6,7 @@
 // Export classes first
 export { ToolRegistry } from './tool-registry';
 export { MCPElementsController } from './mcp-elements-controller';
+export { MCPSignalRService } from './mcp-signalr.service';
 
 // Export types
 export type {
@@ -36,6 +37,7 @@ export type {
 } from './types';
 
 // Export helper functions
+
 export { createSuccessResult, createErrorResult, SuccessfulCallToolResult, FailedCallToolResult } from './types';
 
 // Import for default instance

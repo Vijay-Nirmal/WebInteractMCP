@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult } from '../../lib/mcp-elements';
+import { MCPSignalRService } from '../../lib/mcp-elements/mcp-signalr.service';
 
 /**
  * Angular service for integrating MCP Elements with the AutoBot application
@@ -9,8 +10,13 @@ import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFuncti
 })
 export class MCPElementsService {
   private mcpController: MCPElementsController;
+  private signalRService: MCPSignalRService;
   private isInitialized = false;
+  
   constructor() {
+    // Create SignalR service instance directly (framework-agnostic)
+    this.signalRService = new MCPSignalRService('http://localhost:5120/');
+    
     this.mcpController = new MCPElementsController({
       useModalOverlay: true,
       classPrefix: 'autobot-shepherd',
@@ -24,6 +30,7 @@ export class MCPElementsService {
     }, { enableVisualFeedback: true }); // Enable visual feedback by default
 
     this.setupEventListeners();
+    this.setupSignalRIntegration();
   }
   /**
    * Initialize the MCP Elements service by loading tools
@@ -33,6 +40,10 @@ export class MCPElementsService {
       return;
     }    try {
       console.log('Initializing MCP Elements service...');
+      
+      // Initialize SignalR connection
+      await this.signalRService.start();
+      console.log('SignalR service started');
       
       // First, let's try to load the JSON directly to test
       console.log('Testing direct fetch...');
@@ -72,6 +83,15 @@ export class MCPElementsService {
         throw error;
       }
     }
+  }
+
+  /**
+   * Setup SignalR integration with the MCP controller
+   */
+  private setupSignalRIntegration(): void {
+    // Set the MCP controller in the SignalR service so it can execute tools
+    this.signalRService.setMCPController(this.mcpController);
+    console.log('SignalR integration configured');
   }
 
   /**
@@ -424,5 +444,22 @@ export class MCPElementsService {
    */
   getLastStepReturnValue(): CallToolResult | undefined {
     return this.mcpController.getLastStepReturnValue();
+  }
+
+  /**
+   * Get SignalR connection status
+   */
+  getSignalRStatus(): { isConnected: boolean; connectionState: string | null } {
+    return {
+      isConnected: this.signalRService.isConnected,
+      connectionState: this.signalRService.connectionState?.toString() || null
+    };
+  }
+
+  /**
+   * Cleanup method to stop SignalR connection
+   */
+  async cleanup(): Promise<void> {
+    await this.signalRService.stop();
   }
 }

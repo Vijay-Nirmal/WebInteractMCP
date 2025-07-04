@@ -53,7 +53,7 @@ namespace WebIntractMCPServer
                             OpenWorldHint = item.OpenWorld,
                             ReadOnlyHint = item.ReadOnly
                         }
-                    });
+                    }, provider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<WebIntractMCPServer.Hubs.McpToolsHub>>());
                     return tool;
                 });
             }

@@ -172,6 +172,16 @@ function refReplacer() {
               <span class="status-label">Tool IDs:</span>
               <span class="status-value">{{ debugInfo.toolIds.join(', ') }}</span>
             </div>
+            <div class="status-item">
+              <span class="status-label">SignalR Status:</span>
+              <span class="status-value" [class]="signalRStatus.isConnected ? 'ready' : 'loading'">
+                {{ signalRStatus.isConnected ? '🟢 Connected' : '🔴 Disconnected' }}
+              </span>
+            </div>
+            <div class="status-item" *ngIf="signalRStatus.connectionState">
+              <span class="status-label">Connection State:</span>
+              <span class="status-value">{{ signalRStatus.connectionState }}</span>
+            </div>
           </div>
         </div>
 
@@ -530,6 +540,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
   eventCount = 0;
   debugInfo: any = null;
   visualFeedbackEnabled = true;
+  signalRStatus: { isConnected: boolean; connectionState: string | null } = { isConnected: false, connectionState: null };
   recentEvents: Array<{
     type: string;
     message: string;
@@ -550,9 +561,21 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       
       // Initialize visual feedback state
       this.visualFeedbackEnabled = this.mcpElementsService.isVisualFeedbackEnabled();
+      
+      // Update SignalR status
+      this.updateSignalRStatus();
+      
+      // Set up a timer to periodically update SignalR status
+      setInterval(() => {
+        this.updateSignalRStatus();
+      }, 5000);
     } catch (error) {
       console.error('Failed to initialize MCP Elements service:', error);
     }
+  }
+
+  private updateSignalRStatus(): void {
+    this.signalRStatus = this.mcpElementsService.getSignalRStatus();
   }
 
   ngOnDestroy() {

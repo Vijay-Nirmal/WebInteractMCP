@@ -132,9 +132,9 @@
         },
         "tags": {
           "type": "string",
-          "description": "Comma-separated list of relevant tags for the question (e.g., 'javascript,typescript,react')",
+          "description": "Comma-separated list of relevant tags for the question without any space before or after commas (e.g., 'javascript,typescript,react')",
           "required": true,
-          "pattern": "^[a-z0-9-]+(,[a-z0-9-]+)*$",
+          "pattern": "^[^\\s,]+(,[^\\s,]+)*$",
           "examples": ["javascript,typescript", "react,javascript,frontend", "python,django,web-development"]
         }
       },
