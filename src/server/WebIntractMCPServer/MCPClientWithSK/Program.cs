@@ -86,20 +86,5 @@ app.MapPost("/api/chat", async (ChatRequest request, IChatService chatService) =
     }
 });
 
-// Add session management endpoint
-app.MapDelete("/api/session/{sessionId}", async (string sessionId, IAgentService agentService) =>
-{
-    try
-    {
-        await agentService.ClearSessionAsync(sessionId);
-        return Results.Ok(new { Message = $"Session {sessionId} cleared successfully" });
-    }
-    catch (Exception ex)
-    {
-        app.Logger.LogError(ex, "Error clearing session {SessionId}", sessionId);
-        return Results.Problem($"An error occurred while clearing session {sessionId}");
-    }
-});
-
 app.Run();
 
