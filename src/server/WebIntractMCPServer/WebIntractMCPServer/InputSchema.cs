@@ -1,67 +1,7 @@
-using Microsoft.Extensions.AI;
-using ModelContextProtocol.Protocol;
-using ModelContextProtocol.Server;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace WebIntractMCPServer
 {
-    public static class McpServerBuilderExtensions
-    {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
-            PropertyNameCaseInsensitive = true
-        };
-
-        public static IMcpServerBuilder WithWebIntractMcpTools(this IMcpServerBuilder builder)
-        {
-            var httpClient = new HttpClient();
-            var tools = httpClient.GetFromJsonAsync<List<Tool>>("http://localhost:4200/mcp-tools.json", _jsonSerializerOptions).GetAwaiter().GetResult();
-
-            if (tools == null || !tools.Any())
-            {
-                return builder;
-            }
-
-            foreach (var item in tools)
-            {
-                // TODO: Add tools at runtime instead of at startup, might be able to achive this using McpServerOptions.Capabilities.Tools.Add() method and fire chaned event when tools are added.
-                builder.Services.AddSingleton<McpServerTool>(provider =>
-                {
-                    var serializerOptions = new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true,
-                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                    };
-                    
-                    var tool = new DynamicMcpServerTool(new ModelContextProtocol.Protocol.Tool
-                    {
-                        Name = item.ToolId,
-                        Description = item.Description,
-                        InputSchema = JsonSerializer.SerializeToElement(new InputSchema
-                        {
-                            Type = "object",
-                            Properties = item.ParameterSchema.Parameters.ToDictionary(k => k.Key, v => new PropertySchema { Type = v.Value.Type, Description = v.Value.Description, DefaultValue = v.Value.DefaultValue }),
-                            Required = item.ParameterSchema?.Required ?? []
-                        }),
-                        Annotations = new ToolAnnotations
-                        {
-                            Title = item.Title,
-                            IdempotentHint = item.Idempotent,
-                            DestructiveHint = item.Destructive,
-                            OpenWorldHint = item.OpenWorld,
-                            ReadOnlyHint = item.ReadOnly
-                        }
-                    }, provider.GetRequiredService<Microsoft.AspNetCore.SignalR.IHubContext<WebIntractMCPServer.Hubs.McpToolsHub>>());
-                    return tool;
-                });
-            }
-
-            return builder;
-        }
-    }
-
     public class InputSchema
     {
         [JsonPropertyName("type")]

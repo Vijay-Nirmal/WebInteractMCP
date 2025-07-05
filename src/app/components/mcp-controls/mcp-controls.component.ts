@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MCPElementsService } from '../../services/mcp-elements.service';
 import { ToolConfiguration, CustomFunctionContext, createSuccessResult, createErrorResult } from '../../../lib/mcp-elements';
 
@@ -28,7 +29,7 @@ function refReplacer() {
 @Component({
   selector: 'app-mcp-controls',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="mcp-controls-panel" [class.expanded]="isPanelExpanded">
       <div class="mcp-header" (click)="togglePanel()">
@@ -148,6 +149,35 @@ function refReplacer() {
             </div>
           </div>
         </div>        <div class="mcp-section">
+          <h4>Chat Test</h4>
+          <div class="chat-container">
+            <div class="session-status">
+              <span class="status-indicator" [class]="isSessionActive ? 'active' : 'inactive'">
+                {{ isSessionActive ? '🟢 Session Active' : '🔴 Starting Session...' }}
+              </span>
+            </div>
+            <div class="chat-input-group">
+              <input 
+                type="text" 
+                class="chat-input" 
+                placeholder="{{ isSessionActive ? 'Type a message to test chat with session...' : 'Session auto-starting...' }}"
+                [(ngModel)]="chatMessage"
+                (keyup.enter)="sendChatMessage()"
+                [disabled]="isLoading || !isSessionActive">
+              <button 
+                class="mcp-btn primary" 
+                (click)="sendChatMessage()"
+                [disabled]="isLoading || !chatMessage.trim() || !isSessionActive">
+                Send
+              </button>
+            </div>
+            <div class="chat-response" *ngIf="lastChatResponse">
+              <strong>Response:</strong> {{ lastChatResponse }}
+            </div>
+          </div>
+        </div>
+
+        <div class="mcp-section">
           <h4>Tool Status</h4>
           <div class="status-info">
             <div class="status-item">
@@ -181,6 +211,10 @@ function refReplacer() {
             <div class="status-item" *ngIf="signalRStatus.connectionState">
               <span class="status-label">Connection State:</span>
               <span class="status-value">{{ signalRStatus.connectionState }}</span>
+            </div>
+            <div class="status-item" *ngIf="signalRStatus.sessionId">
+              <span class="status-label">Session ID:</span>
+              <span class="status-value">{{ signalRStatus.sessionId }}</span>
             </div>
           </div>
         </div>
@@ -529,6 +563,67 @@ function refReplacer() {
       margin: 0;
       line-height: 1.4;
     }
+
+    /* Chat interface styles */
+    .chat-container {
+      background: #f9fafb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    .session-status {
+      margin-bottom: 12px;
+      padding: 8px;
+      background: #fff;
+      border-radius: 4px;
+      border: 1px solid #e5e7eb;
+      text-align: center;
+    }
+
+    .status-indicator {
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .status-indicator.active {
+      color: #059669;
+    }
+
+    .status-indicator.inactive {
+      color: #dc2626;
+    }
+
+    .chat-input-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: #3b82f6;
+    }
+
+    .chat-response {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      max-height: 100px;
+      overflow-y: auto;
+    }
   `]
 })
 export class MCPControlsComponent implements OnInit, OnDestroy {
@@ -540,12 +635,16 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
   eventCount = 0;
   debugInfo: any = null;
   visualFeedbackEnabled = true;
-  signalRStatus: { isConnected: boolean; connectionState: string | null } = { isConnected: false, connectionState: null };
+  signalRStatus: { isConnected: boolean; connectionState: string | null; sessionId: string | null } = { isConnected: false, connectionState: null, sessionId: null };
   recentEvents: Array<{
     type: string;
     message: string;
     timestamp: Date;
   }> = [];
+  
+  // Chat properties
+  chatMessage: string = '';
+  lastChatResponse: string = '';
 
   constructor(private mcpElementsService: MCPElementsService) {}  async ngOnInit() {
     try {
@@ -579,11 +678,32 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    // Clean up session when component is destroyed
+    if (this.isSessionActive) {
+      this.closeSession();
+    }
     // Clean up event listeners if needed
   }
 
-  togglePanel() {
+  async togglePanel() {
     this.isPanelExpanded = !this.isPanelExpanded;
+    
+    try {
+      if (this.isPanelExpanded) {
+        // Auto-create session when panel is opened
+        if (!this.isSessionActive) {
+          await this.createSession();
+        }
+      } else {
+        // Auto-close session when panel is closed
+        if (this.isSessionActive) {
+          await this.closeSession();
+        }
+      }
+    } catch (error) {
+      console.error('Error managing session during panel toggle:', error);
+      this.addEvent('error', `Session management error: ${error}`);
+    }
   }
 
   async startWelcomeTour() {
@@ -1036,5 +1156,111 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     this.visualFeedbackEnabled = target.checked;
     this.mcpElementsService.setVisualFeedbackEnabled(this.visualFeedbackEnabled);
     console.log('Visual feedback toggled:', this.visualFeedbackEnabled);
+  }
+
+  /**
+   * Creates a new session with the MCP Server
+   */
+  private async createSession(): Promise<void> {
+    this.isLoading = true;
+    try {
+      const sessionId = await this.mcpElementsService.createSession();
+      this.addEvent('session', `Session created with ID: ${sessionId}`);
+      this.updateSignalRStatus();
+      console.log('Session created successfully:', sessionId);
+    } catch (error) {
+      console.error('Error creating session:', error);
+      this.addEvent('error', `Session creation failed: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Closes the current session
+   */
+  private async closeSession(): Promise<void> {
+    this.isLoading = true;
+    try {
+      const sessionId = this.mcpElementsService.getCurrentSessionId();
+      
+      // Close the SignalR connection
+      await this.mcpElementsService.closeSession();
+      
+      // Also clean up the server-side session if we have a session ID
+      if (sessionId) {
+        try {
+          const response = await fetch(`http://localhost:5120/api/sessions/${sessionId}`, {
+            method: 'DELETE'
+          });
+          
+          if (response.ok) {
+            console.log('Server-side session cleaned up successfully');
+          } else {
+            console.warn('Failed to clean up server-side session:', response.statusText);
+          }
+        } catch (error) {
+          console.warn('Error cleaning up server-side session:', error);
+        }
+      }
+      
+      this.addEvent('session', 'Session closed and cleaned up');
+      this.updateSignalRStatus();
+      console.log('Session closed successfully');
+    } catch (error) {
+      console.error('Error closing session:', error);
+      this.addEvent('error', `Session closure failed: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Checks if a session is currently active
+   */
+  get isSessionActive(): boolean {
+    return this.mcpElementsService.isSessionActive();
+  }
+
+  /**
+   * Sends a chat message using the current session
+   */
+  async sendChatMessage(): Promise<void> {
+    if (!this.chatMessage.trim() || !this.isSessionActive) {
+      return;
+    }
+
+    this.isLoading = true;
+    try {
+      const sessionId = this.mcpElementsService.getCurrentSessionId();
+      if (!sessionId) {
+        throw new Error('No active session found');
+      }
+
+      // Make HTTP request to chat endpoint with session ID header
+      const response = await fetch('http://localhost:5000/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'McpIntract-Session-Id': sessionId
+        },
+        body: JSON.stringify({ message: this.chatMessage })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      this.lastChatResponse = data.response || 'No response received';
+      this.addEvent('chat', `Chat message sent: "${this.chatMessage.substring(0, 30)}..."`);
+      this.chatMessage = '';
+    } catch (error) {
+      console.error('Error sending chat message:', error);
+      this.lastChatResponse = `Error: ${error}`;
+      this.addEvent('error', `Chat error: ${error}`);
+    } finally {
+      this.isLoading = false;
+    }
   }
 }

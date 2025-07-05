@@ -1,8 +1,9 @@
-import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
+import { MCPElementsService } from '../../services/mcp-elements.service';
 
 export interface ChatMessage {
   id: string;
@@ -23,6 +24,9 @@ export interface ChatMessage {
           <span class="bot-icon">🤖</span>
           <span class="bot-title">AI Assistant</span>
           <span class="status-indicator" [class.online]="isOnline()"></span>
+          <span class="session-indicator" [class.active]="isSessionActive" title="Session Status">
+            {{ isSessionActive ? '🔗' : '⏳' }}
+          </span>
         </div>
         <button class="toggle-btn" [class.expanded]="isExpanded()">
           {{ isExpanded() ? '−' : '+' }}
@@ -163,6 +167,17 @@ export interface ChatMessage {
 
     .status-indicator.online {
       background: #2ed573;
+    }
+
+    .session-indicator {
+      font-size: 12px;
+      margin-left: 4px;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
+    }
+
+    .session-indicator.active {
+      opacity: 1;
     }
 
     .toggle-btn {
@@ -394,8 +409,9 @@ export interface ChatMessage {
     }
   `]
 })
-export class ChatbotComponent implements OnInit {
+export class ChatbotComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
+  private mcpElementsService = inject(MCPElementsService);
   
   isExpanded = signal(false);
   isLoading = signal(false);
@@ -414,6 +430,15 @@ export class ChatbotComponent implements OnInit {
   ngOnInit() {
     this.checkServerStatus();
     this.addWelcomeMessage();
+    // Create session when component initializes
+    this.createSession();
+  }
+
+  ngOnDestroy() {
+    // Clean up session when component is destroyed
+    if (this.isSessionActive) {
+      this.closeSession();
+    }
   }
   private async checkServerStatus() {
     try {
@@ -426,7 +451,7 @@ export class ChatbotComponent implements OnInit {
   private addWelcomeMessage() {
     const welcomeMessage: ChatMessage = {
       id: this.generateId(),
-      content: "Hello! I'm your AI assistant powered by Semantic Kernel with advanced agentic capabilities. I can help you with:\n\n🔍 Web search and information retrieval\n💻 Code analysis and generation\n📋 Task planning and management\n📊 Data analysis and visualization\n🌤️ Weather information\n💭 Context-aware conversations\n\nHow can I assist you today?",
+      content: "Hello! I'm your AI assistant powered by Semantic Kernel with advanced agentic capabilities. I can help you with:\n\n🔍 Web search and information retrieval\n💻 Code analysis and generation\n📋 Task planning and management\n📊 Data analysis and visualization\n🌤️ Weather information\n💭 Context-aware conversations\n🔗 Session-based chat continuity\n\nHow can I assist you today?",
       isUser: false,
       timestamp: new Date()
     };
@@ -434,10 +459,30 @@ export class ChatbotComponent implements OnInit {
   }
 
   toggleChat() {
-    this.isExpanded.update(expanded => !expanded);
+    this.isExpanded.update(expanded => {
+      const newExpanded = !expanded;
+      
+      // Create session when chat is expanded for the first time
+      if (newExpanded && !this.isSessionActive) {
+        this.createSession();
+      }
+      
+      return newExpanded;
+    });
   }
   async sendMessage() {
     if (!this.currentMessage.trim() || this.isLoading()) return;
+
+    // Ensure session is active before sending
+    if (!this.isSessionActive) {
+      console.log('No active session, creating one...');
+      await this.createSession();
+      
+      // Wait a moment for session to be established
+      if (!this.isSessionActive) {
+        console.warn('Failed to create session, message will be sent without session ID');
+      }
+    }
 
     const userMessage: ChatMessage = {
       id: this.generateId(),
@@ -461,10 +506,23 @@ export class ChatbotComponent implements OnInit {
     this.isLoading.set(true);
 
     try {
+      const sessionId = this.mcpElementsService.getCurrentSessionId();
+      const headers: any = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add session ID header if available
+      if (sessionId) {
+        headers['McpIntract-Session-Id'] = sessionId;
+        console.log('Sending message with session ID:', sessionId);
+      } else {
+        console.warn('No session ID available for chat request');
+      }
+
       const response = await firstValueFrom(
         this.http.post<{ response: string }>('http://localhost:5000/api/chat', {
           message: userMessage.content
-        })
+        }, { headers })
       );
 
       this.messages.update(msgs => {
@@ -482,13 +540,21 @@ export class ChatbotComponent implements OnInit {
 
     } catch (error) {
       console.error('Chat error:', error);
+      let errorMessage = "Sorry, I'm having trouble connecting to the server. Please try again later.";
+      
+      if (!this.isSessionActive) {
+        errorMessage = "Session is not active. Please wait for the session to be established or try refreshing the page.";
+      } else if (error instanceof Error && error.message.includes('401')) {
+        errorMessage = "Session expired. Please refresh the page to start a new session.";
+      }
+      
       this.messages.update(msgs => {
         const updated = [...msgs];
         const loadingIndex = updated.findIndex(msg => msg.id === loadingMessage.id);
         if (loadingIndex !== -1) {
           updated[loadingIndex] = {
             ...loadingMessage,
-            content: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+            content: errorMessage,
             isLoading: false
           };
         }
@@ -500,8 +566,16 @@ export class ChatbotComponent implements OnInit {
   }
 
   sendQuickMessage(message: string) {
-    this.currentMessage = message;
-    this.sendMessage();
+    // Ensure session is active before sending
+    if (!this.isSessionActive) {
+      this.createSession().then(() => {
+        this.currentMessage = message;
+        this.sendMessage();
+      });
+    } else {
+      this.currentMessage = message;
+      this.sendMessage();
+    }
   }
 
   private scrollToBottom() {
@@ -517,5 +591,36 @@ export class ChatbotComponent implements OnInit {
 
   private generateId(): string {
     return Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
+   * Creates a new session with the MCP Server
+   */
+  private async createSession(): Promise<void> {
+    try {
+      const sessionId = await this.mcpElementsService.createSession();
+      console.log('Chat session created successfully with ID:', sessionId);
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+    }
+  }
+
+  /**
+   * Closes the current session
+   */
+  private async closeSession(): Promise<void> {
+    try {
+      await this.mcpElementsService.closeSession();
+      console.log('Chat session closed successfully');
+    } catch (error) {
+      console.error('Error closing chat session:', error);
+    }
+  }
+
+  /**
+   * Checks if a session is currently active
+   */
+  get isSessionActive(): boolean {
+    return this.mcpElementsService.isSessionActive();
   }
 }

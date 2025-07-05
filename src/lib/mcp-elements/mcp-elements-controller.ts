@@ -6,6 +6,7 @@
 import { Tour, ShepherdBase } from 'shepherd.js';
 import { ToolRegistry } from './tool-registry';
 import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition, ReturnValueProviderFunction, ReturnValueProvider, CallToolResult, ReturnValueContext, SuccessfulCallToolResult, FailedCallToolResult, createSuccessResult, createErrorResult } from './types';
+import { MCPSignalRService } from './mcp-signalr.service';
 
 /**
  * The main controller for managing and running MCP Elements Tools.
@@ -23,6 +24,7 @@ export class MCPElementsController {
   private stepReturnValues: CallToolResult[] = [];
   private customStyles: VisualEffectStyles = {};
   private styleElementId: string = 'mcp-visual-feedback-styles';
+  private signalRService: MCPSignalRService | null = null;
 
   /**
    * Creates a new MCPElementsController instance.
@@ -1668,5 +1670,77 @@ export class MCPElementsController {
    */
   getLastStepReturnValue(): CallToolResult | undefined {
     return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : undefined;
+  }
+
+  /**
+   * Creates a new session with the MCP Server via SignalR.
+   * @param serverUrl - The SignalR server URL (default: 'http://localhost:5120')
+   * @returns Promise that resolves with the session ID
+   */
+  async createSession(serverUrl: string = 'http://localhost:5120'): Promise<string> {
+    try {
+      // Create a new SignalR service instance
+      this.signalRService = new MCPSignalRService(serverUrl);
+      this.signalRService.setMCPController(this);
+      
+      // Start the connection
+      await this.signalRService.start();
+      
+      // Get the connection ID which serves as our session ID
+      const sessionId = this.signalRService.getConnectionId();
+      
+      if (!sessionId) {
+        throw new Error('Failed to get SignalR connection ID');
+      }
+      
+      // Register the session with the server
+      await this.signalRService.registerSession(sessionId);
+      
+      this.debugLog('Session created successfully', { sessionId, serverUrl });
+      
+      return sessionId;
+    } catch (error) {
+      this.debugLog('Error creating session', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Closes the current session and stops the SignalR connection.
+   */
+  async closeSession(): Promise<void> {
+    if (this.signalRService) {
+      await this.signalRService.stop();
+      this.signalRService = null;
+      this.debugLog('Session closed successfully');
+    }
+  }
+
+  /**
+   * Gets the current session ID.
+   * @returns The current session ID or null if no session is active.
+   */
+  getCurrentSessionId(): string | null {
+    return this.signalRService?.getConnectionId() || null;
+  }
+
+  /**
+   * Checks if a session is currently active.
+   * @returns True if a session is active, false otherwise.
+   */
+  isSessionActive(): boolean {
+    return this.signalRService?.isConnected || false;
+  }
+
+  /**
+   * Gets the SignalR connection status.
+   * @returns Object containing connection status information.
+   */
+  getConnectionStatus(): { isConnected: boolean; connectionState: string | null; sessionId: string | null } {
+    return {
+      isConnected: this.signalRService?.isConnected || false,
+      connectionState: this.signalRService?.connectionState?.toString() || null,
+      sessionId: this.getCurrentSessionId()
+    };
   }
 }

@@ -3,43 +3,45 @@ using ModelContextProtocol.Server;
 using Microsoft.AspNetCore.SignalR;
 using WebIntractMCPServer.Hubs;
 
-namespace WebIntractMCPServer
+namespace WebIntractMCPServer;
+
+public class DynamicMcpServerTool : McpServerTool
 {
-    public class DynamicMcpServerTool : McpServerTool
+    public override ModelContextProtocol.Protocol.Tool ProtocolTool { get; }
+    private readonly IHubContext<McpToolsHub> _hubContext;
+    private readonly string _sessionId;
+
+    public DynamicMcpServerTool(ModelContextProtocol.Protocol.Tool tool, IHubContext<McpToolsHub> hubContext, string sessionId)
     {
-        public override ModelContextProtocol.Protocol.Tool ProtocolTool { get; }
-        private readonly IHubContext<McpToolsHub> _hubContext;
+        ArgumentNullException.ThrowIfNull(tool, nameof(tool));
+        ArgumentNullException.ThrowIfNull(hubContext, nameof(hubContext));
+        ArgumentNullException.ThrowIfNull(sessionId, nameof(sessionId));
+        ProtocolTool = tool;
+        _hubContext = hubContext;
+        _sessionId = sessionId;
+    }
 
-        public DynamicMcpServerTool(ModelContextProtocol.Protocol.Tool tool, IHubContext<McpToolsHub> hubContext)
+    public override async ValueTask<CallToolResponse> InvokeAsync(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request.Params, nameof(request.Params));
+        var toolName = request.Params.Name;
+        var arguments = request.Params.Arguments;
+
+        try
         {
-            ArgumentNullException.ThrowIfNull(tool, nameof(tool));
-            ArgumentNullException.ThrowIfNull(hubContext, nameof(hubContext));
-            ProtocolTool = tool;
-            _hubContext = hubContext;
+            var result = await McpToolsHub.InvokeToolOnClient(_hubContext, _sessionId, toolName, arguments);
+
+            return result;
         }
-
-        public override async ValueTask<CallToolResponse> InvokeAsync(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken = default)
+        catch (Exception ex)
         {
-            ArgumentNullException.ThrowIfNull(request.Params, nameof(request.Params));
-            var toolName = request.Params.Name;
-            var arguments = request.Params.Arguments;
-
-            try
+            var response = new CallToolResponse
             {
-                var result = await McpToolsHub.InvokeToolOnClient(_hubContext, toolName, arguments);
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                var response = new CallToolResponse
-                {
-                    IsError = true,
-                    Content = [ new Content { Type = "text", Text = $"Error invoking tool '{toolName}': {ex.Message}" }]
-                };
-                
-                return response;
-            }
+                IsError = true,
+                Content = [ new Content { Type = "text", Text = $"Error invoking tool '{toolName}': {ex.Message}" }]
+            };
+            
+            return response;
         }
     }
 }

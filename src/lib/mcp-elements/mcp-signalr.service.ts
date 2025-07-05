@@ -178,4 +178,30 @@ export class MCPSignalRService {
   get isConnected(): boolean {
     return this.connection?.state === signalR.HubConnectionState.Connected;
   }
+
+  /**
+   * Gets the SignalR connection ID which serves as the session ID.
+   * @returns The connection ID or null if not connected.
+   */
+  getConnectionId(): string | null {
+    return this.connection?.connectionId || null;
+  }
+
+  /**
+   * Registers the session with the MCP server.
+   * @param sessionId - The session ID to register.
+   */
+  async registerSession(sessionId: string): Promise<void> {
+    if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
+      try {
+        await this.connection.invoke('RegisterSession', sessionId);
+        console.log(`Session registered with ID: ${sessionId}`);
+      } catch (error) {
+        console.error('Error registering session:', error);
+        throw error;
+      }
+    } else {
+      throw new Error('SignalR connection not available to register session');
+    }
+  }
 }

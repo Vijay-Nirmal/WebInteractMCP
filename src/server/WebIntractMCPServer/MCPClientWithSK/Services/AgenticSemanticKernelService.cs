@@ -6,19 +6,17 @@ namespace MCPClientWithSK.Services;
 
 public class AgenticSemanticKernelService : IAgentService
 {
-    private readonly Kernel _kernel;
-    private readonly IChatCompletionService _chatCompletion;
+    private readonly ISessionKernelFactory _kernelFactory;
     private readonly IMemoryService _memoryService;
     private readonly ILogger<AgenticSemanticKernelService> _logger;
 
     
     public AgenticSemanticKernelService(
-        Kernel kernel, 
+        ISessionKernelFactory kernelFactory, 
         IMemoryService memoryService,
         ILogger<AgenticSemanticKernelService> logger)
     {
-        _kernel = kernel;
-        _chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
+        _kernelFactory = kernelFactory;
         _memoryService = memoryService;
         _logger = logger;
     }
@@ -29,6 +27,10 @@ public class AgenticSemanticKernelService : IAgentService
         {
             sessionId ??= Guid.NewGuid().ToString();
             _logger.LogInformation("Processing message for session {SessionId}", sessionId);
+
+            // Get or create session-specific kernel
+            var kernel = await _kernelFactory.GetOrCreateKernelAsync(sessionId);
+            var chatCompletion = kernel.GetRequiredService<IChatCompletionService>();
 
             var context = await _memoryService.GetRelevantContextAsync(sessionId, message);
 
@@ -55,10 +57,10 @@ public class AgenticSemanticKernelService : IAgentService
             };
 
             // Get response from the model with retry logic
-            var response = await _chatCompletion.GetChatMessageContentAsync(
+            var response = await chatCompletion.GetChatMessageContentAsync(
                     chatHistory,
                     executionSettings,
-                    _kernel,
+                    kernel,
                     cancellationToken);
             var responseText = response?.Content ?? "I apologize, but I couldn't generate a response.";
 
@@ -77,6 +79,7 @@ public class AgenticSemanticKernelService : IAgentService
     public async Task ClearSessionAsync(string sessionId)
     {
         await _memoryService.ClearSessionMemoryAsync(sessionId);
+        await _kernelFactory.RemoveKernelAsync(sessionId);
         _logger.LogInformation("Cleared session {SessionId}", sessionId);
     }
 }

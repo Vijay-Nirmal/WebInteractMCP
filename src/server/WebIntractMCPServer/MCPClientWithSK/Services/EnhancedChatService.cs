@@ -11,24 +11,23 @@ public class EnhancedChatService : IChatService
         _logger = logger;
     }
 
-    public async Task<string> GetResponseAsync(string message)
+    public async Task<string> GetResponseAsync(string message, string? sessionId = null)
     {
         try
         {
-            _logger.LogInformation("Processing enhanced chat message: {Message}", message);
+            _logger.LogInformation("Processing enhanced chat message: {Message} for session: {SessionId}", message, sessionId ?? "none");
             
-            // Use session ID from request context or generate one
-            // In a real implementation, you'd get this from the HTTP context or user session
-            var sessionId = "default-session"; // This should be extracted from the request
+            // Use provided session ID or fallback to default
+            var effectiveSessionId = sessionId ?? "default-session";
             
-            var response = await _agentService.ProcessMessageAsync(message, sessionId);
+            var response = await _agentService.ProcessMessageAsync(message, effectiveSessionId);
             
-            _logger.LogInformation("Generated enhanced response for user message");
+            _logger.LogInformation("Generated enhanced response for user message (session: {SessionId})", effectiveSessionId);
             return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in enhanced chat service for message: {Message}", message);
+            _logger.LogError(ex, "Error in enhanced chat service for message: {Message} (session: {SessionId})", message, sessionId ?? "none");
             return "I apologize, but I'm having trouble processing your request right now. Please try again later.";
         }
     }
