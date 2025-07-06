@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  webintract-mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webintract-mcp-server
+    ports:
+      - "8080:8080"
+    environment:
+      # ASP.NET Core Configuration
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      
+      # McpIntract Client Configuration
+      - McpIntract__Client__BaseUrl=http://host.docker.internal:4200
+      - McpIntract__Client__ToolsEndpoint=/mcp-tools.json
+      - McpIntract__Client__TimeoutSeconds=30
+      - McpIntract__Client__CacheTools=true
+      - McpIntract__Client__CacheDurationMinutes=30
+      
+      # McpIntract Tool Configuration
+      - McpIntract__Tool__TimeoutMinutes=5
+      - McpIntract__Tool__EnableDetailedErrorLogging=false
+      
+      # McpIntract CORS Configuration
+      - McpIntract__Cors__AllowedOrigins__0=http://host.docker.internal:4200
+      - McpIntract__Cors__AllowedOrigins__1=http://localhost:4200
+      - McpIntract__Cors__AllowAnyOrigin=false
+      - McpIntract__Cors__AllowCredentials=true
+      
+      # Logging Configuration
+      - Logging__LogLevel__Default=Information
+      - Logging__LogLevel__WebIntractMCPServer=Information
+      - Logging__LogLevel__Microsoft.AspNetCore=Warning
+    
+    networks:
+      - webintract-network
+    
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    depends_on:
+      - redis
+    
+    # Optional: Mount logs directory
+    volumes:
+      - ./logs:/app/logs
+
+  # Optional Redis service for caching and SignalR backplane
+  redis:
+    image: redis:7-alpine
+    container_name: webintract-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - webintract-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  webintract-network:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

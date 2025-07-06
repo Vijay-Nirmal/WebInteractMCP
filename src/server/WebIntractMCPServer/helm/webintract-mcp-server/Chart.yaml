@@ -1,0 +1,20 @@
+apiVersion: v2
+name: webintract-mcp-server
+description: A Helm chart for WebIntract MCP Server - A production-ready Model Context Protocol server
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+home: https://github.com/Vijay-Nirmal/AutoBot
+sources:
+  - https://github.com/Vijay-Nirmal/AutoBot
+maintainers:
+  - name: Vijay Nirmal
+    email: vijay@example.com
+keywords:
+  - mcp
+  - model-context-protocol
+  - signalr
+  - aspnetcore
+  - webintract
+annotations:
+  category: Communication
