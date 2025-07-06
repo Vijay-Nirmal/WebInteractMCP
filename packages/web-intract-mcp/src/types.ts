@@ -1,7 +1,14 @@
 /**
- * @file types.ts
- * @description Core TypeScript type definitions for MCP Elements library
+ * @fileoverview Core TypeScript type definitions for Web Intract MCP library
+ * @description This file contains all the type definitions used throughout the library
+ * @version 1.0.0
+ * @author Vijay Nirmal
  */
+
+/**
+ * Role types for MCP annotations
+ */
+export type Role = 'user' | 'assistant';
 
 /**
  * Optional annotations for the client. The client can use annotations to inform how objects are used or displayed
@@ -9,219 +16,135 @@
 export interface Annotations {
   /**
    * Describes who the intended customer of this object or data is.
-   *
    * It can include multiple entries to indicate content useful for multiple audiences (e.g., `["user", "assistant"]`).
    */
   audience?: Role[];
 
   /**
    * Describes how important this data is for operating the server.
-   *
    * A value of 1 means "most important," and indicates that the data is
    * effectively required, while 0 means "least important," and indicates that
    * the data is entirely optional.
-   *
-   * @TJS-type number
-   * @minimum 0
-   * @maximum 1
    */
   priority?: number;
 
   /**
    * The moment the resource was last modified, as an ISO 8601 formatted string.
-   *
    * Should be an ISO 8601 formatted string (e.g., "2025-01-12T15:00:58Z").
-   *
-   * Examples: last activity timestamp in an open file, timestamp when the resource
-   * was attached, etc.
+   * Examples: last activity timestamp in an open file, timestamp when the resource was attached, etc.
    */
   lastModified?: string;
 }
 
 /**
- * Role types for annotations
- */
-export type Role = 'user' | 'assistant';
-
-/**
- * Text provided to or from an LLM.
+ * Text content provided to or from an LLM
  */
 export interface TextContent {
   type: "text";
-
-  /**
-   * The text content of the message.
-   */
+  /** The text content of the message */
   text: string;
-
-  /**
-   * Optional annotations for the client.
-   */
+  /** Optional annotations for the client */
   annotations?: Annotations;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
 /**
- * An image provided to or from an LLM.
+ * Image content provided to or from an LLM
  */
 export interface ImageContent {
   type: "image";
-
-  /**
-   * The base64-encoded image data.
-   *
-   * @format byte
-   */
+  /** The base64-encoded image data */
   data: string;
-
-  /**
-   * The MIME type of the image. Different providers may support different image types.
-   */
+  /** The MIME type of the image */
   mimeType: string;
-
-  /**
-   * Optional annotations for the client.
-   */
+  /** Optional annotations for the client */
   annotations?: Annotations;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
 /**
- * Audio provided to or from an LLM.
+ * Audio content provided to or from an LLM
  */
 export interface AudioContent {
   type: "audio";
-
-  /**
-   * The base64-encoded audio data.
-   *
-   * @format byte
-   */
+  /** The base64-encoded audio data */
   data: string;
-
-  /**
-   * The MIME type of the audio. Different providers may support different audio types.
-   */
+  /** The MIME type of the audio */
   mimeType: string;
-
-  /**
-   * Optional annotations for the client.
-   */
+  /** Optional annotations for the client */
   annotations?: Annotations;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
 /**
- * The contents of a specific resource or sub-resource.
+ * Base resource interface containing common properties
  */
-export interface ResourceContents {
-  /**
-   * The URI of this resource.
-   *
-   * @format uri
-   */
+export interface Resource {
+  /** The URI of this resource */
   uri: string;
-  /**
-   * The MIME type of this resource, if known.
-   */
+  /** A human-readable name for this resource */
+  name?: string;
+  /** A description of what this resource represents */
+  description?: string;
+  /** The MIME type of this resource, if known */
   mimeType?: string;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
+/**
+ * The contents of a specific resource or sub-resource
+ */
+export interface ResourceContents extends Resource {
+  /** The URI of this resource */
+  uri: string;
+  /** The MIME type of this resource, if known */
+  mimeType?: string;
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
+}
+
+/**
+ * Text-based resource contents
+ */
 export interface TextResourceContents extends ResourceContents {
-  /**
-   * The text of the item. This must only be set if the item can actually be represented as text (not binary data).
-   */
+  /** The text content of the resource */
   text: string;
 }
 
+/**
+ * Binary resource contents
+ */
 export interface BlobResourceContents extends ResourceContents {
-  /**
-   * A base64-encoded string representing the binary data of the item.
-   *
-   * @format byte
-   */
+  /** A base64-encoded string representing the binary data */
   blob: string;
 }
 
 /**
- * A resource, which can have various types.
- */
-export interface Resource {
-  /**
-   * The URI of this resource.
-   *
-   * @format uri
-   */
-  uri: string;
-
-  /**
-   * A human-readable name for this resource.
-   */
-  name?: string;
-
-  /**
-   * A description of what this resource represents.
-   */
-  description?: string;
-
-  /**
-   * The MIME type of this resource, if known.
-   */
-  mimeType?: string;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
-}
-
-/**
- * A resource that the server is capable of reading, included in a prompt or tool call result.
- *
- * Note: resource links returned by tools are not guaranteed to appear in the results of `resources/list` requests.
+ * A resource link that the server is capable of reading
  */
 export interface ResourceLink extends Resource {
   type: "resource_link";
 }
 
 /**
- * The contents of a resource, embedded into a prompt or tool call result.
- *
- * It is up to the client how best to render embedded resources for the benefit
- * of the LLM and/or the user.
+ * The contents of a resource, embedded into a prompt or tool call result
  */
 export interface EmbeddedResource {
   type: "resource";
   resource: TextResourceContents | BlobResourceContents;
-
-  /**
-   * Optional annotations for the client.
-   */
+  /** Optional annotations for the client */
   annotations?: Annotations;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
+/**
+ * Union type for all content block types
+ */
 export type ContentBlock =
   | TextContent
   | ImageContent
@@ -230,39 +153,17 @@ export type ContentBlock =
   | EmbeddedResource;
 
 /**
- * The server's response to a tool call.
+ * The server's response to a tool call
  */
 export interface CallToolResult {
-  /**
-   * A list of content objects that represent the unstructured result of the tool call.
-   */
+  /** A list of content objects that represent the unstructured result of the tool call */
   content: ContentBlock[];
-
-  /**
-   * An optional JSON object that represents the structured result of the tool call.
-   */
-  structuredContent?: { [key: string]: unknown };
-
-  /**
-   * Whether the tool call ended in an error.
-   *
-   * If not set, this is assumed to be false (the call was successful).
-   *
-   * Any errors that originate from the tool SHOULD be reported inside the result
-   * object, with `isError` set to true, _not_ as an MCP protocol-level error
-   * response. Otherwise, the LLM would not be able to see that an error occurred
-   * and self-correct.
-   *
-   * However, any errors in _finding_ the tool, an error indicating that the
-   * server does not support tool calls, or any other exceptional conditions,
-   * should be reported as an MCP error response.
-   */
+  /** An optional JSON object that represents the structured result of the tool call */
+  structuredContent?: Record<string, unknown>;
+  /** Whether the tool call ended in an error (default: false) */
   isError?: boolean;
-
-  /**
-   * See [specification/draft/basic/index#general-fields] for notes on _meta usage.
-   */
-  _meta?: { [key: string]: unknown };
+  /** Additional metadata */
+  _meta?: Record<string, unknown>;
 }
 
 /**
@@ -276,7 +177,7 @@ export interface ParameterDefinition {
   /** Whether this parameter is required (default: false) */
   required?: boolean;
   /** Default value for the parameter */
-  defaultValue?: any;
+  defaultValue?: unknown;
   /** For string types: minimum length */
   minLength?: number;
   /** For string types: maximum length */
@@ -292,7 +193,7 @@ export interface ParameterDefinition {
   /** For object types: properties definition */
   properties?: Record<string, ParameterDefinition>;
   /** Example value(s) for documentation */
-  examples?: any[];
+  examples?: unknown[];
 }
 
 /**
@@ -377,12 +278,48 @@ export interface VisualEffectStyles {
  * The execution mode for a Tool.
  * - `normal`: Standard ShepherdJS tour with next/back buttons.
  * - `buttonless`: No buttons, steps advance automatically after a specified delay.
- * - `silent`: No UI popups. The tool runs in the background to perform a series of automated actions.
+ * - `silent`: No UI popups. The tool runs in the background to perform automated actions.
  */
 export type ToolMode = 'normal' | 'buttonless' | 'silent';
 
 /**
- * Represents an automated action that can be performed on a web element.
+ * Forward declaration to avoid circular dependency
+ */
+export interface MCPElementsController {
+  // This will be properly defined in the controller file
+}
+
+/**
+ * Context object passed to custom functions during execution
+ */
+export interface CustomFunctionContext {
+  /** The target DOM element */
+  element: HTMLElement;
+  /** Parameters passed via functionParams in the action */
+  params: Record<string, unknown>;
+  /** Tool-level parameters passed when starting the tool */
+  toolParams: Record<string, unknown>;
+  /** Reference to the MCPElementsController instance */
+  controller: MCPElementsController;
+  /** Debug logging function */
+  debugLog: (message: string, ...data: unknown[]) => void;
+  /** Currently active tool configuration */
+  activeTool: ToolConfiguration | null;
+  /** Current step index in the tool execution */
+  currentStepIndex: number;
+  /** Return value from the previous step (if any) */
+  previousStepReturnValue?: CallToolResult | undefined;
+}
+
+/**
+ * Type definition for custom function implementations
+ */
+export type CustomFunctionImplementation = (
+  context: CustomFunctionContext
+) => CallToolResult | Promise<CallToolResult>;
+
+/**
+ * Represents an automated action that can be performed on a web element
  */
 export interface ToolAction {
   /** The type of action to perform */
@@ -390,7 +327,7 @@ export interface ToolAction {
   /** The CSS selector for the target element */
   element: string;
   /** The value to use for the action (e.g., text for 'fillInput'). Can be parameterized. */
-  value?: any;
+  value?: unknown;
   /** Delay in milliseconds before performing this action (for 'silent' mode) */
   delay?: number;
   /** For 'executeFunction' type: the function to execute */
@@ -398,11 +335,68 @@ export interface ToolAction {
   /** For 'executeFunction' type: the name of a registered function to execute */
   functionName?: string;
   /** Parameters to pass to the function */
-  functionParams?: Record<string, any>;
+  functionParams?: Record<string, unknown>;
 }
 
 /**
- * Represents a single step within a Tool. It's an extension of a ShepherdJS step.
+ * Context object passed to return value provider functions
+ */
+export interface ReturnValueContext {
+  /** Tool-level parameters passed when starting the tool */
+  toolParams: Record<string, unknown>;
+  /** Reference to the MCPElementsController instance */
+  controller: MCPElementsController;
+  /** Debug logging function */
+  debugLog: (message: string, ...data: unknown[]) => void;
+  /** Currently active tool configuration */
+  activeTool: ToolConfiguration | null;
+  
+  // Step-level context (available when called from a step)
+  /** The target DOM element (available for step-level providers) */
+  element?: HTMLElement;
+  /** Parameters passed to the current step (available for step-level providers) */
+  stepParams?: Record<string, unknown>;
+  /** Current step index in the tool execution (available for step-level providers) */
+  currentStepIndex?: number;
+  /** Return value from the previous step (available for step-level providers) */
+  previousStepReturnValue?: CallToolResult | undefined;
+  /** Action result from the current step (available for step-level providers) */
+  actionResult?: CallToolResult | undefined;
+  
+  // Tool-level context (available when called from tool completion)
+  /** Total number of steps executed (available for tool-level providers) */
+  stepsExecuted?: number;
+  /** Return value from the last step (available for tool-level providers) */
+  lastStepReturnValue?: CallToolResult | undefined;
+  /** Whether the tool executed successfully (available for tool-level providers) */
+  toolExecutionSuccess?: boolean | undefined;
+  /** Any error that occurred during tool execution (available for tool-level providers) */
+  toolExecutionError?: Error | undefined;
+}
+
+/**
+ * Type definition for return value provider functions
+ */
+export type ReturnValueProvider = (
+  context: ReturnValueContext
+) => CallToolResult | Promise<CallToolResult>;
+
+/**
+ * Configuration for return values (used by both steps and tools)
+ */
+export interface ReturnValue {
+  /** Static/hardcoded return value */
+  value?: unknown;
+  /** Function to compute the return value dynamically */
+  provider?: ReturnValueProvider;
+  /** Name of a registered function to compute the return value */
+  providerName?: string;
+  /** Parameters to pass to the provider function */
+  providerParams?: Record<string, unknown>;
+}
+
+/**
+ * Represents a single step within a Tool
  */
 export interface ToolStep {
   /** CSS selector for the element to highlight */
@@ -412,9 +406,9 @@ export interface ToolStep {
   /** Delay in milliseconds before auto-advancing in 'buttonless' mode */
   delay?: number;
   /** The automated action to perform in 'silent' mode */
-  action?: ToolAction;
+  action?: ToolAction | undefined;
   /** An object to pass any additional ShepherdJS step options directly */
-  shepherdOptions?: any;
+  shepherdOptions?: Record<string, unknown>;
   /** Whether to stop execution if this step fails (default: false) */
   stopOnFailure?: boolean;
   /** Configuration for the return value from this step */
@@ -422,14 +416,14 @@ export interface ToolStep {
 }
 
 /**
- * The complete configuration for a single Tool. This is the core object for our library.
+ * The complete configuration for a single Tool
  */
 export interface ToolConfiguration {
   /** A unique identifier for the Tool */
   toolId: string;
   /** A human-readable title for the Tool */
   title: string;
-  /** A detailed description of what the Tool does. Useful for the MCP server. */
+  /** A detailed description of what the Tool does */
   description: string;
   /** The execution mode for the Tool */
   mode: ToolMode;
@@ -441,10 +435,10 @@ export interface ToolConfiguration {
   /** An array of steps that make up the Tool */
   steps: ToolStep[];
   /** Override global options for this specific tool */
-  options?: Partial<MCPElementsOptions>;
-  /** Parameter schema for MCP server integration - defines expected parameters and their types */
+  options?: Partial<WebIntractMCPOptions>;
+  /** Parameter schema for MCP server integration */
   parameterSchema?: ToolParameterSchema;
-  /** Configuration for the tool-level return value (overrides last step's return value) */
+  /** Configuration for the tool-level return value */
   returnValue?: ReturnValue;
   /** Whether the tool performs destructive actions */
   destructive?: boolean;
@@ -457,9 +451,11 @@ export interface ToolConfiguration {
 }
 
 /**
- * Global configuration options for MCP Elements Controller
+ * Global configuration options for Web Intract MCP Controller
  */
-export interface MCPElementsOptions {
+export interface WebIntractMCPOptions {
+  /** The base server URL (default: 'http://localhost:8080') */
+  serverUrl: string;
   /** Whether to show visual feedback for automated actions (default: true) */
   enableVisualFeedback: boolean;
   /** Whether to enable debug mode logging (default: false) */
@@ -480,12 +476,33 @@ export interface MCPElementsOptions {
   defaultButtonlessDelay: number;
   /** Custom styling configuration for visual effects */
   visualEffectStyles?: VisualEffectStyles;
+  /** Configuration for the SignalR service */
+  transport?: TransportOptions | undefined;
+}
+
+
+/**
+ * Configuration options for the SignalR service
+ */
+export interface TransportOptions {
+  /** SignalR hub endpoint path (default: '/mcptools') */
+  hubPath: string;
+  /** Connection retry attempts (default: 10) */
+  maxRetryAttempts: number;
+  /** Base retry delay in milliseconds (default: 1000) */
+  baseRetryDelayMs: number;
+  /** Whether to enable detailed logging (default: false) */
+  enableLogging: boolean;
+  /** SignalR log level (default: Information) */
+  logLevel: signalR.LogLevel;
+  /** Allowed transport types */
+  transportTypes: signalR.HttpTransportType;
 }
 
 /**
- * Event types that can be emitted by the MCP Elements Controller
+ * Event types that can be emitted by the Web Intract MCP Controller
  */
-export type MCPElementsEvent = 'start' | 'complete' | 'cancel' | 'step:show';
+export type WebIntractMCPEvent = 'start' | 'complete' | 'cancel' | 'step:show';
 
 /**
  * Configuration for tools to start
@@ -494,35 +511,8 @@ export interface ToolStartConfig {
   /** The ID of the tool to start */
   toolId: string;
   /** Optional parameters to pass to the tool */
-  params?: Record<string, any>;
+  params?: Record<string, unknown>;
 }
-
-/**
- * Context object passed to custom functions during execution
- */
-export interface CustomFunctionContext {
-  /** The target DOM element */
-  element: HTMLElement;
-  /** Parameters passed via functionParams in the action */
-  params: Record<string, any>;
-  /** Tool-level parameters passed when starting the tool */
-  toolParams: Record<string, any>;
-  /** Reference to the MCPElementsController instance */
-  controller: any; // Using any to avoid circular dependency
-  /** Debug logging function */
-  debugLog: (message: string, ...data: any[]) => void;
-  /** Currently active tool configuration */
-  activeTool: ToolConfiguration | null;
-  /** Current step index in the tool execution */
-  currentStepIndex: number;
-  /** Return value from the previous step (if any) */
-  previousStepReturnValue?: CallToolResult;
-}
-
-/**
- * Type definition for custom function implementations
- */
-export type CustomFunctionImplementation = (context: CustomFunctionContext) => CallToolResult | Promise<CallToolResult>;
 
 /**
  * Represents a custom function that can be executed as part of a tool step
@@ -533,51 +523,8 @@ export interface CustomFunction {
   /** The function implementation */
   implementation: CustomFunctionImplementation;
   /** Expected parameters for the function */
-  parameters?: Record<string, any>;
+  parameters?: Record<string, unknown>;
 }
-
-/**
- * Context object passed to return value provider functions
- * Contains all available information from both step and tool execution contexts
- */
-export interface ReturnValueContext {
-  /** Tool-level parameters passed when starting the tool */
-  toolParams: Record<string, any>;
-  /** Reference to the MCPElementsController instance */
-  controller: any; // Using any to avoid circular dependency
-  /** Debug logging function */
-  debugLog: (message: string, ...data: any[]) => void;
-  /** Currently active tool configuration */
-  activeTool: ToolConfiguration | null;
-  
-  // Step-level context (available when called from a step)
-  /** The target DOM element (available for step-level providers) */
-  element?: HTMLElement;
-  /** Parameters passed to the current step (available for step-level providers) */
-  stepParams?: Record<string, any>;
-  /** Current step index in the tool execution (available for step-level providers) */
-  currentStepIndex?: number;
-  /** Return value from the previous step (available for step-level providers) */
-  previousStepReturnValue?: CallToolResult;
-  /** Action result from the current step (available for step-level providers) */
-  actionResult?: CallToolResult;
-  
-  // Tool-level context (available when called from tool completion)
-  /** Total number of steps executed (available for tool-level providers) */
-  stepsExecuted?: number;
-  /** Return value from the last step (available for tool-level providers) */
-  lastStepReturnValue?: CallToolResult;
-  /** Whether the tool executed successfully (available for tool-level providers) */
-  toolExecutionSuccess?: boolean;
-  /** Any error that occurred during tool execution (available for tool-level providers) */
-  toolExecutionError?: Error;
-}
-
-/**
- * Type definition for return value provider functions
- * Unified type that works for both step-level and tool-level providers
- */
-export type ReturnValueProvider = (context: ReturnValueContext) => CallToolResult | Promise<CallToolResult>;
 
 /**
  * Represents a return value provider function that can be registered and used in steps or tools
@@ -588,29 +535,33 @@ export interface ReturnValueProviderFunction {
   /** The provider function implementation */
   implementation: ReturnValueProvider;
   /** Expected parameters for the provider function */
-  parameters?: Record<string, any>;
-  /** Whether this provider is intended for step-level or tool-level use (optional metadata) */
+  parameters?: Record<string, unknown>;
+  /** Whether this provider is intended for step-level or tool-level use */
   scope?: 'step' | 'tool' | 'both';
 }
 
 /**
- * Configuration for return values (used by both steps and tools)
+ * Connection status information for SignalR
  */
-export interface ReturnValue {
-  /** Static/hardcoded return value */
-  value?: any;
-  /** Function to compute the return value dynamically */
-  provider?: ReturnValueProvider;
-  /** Name of a registered function to compute the return value */
-  providerName?: string;
-  /** Parameters to pass to the provider function */
-  providerParams?: Record<string, any>;
+export interface ConnectionStatus {
+  /** Whether the connection is active */
+  isConnected: boolean;
+  /** Current connection state */
+  connectionState: string | null;
+  /** Current session ID */
+  sessionId: string | null;
 }
 
 /**
  * Helper function to create a successful CallToolResult
+ * @param content - The content for the result (string or ContentBlock array)
+ * @param structuredContent - Optional structured data
+ * @returns A successful CallToolResult
  */
-export const createSuccessResult = (content?: string | ContentBlock[], structuredContent?: { [key: string]: unknown }): CallToolResult => {
+export function createSuccessResult(
+  content?: string | ContentBlock[], 
+  structuredContent?: Record<string, unknown>
+): CallToolResult {
   let contentArray: ContentBlock[];
   
   if (!content) {
@@ -621,17 +572,28 @@ export const createSuccessResult = (content?: string | ContentBlock[], structure
     contentArray = content;
   }
   
-  return {
+  const result: CallToolResult = {
     content: contentArray,
-    structuredContent,
     isError: false
   };
-};
+  
+  if (structuredContent !== undefined) {
+    result.structuredContent = structuredContent;
+  }
+  
+  return result;
+}
 
 /**
  * Helper function to create an error CallToolResult
+ * @param error - The error (Error object or string)
+ * @param structuredContent - Optional structured data
+ * @returns An error CallToolResult
  */
-export const createErrorResult = (error: Error | string, structuredContent?: { [key: string]: unknown }): CallToolResult => {
+export function createErrorResult(
+  error: Error | string, 
+  structuredContent?: Record<string, unknown>
+): CallToolResult {
   const errorMessage = error instanceof Error ? error.message : error;
   const errorDetails = error instanceof Error ? { 
     name: error.name, 
@@ -639,12 +601,19 @@ export const createErrorResult = (error: Error | string, structuredContent?: { [
     stack: error.stack 
   } : { message: errorMessage };
   
-  return {
+  const result: CallToolResult = {
     content: [{ type: "text", text: `Error: ${errorMessage}` }],
-    structuredContent: structuredContent || { error: errorDetails },
     isError: true
   };
-};
+  
+  if (structuredContent !== undefined) {
+    result.structuredContent = structuredContent;
+  } else {
+    result.structuredContent = { error: errorDetails };
+  }
+  
+  return result;
+}
 
 /**
  * Default successful result constant
@@ -653,8 +622,10 @@ export const SuccessfulCallToolResult: CallToolResult = createSuccessResult();
 
 /**
  * Helper function to create a failed result
+ * @param error - The error that occurred
+ * @returns A failed CallToolResult
  */
-export const FailedCallToolResult = (error?: Error | unknown): CallToolResult => {
+export function createFailedResult(error?: Error | unknown): CallToolResult {
   const errorObj = error instanceof Error ? error : new Error(String(error || 'Operation failed'));
   return createErrorResult(errorObj);
-};
+}

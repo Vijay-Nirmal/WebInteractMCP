@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult } from '../../lib/mcp-elements';
+import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider } from 'web-intract-mcp';
 
 /**
  * Angular service for integrating MCP Elements with the AutoBot application
@@ -8,11 +8,11 @@ import { MCPElementsController, ToolConfiguration, ToolStartConfig, CustomFuncti
   providedIn: 'root'
 })
 export class MCPElementsService {
-  private mcpController: MCPElementsController;
+  private mcpController: WebIntractMCPController;
   private isInitialized = false;
   
   constructor() {
-    this.mcpController = new MCPElementsController({
+    this.mcpController = new WebIntractMCPController({
       useModalOverlay: true,
       classPrefix: 'autobot-shepherd',
       defaultStepOptions: {
@@ -334,7 +334,7 @@ export class MCPElementsService {
     const allTools = this.mcpController.getRegistry().getAllTools();
     return {      isInitialized: this.isInitialized,
       totalTools: allTools.size,      toolIds: Array.from(allTools.keys()),
-      tools: Array.from(allTools.values()).map(tool => ({
+      tools: Array.from(allTools.values()).map((tool: ToolConfiguration) => ({
         id: tool.toolId,
         title: tool.title,
         mode: tool.mode,
@@ -372,20 +372,6 @@ export class MCPElementsService {
   }
 
   /**
-   * Get a registered custom function
-   */
-  getCustomFunction(functionName: string): CustomFunction | undefined {
-    return this.mcpController.getCustomFunction(functionName);
-  }
-
-  /**
-   * Get all registered custom functions
-   */
-  getAllCustomFunctions(): Map<string, CustomFunction> {
-    return this.mcpController.getAllCustomFunctions();
-  }
-
-  /**
    * Register a return value provider function
    */
   registerReturnValueProvider(provider: ReturnValueProviderFunction): void {
@@ -397,20 +383,6 @@ export class MCPElementsService {
    */
   registerReturnValueProviders(providers: ReturnValueProviderFunction[]): void {
     this.mcpController.registerReturnValueProviders(providers);
-  }
-
-  /**
-   * Get a registered return value provider function
-   */
-  getReturnValueProvider(providerName: string): ReturnValueProviderFunction | undefined {
-    return this.mcpController.getReturnValueProvider(providerName);
-  }
-
-  /**
-   * Get all registered return value provider functions
-   */
-  getAllReturnValueProviders(): Map<string, ReturnValueProviderFunction> {
-    return this.mcpController.getAllReturnValueProviders();
   }
 
   /**
@@ -437,8 +409,8 @@ export class MCPElementsService {
   /**
    * Creates a new session with the MCP Server
    */
-  async createSession(serverUrl?: string): Promise<string> {
-    return await this.mcpController.createSession(serverUrl);
+  async createSession(): Promise<string> {
+    return await this.mcpController.createSession();
   }
 
   /**

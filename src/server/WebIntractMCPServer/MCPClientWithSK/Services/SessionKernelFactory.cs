@@ -97,7 +97,7 @@ public class SessionKernelFactory : ISessionKernelFactory
             var clientTransport = new SseClientTransport(new SseClientTransportOptions
             {
                 Name = $"Session_{sessionId}",
-                Endpoint = new Uri("http://localhost:5120/sse"),
+                Endpoint = new Uri("http://localhost:8080/sse"),
                 AdditionalHeaders = new Dictionary<string, string>
                 {
                     { "McpIntract-Session-Id", sessionId }

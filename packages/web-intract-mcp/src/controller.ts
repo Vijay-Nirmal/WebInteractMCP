@@ -1,50 +1,91 @@
 /**
- * @file mcp-elements-controller.ts
- * @description The main controller for managing and running MCP Elements Tools
+ * @fileoverview Web Intract MCP Controller - Main controller for MCP tool execution and management
+ * @description Production-ready controller that transforms web applications into MCP servers with robust tool execution
+ * @version 1.0.0
+ * @author Vijay Nirmal
  */
 
 import { Tour, ShepherdBase } from 'shepherd.js';
+import {
+  ToolConfiguration,
+  ToolStep,
+  ToolStartConfig,
+  CallToolResult,
+  WebIntractMCPOptions,
+  WebIntractMCPEvent,
+  CustomFunction,
+  CustomFunctionImplementation,
+  ReturnValueProviderFunction,
+  ReturnValueProvider,
+  ReturnValueContext,
+  VisualEffectStyles,
+  ParameterDefinition,
+  ToolParameterSchema,
+  ToolAction,
+  createSuccessResult,
+  createErrorResult,
+  SuccessfulCallToolResult,
+  CustomFunctionContext
+} from './types';
 import { ToolRegistry } from './tool-registry';
-import { ToolConfiguration, ToolStartConfig, MCPElementsEvent, ToolStep, ToolAction, MCPElementsOptions, CustomFunction, CustomFunctionContext, CustomFunctionImplementation, VisualEffectStyles, ToolParameterSchema, ParameterDefinition, ReturnValueProviderFunction, ReturnValueProvider, CallToolResult, ReturnValueContext, SuccessfulCallToolResult, FailedCallToolResult, createSuccessResult, createErrorResult } from './types';
-import { MCPSignalRService } from './mcp-signalr.service';
+import { WebIntractSignalRService } from './signalr.service';
 
 /**
- * The main controller for managing and running MCP Elements Tools.
+ * Validation result interface
  */
-export class MCPElementsController {
+interface ValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+/**
+ * Default configuration options
+ */
+const DEFAULT_OPTIONS: WebIntractMCPOptions = {
+  serverUrl: 'http://localhost:8080',
+  enableVisualFeedback: true,
+  debugMode: false,
+  stopOnFailure: false,
+  elementTimeout: 5000,
+  highlightDuration: 2000,
+  focusEffectDuration: 1000,
+  clickEffectDuration: 600,
+  actionDelay: 500,
+  defaultButtonlessDelay: 3000
+};
+
+/**
+ * Main controller class for Web Intract MCP
+ * Provides comprehensive tool execution, registration, and management capabilities
+ */
+export class WebIntractMCPController {
+  
   private registry: ToolRegistry;
   private shepherdTour: Tour | null = null;
   private activeTool: ToolConfiguration | null = null;
   private toolQueue: ToolStartConfig[] = [];
-  private eventListeners: Map<MCPElementsEvent, Function[]> = new Map();
+  private eventListeners: Map<WebIntractMCPEvent, Function[]> = new Map();
   private currentStepIndex: number = 0;
-  private globalOptions: MCPElementsOptions;
+  private globalOptions: WebIntractMCPOptions;
   private customFunctions: Map<string, CustomFunction> = new Map();
   private returnValueProviders: Map<string, ReturnValueProviderFunction> = new Map();
   private stepReturnValues: CallToolResult[] = [];
   private customStyles: VisualEffectStyles = {};
   private styleElementId: string = 'mcp-visual-feedback-styles';
-  private signalRService: MCPSignalRService | null = null;
+  private signalRService: WebIntractSignalRService | null = null;
 
   /**
-   * Creates a new MCPElementsController instance.
-   * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor.
-   * @param options - Global configuration options for the controller.
+   * Creates a new WebIntractMCPController instance
+   * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor
+   * @param options - Global configuration options
    */
- constructor(private shepherdOptions: any = {}, options: Partial<MCPElementsOptions> = {}) {
+  constructor(private shepherdOptions: any = {}, options: Partial<WebIntractMCPOptions> = {}) {
     this.registry = new ToolRegistry();
 
     // Set default options
     this.globalOptions = {
-      enableVisualFeedback: true,
-      debugMode: false,
-      stopOnFailure: false,
-      elementTimeout: 5000,
-      highlightDuration: 2000,
-      focusEffectDuration: 1000,
-      clickEffectDuration: 600,
-      actionDelay: 500,
-      defaultButtonlessDelay: 3000,
+      ...DEFAULT_OPTIONS,
       ...options
     };
 
@@ -69,14 +110,14 @@ export class MCPElementsController {
    * Gets the current global options.
    * @returns The current global options.
    */
-  getGlobalOptions(): MCPElementsOptions {
+  getGlobalOptions(): WebIntractMCPOptions {
     return { ...this.globalOptions };
   }
  /**
    * Updates global options.
    * @param options - Partial options to update.
    */
-  updateGlobalOptions(options: Partial<MCPElementsOptions>): void {
+  updateGlobalOptions(options: Partial<WebIntractMCPOptions>): void {
     this.globalOptions = { ...this.globalOptions, ...options };
     
     // Update custom styles if provided
@@ -222,7 +263,7 @@ export class MCPElementsController {
    * @param tool - The tool configuration.
    * @returns The effective options for the tool.
    */
-  private getEffectiveOptions(tool: ToolConfiguration): MCPElementsOptions {
+  private getEffectiveOptions(tool: ToolConfiguration): WebIntractMCPOptions {
     return { ...this.globalOptions, ...tool.options };
   }
 
@@ -327,7 +368,7 @@ export class MCPElementsController {
    * @param eventName - The name of the event.
    * @param handler - The callback function.
    */
-  on(eventName: MCPElementsEvent, handler: Function): void {
+  on(eventName: WebIntractMCPEvent, handler: Function): void {
     if (!this.eventListeners.has(eventName)) {
       this.eventListeners.set(eventName, []);
     }
@@ -339,7 +380,7 @@ export class MCPElementsController {
    * @param eventName - The name of the event.
    * @param handler - The callback function to remove.
    */
-  off(eventName: MCPElementsEvent, handler: Function): void {
+  off(eventName: WebIntractMCPEvent, handler: Function): void {
     const handlers = this.eventListeners.get(eventName);
     if (handlers) {
       const index = handlers.indexOf(handler);
@@ -355,7 +396,7 @@ export class MCPElementsController {
    * @param eventName - The name of the event to emit.
    * @param data - Optional data to pass to the event handlers.
    */
-  private emit(eventName: MCPElementsEvent, data?: any): void {
+  private emit(eventName: WebIntractMCPEvent, data?: any): void {
     const handlers = this.eventListeners.get(eventName) || [];
     handlers.forEach(handler => {
       try {
@@ -490,7 +531,7 @@ export class MCPElementsController {
       });
 
       // Set up auto-advance with delays and return value calculation
-      this.shepherdTour!.on('show', async (event: any) => {
+      this.shepherdTour!.on('show', async () => {
         try {
           const currentStep = this.shepherdTour!.getCurrentStep();
           if (!currentStep || !currentStep.id) {
@@ -505,7 +546,13 @@ export class MCPElementsController {
             return;
           }
 
-          const stepIndex = parseInt(stepIndexMatch[1], 10);
+          var stepId = stepIndexMatch[1];
+          if (!stepId) {
+            console.warn('No step ID found for buttonless mode');
+            return; 
+          }
+
+          const stepIndex = parseInt(stepId, 10);
           const step = steps[stepIndex];
 
           if (!step) {
@@ -550,6 +597,12 @@ export class MCPElementsController {
     try {
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
+
+        if (!step) {
+            console.warn(`Step ${i + 1} is undefined, skipping...`);
+            continue;
+        }
+
         this.currentStepIndex = i;
 
         this.debugLog(`Executing step ${i + 1}/${steps.length}:`, step);
@@ -674,8 +727,7 @@ export class MCPElementsController {
       };
 
       try {
-        const result = await provider(context);
-        return result; // Provider should return CallToolResult directly
+        return await provider(context);
       } catch (error) {
         console.error('Error executing return value provider:', error);
         return createErrorResult(error instanceof Error ? error : new Error(String(error)));
@@ -703,8 +755,7 @@ export class MCPElementsController {
     toolExecutionError?: Error
   ): Promise<CallToolResult> {
     if (!tool.returnValue) {
-      // No tool-level return value specified, use last step's return value
-      return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
+      return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
     }
 
     const returnValueConfig = tool.returnValue;
@@ -725,7 +776,7 @@ export class MCPElementsController {
       if (!provider) {
         console.warn(`Tool return value provider not found: ${returnValueConfig.providerName}`);
         // Fallback to last step's return value
-        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
       }
 
       const context: ReturnValueContext = {
@@ -746,12 +797,12 @@ export class MCPElementsController {
       } catch (error) {
         console.error('Error executing tool return value provider:', error);
         // Fallback to last step's return value
-        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
+        return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
       }
     }
 
     // Fallback to last step's return value
-    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult;
+    return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
   }
 
   /**
@@ -824,7 +875,7 @@ export class MCPElementsController {
   private setupTourEventHandlersWithReturnValues(resolve: (result: CallToolResult) => void): void {
     if (!this.shepherdTour) return;
 
-    this.shepherdTour.on('show', async (event: any) => {
+    this.shepherdTour.on('show', async () => {
       this.emit('step:show', {
         step: this.activeTool?.steps[this.currentStepIndex],
         index: this.currentStepIndex,
@@ -917,7 +968,7 @@ export class MCPElementsController {
         this.debugLog('Filling input with value:', action.value);
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           // Use typing animation for visual feedback
-          await this.showTypingEffect(element, action.value || '', effectiveOptions);
+          await this.showTypingEffect(element, String(action.value) || '', effectiveOptions);
           element.dispatchEvent(new Event('blur', { bubbles: true }));
           actionResult = createSuccessResult('Input filled successfully', { 
             filled: true, 
@@ -938,7 +989,7 @@ export class MCPElementsController {
           element.focus();
           await new Promise(resolve => setTimeout(resolve, 300));
 
-          element.value = action.value || '';
+          element.value = String(action.value) || '';
           element.dispatchEvent(new Event('change', { bubbles: true }));
           actionResult = createSuccessResult('Option selected successfully', { 
             selected: true, 
@@ -956,7 +1007,7 @@ export class MCPElementsController {
         // Show click effect if element is clickable (like a link)
         this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
-        window.location.href = action.value || '';
+        window.location.href = String(action.value) || '';
         actionResult = createSuccessResult('Navigation completed successfully', { 
           navigated: true, 
           url: action.value 
@@ -1208,7 +1259,7 @@ export class MCPElementsController {
    * Shows a click visual effect on an element.
    * @private
    */
-  private showClickEffect(element: HTMLElement, options?: MCPElementsOptions): void {
+  private showClickEffect(element: HTMLElement, options?: WebIntractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1246,7 +1297,7 @@ export class MCPElementsController {
    * Shows typing animation on an input element.
    * @private
    */
-  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: MCPElementsOptions): Promise<void> {
+  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: WebIntractMCPOptions): Promise<void> {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) {
       element.value = text;
@@ -1277,7 +1328,7 @@ export class MCPElementsController {
    * Highlights an element temporarily.
    * @private
    */
-  private highlightElement(element: HTMLElement, duration: number = 2000, options?: MCPElementsOptions): void {
+  private highlightElement(element: HTMLElement, duration: number = 2000, options?: WebIntractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1296,7 +1347,7 @@ export class MCPElementsController {
    * Shows a focus effect on an element.
    * @private
    */
-  private showFocusEffect(element: HTMLElement, duration: number = 1000, options?: MCPElementsOptions): void {
+  private showFocusEffect(element: HTMLElement, duration: number = 1000, options?: WebIntractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1674,14 +1725,12 @@ export class MCPElementsController {
 
   /**
    * Creates a new session with the MCP Server via SignalR.
-   * @param serverUrl - The SignalR server URL (default: 'http://localhost:5120')
    * @returns Promise that resolves with the session ID
    */
-  async createSession(serverUrl: string = 'http://localhost:5120'): Promise<string> {
+  async createSession(): Promise<string> {
     try {
       // Create a new SignalR service instance
-      this.signalRService = new MCPSignalRService(serverUrl);
-      this.signalRService.setMCPController(this);
+      this.signalRService = new WebIntractSignalRService(this.globalOptions.serverUrl, this);
       
       // Start the connection
       await this.signalRService.start();
@@ -1693,10 +1742,7 @@ export class MCPElementsController {
         throw new Error('Failed to get SignalR connection ID');
       }
       
-      // Register the session with the server
-      await this.signalRService.registerSession(sessionId);
-      
-      this.debugLog('Session created successfully', { sessionId, serverUrl });
+      this.debugLog('Session created successfully', { sessionId });
       
       return sessionId;
     } catch (error) {

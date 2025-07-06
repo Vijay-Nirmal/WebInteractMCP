@@ -171,7 +171,6 @@ publish/
 #*.pubxml
 
 # NuGet Packages Directory
-packages/*
 ## TODO: If the tool you use requires repositories.config
 ## uncomment the next line
 #!packages/repositories.config
@@ -238,7 +237,6 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
-packages/
 *.VC.db*
 *.VC.opendb
 .vs/

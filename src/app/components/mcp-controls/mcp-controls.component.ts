@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MCPElementsService } from '../../services/mcp-elements.service';
-import { ToolConfiguration, CustomFunctionContext, createSuccessResult, createErrorResult } from '../../../lib/mcp-elements';
+import { ToolConfiguration, CustomFunctionContext, createSuccessResult, createErrorResult } from 'web-intract-mcp';
 
 function refReplacer() {
   let m = new Map(), v= new Map(), init: any = null;
@@ -843,8 +843,8 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
         name: 'highlightElement',
         implementation: function(context: CustomFunctionContext) {
           const element = context.element;
-          const duration = context.params['duration'] || 3000;
-          const color = context.params['color'] || '#ff6b6b';
+          const duration = Number(context.params['duration']) || 3000;
+          const color = String(context.params['color']) || '#ff6b6b';
           
           // Store original styles
           const originalStyle = element.style.cssText;
@@ -915,7 +915,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       {
         name: 'processData',
         implementation: function(context: CustomFunctionContext) {
-          const inputData = context.params['inputData'] || 'default data';
+          const inputData = String(context.params['inputData']) || 'default data';
           const previousValue = context.previousStepReturnValue;
           
           const processed = {
@@ -971,8 +971,9 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       {
         name: 'combineAllValues',
         implementation: function(context) {
-          // Get all previous step return values from the controller
-          const allValues = context.controller.getLastToolReturnValues();
+          // Get all previous step return values from the service (since context.controller is the service wrapper)
+          const service = (context as any).mcpElementsService;
+          const allValues = service ? service.getLastToolReturnValues() : [];
           const combined = {
             summary: 'All steps completed',
             stepCount: allValues.length,
@@ -999,8 +1000,9 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           const includeMetrics = context.toolParams['includeMetrics'] || false;
           const format = context.toolParams['format'] || 'simple';
           
-          // Get all step return values from the controller since allStepReturnValues is no longer in context
-          const allStepReturnValues = context.controller.getLastToolReturnValues();
+          // Get all step return values from the service (since context.controller is the service wrapper)
+          const service = (context as any).mcpElementsService;
+          const allStepReturnValues = service ? service.getLastToolReturnValues() : [];
           
           const summary: any = {
             toolName: context.activeTool?.title || 'Unknown Tool',
@@ -1037,8 +1039,9 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       {
         name: 'combineToolResults',
         implementation: function(context) {
-          // Get all step return values from the controller
-          const allStepReturnValues = context.controller.getLastToolReturnValues();
+          // Get all step return values from the service (since context.controller is the service wrapper)
+          const service = (context as any).mcpElementsService;
+          const allStepReturnValues = service ? service.getLastToolReturnValues() : [];
           
           const result = {
             message: 'Tool execution completed with custom tool-level return value',
@@ -1190,7 +1193,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       // Also clean up the server-side session if we have a session ID
       if (sessionId) {
         try {
-          const response = await fetch(`http://localhost:5120/api/sessions/${sessionId}`, {
+          const response = await fetch(`http://localhost:8080/api/sessions/${sessionId}`, {
             method: 'DELETE'
           });
           
