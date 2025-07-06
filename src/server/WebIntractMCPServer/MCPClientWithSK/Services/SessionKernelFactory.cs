@@ -6,6 +6,7 @@ namespace MCPClientWithSK.Services;
 
 public class SessionKernelFactory : ISessionKernelFactory
 {
+    // TODO: Cleanup session kernels when signalR closed/disconnects or after a timeout
     private readonly ConcurrentDictionary<string, Kernel> _sessionKernels = new();
     private readonly IConfiguration _configuration;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -42,21 +43,9 @@ public class SessionKernelFactory : ISessionKernelFactory
         if (_sessionKernels.TryRemove(sessionId, out var kernel))
         {
             _logger.LogInformation("Removed kernel for session: {SessionId}", sessionId);
-            // Note: Kernel doesn't implement IDisposable in current SK version
-            // If needed, we could implement cleanup here
             return Task.FromResult(true);
         }
         return Task.FromResult(false);
-    }
-
-    public async Task ClearAllKernelsAsync()
-    {
-        var sessions = _sessionKernels.Keys.ToList();
-        foreach (var sessionId in sessions)
-        {
-            await RemoveKernelAsync(sessionId);
-        }
-        _logger.LogInformation("Cleared all session kernels");
     }
 
     private async Task<Kernel> CreateKernelWithMcpPluginsAsync(string sessionId)

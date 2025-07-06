@@ -47,16 +47,14 @@ export class MCPSignalRService {
       .build();
 
     // Listen for tool invocation requests from the server
-    this.connection.on('InvokeTool', async (requestId: string, toolName: string, toolArguments: any) => {
-      console.log(`Received tool invocation request: ${toolName}`, { requestId, arguments: toolArguments });
+    this.connection.on('InvokeTool', async (toolName: string, toolArguments: any): Promise<CallToolResult> => {
+      console.log(`Received tool invocation request: ${toolName}`, { arguments: toolArguments });
       
       try {
-        const result = await this.invokeTool(toolName, toolArguments);
-        await this.sendToolResponse(requestId, result);
+        return await this.invokeTool(toolName, toolArguments);
       } catch (error) {
         console.error('Error executing tool:', error);
-        const errorResult = createErrorResult(error instanceof Error ? error : new Error(String(error)));
-        await this.sendToolResponse(requestId, errorResult);
+        return createErrorResult(error instanceof Error ? error : new Error(String(error)));
       }
     });
 
@@ -97,24 +95,6 @@ export class MCPSignalRService {
     if (this.connection) {
       await this.connection.stop();
       console.log('SignalR connection stopped');
-    }
-  }
-
-  /**
-   * Send tool response back to the server
-   * @param requestId - The request ID
-   * @param result - The tool execution result
-   */
-  private async sendToolResponse(requestId: string, result: CallToolResult): Promise<void> {
-    if (this.connection && this.connection.state === signalR.HubConnectionState.Connected) {
-      try {
-        await this.connection.invoke('SendToolResponse', requestId, result);
-        console.log(`Tool response sent for request ${requestId}`);
-      } catch (error) {
-        console.error('Error sending tool response:', error);
-      }
-    } else {
-      console.error('SignalR connection not available to send response');
     }
   }
 

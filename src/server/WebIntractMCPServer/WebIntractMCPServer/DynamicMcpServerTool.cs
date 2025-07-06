@@ -29,9 +29,7 @@ public class DynamicMcpServerTool : McpServerTool
 
         try
         {
-            var result = await McpToolsHub.InvokeToolOnClient(_hubContext, _sessionId, toolName, arguments);
-
-            return result;
+            return await McpToolsHub.InvokeToolOnClient(_hubContext, _sessionId, toolName, arguments);
         }
         catch (Exception ex)
         {
