@@ -1,40 +1,38 @@
 using Microsoft.AspNetCore.SignalR;
-using ModelContextProtocol.Protocol;
 
-namespace WebIntractMCPServer.Hubs
+namespace WebIntractMCPServer.Hubs;
+
+/// <summary>
+/// SignalR hub for MCP tools communication with clients
+/// </summary>
+public sealed class McpToolsHub(ILogger<McpToolsHub>? logger) : Hub
 {
-    public class McpToolsHub : Hub
+    /// <summary>
+    /// Called when a client connects to the hub
+    /// </summary>
+    /// <returns>A task representing the asynchronous operation</returns>
+    public override async Task OnConnectedAsync()
     {
-        public static async Task<CallToolResponse> InvokeToolOnClient(IHubContext<McpToolsHub> hubContext, string connectionId, string toolName, object? arguments)
+        logger?.LogDebug("Client connected: {ConnectionId}", Context.ConnectionId);
+        await base.OnConnectedAsync();
+    }
+
+    /// <summary>
+    /// Called when a client disconnects from the hub
+    /// </summary>
+    /// <param name="exception">Exception that caused the disconnection, if any</param>
+    /// <returns>A task representing the asynchronous operation</returns>
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        if (exception is not null)
         {
-            var cancellationToken = new CancellationTokenSource(TimeSpan.FromMinutes(5)).Token; // TODO: Make the timeout configurable
-            try
-            {
-                // TODO: Make the timeout configurable
-                return await hubContext.Clients.Client(connectionId).InvokeAsync<CallToolResponse>("InvokeTool", toolName, arguments, cancellationToken);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                return new CallToolResponse
-                {
-                    Content = new List<Content>
-                    {
-                        new Content { Type = "text", Text = "Tool execution timeout" }
-                    },
-                    IsError = true
-                };
-            }
-            catch (Exception ex)
-            {
-                return new CallToolResponse
-                {
-                    Content = new List<Content>
-                    {
-                        new Content { Type = "text", Text = $"Tool execution error: {ex.Message}" }
-                    },
-                    IsError = true
-                };
-            }
+            logger?.LogWarning(exception, "Client disconnected with error: {ConnectionId}", Context.ConnectionId);
         }
+        else
+        {
+            logger?.LogDebug("Client disconnected: {ConnectionId}", Context.ConnectionId);
+        }
+
+        await base.OnDisconnectedAsync(exception);
     }
 }

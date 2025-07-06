@@ -1,156 +1,226 @@
 using System.Text.Json.Serialization;
 
-namespace WebIntractMCPServer
+namespace WebIntractMCPServer;
+
+/// <summary>
+/// Schema definition for tool input parameters
+/// </summary>
+internal sealed class InputSchema
 {
-    public class InputSchema
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        [JsonPropertyName("properties")]
-        public Dictionary<string, PropertySchema> Properties { get; set; } = new Dictionary<string, PropertySchema>();
-        [JsonPropertyName("required")]
-        public List<string> Required { get; set; } = new List<string>();
-    }
+    /// <summary>
+    /// The type of the schema (typically "object")
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
 
-    public class PropertySchema
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
-        [JsonPropertyName("description")]
-        public string Description { get; set; }
-        [JsonPropertyName("defaultValue")]
-        public object? DefaultValue { get; set; }
-    }
+    /// <summary>
+    /// Property definitions for the schema
+    /// </summary>
+    [JsonPropertyName("properties")]
+    public Dictionary<string, PropertySchema> Properties { get; set; } = [];
 
-    public class Tool
-    {
-        [JsonPropertyName("toolId")]
-        public required string ToolId { get; set; }
+    /// <summary>
+    /// List of required property names
+    /// </summary>
+    [JsonPropertyName("required")]
+    public List<string> Required { get; set; } = [];
+}
 
-        [JsonPropertyName("title")]
-        public required string Title { get; set; }
+/// <summary>
+/// Schema definition for a single property
+/// </summary>
+internal sealed class PropertySchema
+{
+    /// <summary>
+    /// The data type of the property
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
 
-        [JsonPropertyName("description")]
-        public required string Description { get; set; }
+    /// <summary>
+    /// Human-readable description of the property
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
 
-        [JsonPropertyName("mode")]
-        public required string Mode { get; set; }
+    /// <summary>
+    /// Default value for the property, if any
+    /// </summary>
+    [JsonPropertyName("defaultValue")]
+    public object? DefaultValue { get; set; }
+}
 
-        [JsonPropertyName("steps")]
-        public List<Step> Steps { get; set; } = [];
+/// <summary>
+/// Represents a tool definition from the client
+/// </summary>
+public sealed class Tool
+{
+    /// <summary>
+    /// Unique identifier for the tool
+    /// </summary>
+    [JsonPropertyName("toolId")]
+    public required string ToolId { get; set; }
 
-        [JsonPropertyName("pageMatcher")]
-        public string? PageMatcher { get; set; }
+    /// <summary>
+    /// Display title for the tool
+    /// </summary>
+    [JsonPropertyName("title")]
+    public required string Title { get; set; }
 
-        [JsonPropertyName("options")]
-        public Options? Options { get; set; }
+    /// <summary>
+    /// Detailed description of what the tool does
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
 
-        [JsonPropertyName("parameterSchema")]
-        public ToolParameters? ParameterSchema { get; set; } = new ToolParameters();
+    /// <summary>
+    /// Parameter schema definition for the tool
+    /// </summary>
+    [JsonPropertyName("parameterSchema")]
+    public ToolParameters? ParameterSchema { get; set; } = new();
 
-        [JsonPropertyName("destructive")]
-        public bool? Destructive { get; set; }
+    /// <summary>
+    /// Indicates if the tool performs destructive operations
+    /// </summary>
+    [JsonPropertyName("destructive")]
+    public bool? Destructive { get; set; }
 
-        [JsonPropertyName("idempotent")]
-        public bool? Idempotent { get; set; }
+    /// <summary>
+    /// Indicates if the tool is idempotent (safe to run multiple times)
+    /// </summary>
+    [JsonPropertyName("idempotent")]
+    public bool? Idempotent { get; set; }
 
-        [JsonPropertyName("openWorld")]
-        public bool? OpenWorld { get; set; }
+    /// <summary>
+    /// Indicates if the tool operates in an open-world context
+    /// </summary>
+    [JsonPropertyName("openWorld")]
+    public bool? OpenWorld { get; set; }
 
-        [JsonPropertyName("readOnly")]
-        public bool? ReadOnly { get; set; }
-    }
+    /// <summary>
+    /// Indicates if the tool only performs read operations
+    /// </summary>
+    [JsonPropertyName("readOnly")]
+    public bool? ReadOnly { get; set; }
+}
 
-    public class Action
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
+/// <summary>
+/// Represents a parameter definition for a tool
+/// </summary>
+public sealed class ToolParameter
+{
+    /// <summary>
+    /// Data type of the parameter
+    /// </summary>
+    [JsonPropertyName("type")]
+    public required string Type { get; set; }
 
-        [JsonPropertyName("element")]
-        public string Element { get; set; }
+    /// <summary>
+    /// Description of the parameter
+    /// </summary>
+    [JsonPropertyName("description")]
+    public required string Description { get; set; }
 
-        [JsonPropertyName("value")]
-        public string Value { get; set; }
+    /// <summary>
+    /// Whether this parameter is required (default: false)
+    /// </summary>
+    [JsonPropertyName("required")]
+    public bool? Required { get; set; }
 
-        [JsonPropertyName("delay")]
-        public int? Delay { get; set; }
+    /// <summary>
+    /// Default value for the parameter
+    /// </summary>
+    [JsonPropertyName("defaultValue")]
+    public object? DefaultValue { get; set; }
 
-        [JsonPropertyName("functionName")]
-        public string FunctionName { get; set; }
+    /// <summary>
+    /// For string types: minimum length
+    /// </summary>
+    [JsonPropertyName("minLength")]
+    public int? MinLength { get; set; }
 
-        [JsonPropertyName("functionParams")]
-        public ToolParameter FunctionParams { get; set; }
-    }
+    /// <summary>
+    /// For string types: maximum length
+    /// </summary>
+    [JsonPropertyName("maxLength")]
+    public int? MaxLength { get; set; }
 
-    public class AttachTo
-    {
-        [JsonPropertyName("on")]
-        public string On { get; set; }
-    }
+    /// <summary>
+    /// For string/array types: pattern or allowed values
+    /// </summary>
+    [JsonPropertyName("pattern")]
+    public object? Pattern { get; set; } // Can be string or string[]
 
-    public class ToolParameter
-    {
-        [JsonPropertyName("type")]
-        public string Type { get; set; }
+    /// <summary>
+    /// For number types: minimum value
+    /// </summary>
+    [JsonPropertyName("minimum")]
+    public double? Minimum { get; set; }
 
-        [JsonPropertyName("description")]
-        public string Description { get; set; }
+    /// <summary>
+    /// For number types: maximum value
+    /// </summary>
+    [JsonPropertyName("maximum")]
+    public double? Maximum { get; set; }
 
-        [JsonPropertyName("defaultValue")]
-        public object? DefaultValue { get; set; }
-    }
+    /// <summary>
+    /// For array types: type of array items
+    /// </summary>
+    [JsonPropertyName("items")]
+    public ToolParameter? Items { get; set; }
 
-    public class Metadata
-    {
-        [JsonPropertyName("version")]
-        public string Version { get; set; }
+    /// <summary>
+    /// For object types: properties definition
+    /// </summary>
+    [JsonPropertyName("properties")]
+    public Dictionary<string, ToolParameter>? Properties { get; set; }
 
-        [JsonPropertyName("author")]
-        public string Author { get; set; }
-    }
+    /// <summary>
+    /// Example value(s) for documentation
+    /// </summary>
+    [JsonPropertyName("examples")]
+    public List<object>? Examples { get; set; }
+}
 
-    public class Options
-    {
-        [JsonPropertyName("debugMode")]
-        public bool? DebugMode { get; set; }
+/// <summary>
+/// Metadata information for tools
+/// </summary>
+public sealed class Metadata
+{
+    /// <summary>
+    /// Version of the tool
+    /// </summary>
+    [JsonPropertyName("version")]
+    public string? Version { get; set; }
 
-        [JsonPropertyName("elementTimeout")]
-        public int? ElementTimeout { get; set; }
+    /// <summary>
+    /// Author of the tool
+    /// </summary>
+    [JsonPropertyName("author")]
+    public string? Author { get; set; }
+}
 
-        [JsonPropertyName("actionDelay")]
-        public int? ActionDelay { get; set; }
 
-        [JsonPropertyName("highlightDuration")]
-        public int? HighlightDuration { get; set; }
-    }
+/// <summary>
+/// Collection of parameters for a tool
+/// </summary>
+public sealed class ToolParameters
+{
+    /// <summary>
+    /// Dictionary of parameter definitions
+    /// </summary>
+    [JsonPropertyName("parameters")]
+    public Dictionary<string, ToolParameter> Parameters { get; set; } = [];
 
-    public class ToolParameters
-    {
-        [JsonPropertyName("parameters")]
-        public Dictionary<string, ToolParameter> Parameters { get; set; } = [];
+    /// <summary>
+    /// List of required parameter names
+    /// </summary>
+    [JsonPropertyName("required")]
+    public List<string> Required { get; set; } = [];
 
-        [JsonPropertyName("required")]
-        public List<string> Required { get; set; } = [];
-
-        [JsonPropertyName("metadata")]
-        public Metadata Metadata { get; set; }
-    }
-
-    public class Step
-    {
-        [JsonPropertyName("targetElement")]
-        public string TargetElement { get; set; }
-
-        [JsonPropertyName("content")]
-        public string Content { get; set; }
-
-        [JsonPropertyName("delay")]
-        public int? Delay { get; set; }
-
-        [JsonPropertyName("action")]
-        public Action Action { get; set; }
-
-        [JsonPropertyName("stopOnFailure")]
-        public bool? StopOnFailure { get; set; }
-    }
+    /// <summary>
+    /// Metadata for the tool parameters
+    /// </summary>
+    [JsonPropertyName("metadata")]
+    public Metadata? Metadata { get; set; }
 }

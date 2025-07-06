@@ -1,45 +1,55 @@
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
-using Microsoft.AspNetCore.SignalR;
-using WebIntractMCPServer.Hubs;
+using WebIntractMCPServer.Abstractions;
 
 namespace WebIntractMCPServer;
 
-public class DynamicMcpServerTool : McpServerTool
+/// <summary>
+/// Dynamic MCP server tool that delegates execution to the client via SignalR
+/// </summary>
+public sealed class DynamicMcpServerTool(
+    ModelContextProtocol.Protocol.Tool tool,
+    IToolService toolService,
+    string sessionId,
+    ILogger<DynamicMcpServerTool> logger) : McpServerTool
 {
-    public override ModelContextProtocol.Protocol.Tool ProtocolTool { get; }
-    private readonly IHubContext<McpToolsHub> _hubContext;
-    private readonly string _sessionId;
+    /// <inheritdoc />
+    public override ModelContextProtocol.Protocol.Tool ProtocolTool { get; } = tool ?? throw new ArgumentNullException(nameof(tool));
 
-    public DynamicMcpServerTool(ModelContextProtocol.Protocol.Tool tool, IHubContext<McpToolsHub> hubContext, string sessionId)
+    /// <summary>
+    /// Invokes the tool asynchronously
+    /// </summary>
+    /// <param name="request">The tool invocation request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The tool execution response</returns>
+    /// <exception cref="ArgumentNullException">Thrown when request or request parameters are null</exception>
+    public override async ValueTask<CallToolResponse> InvokeAsync(
+        RequestContext<CallToolRequestParams> request, 
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(tool, nameof(tool));
-        ArgumentNullException.ThrowIfNull(hubContext, nameof(hubContext));
-        ArgumentNullException.ThrowIfNull(sessionId, nameof(sessionId));
-        ProtocolTool = tool;
-        _hubContext = hubContext;
-        _sessionId = sessionId;
-    }
+        ArgumentNullException.ThrowIfNull(request?.Params);
+        ArgumentNullException.ThrowIfNull(toolService);
+        ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
+        ArgumentNullException.ThrowIfNull(logger);
 
-    public override async ValueTask<CallToolResponse> InvokeAsync(RequestContext<CallToolRequestParams> request, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(request.Params, nameof(request.Params));
         var toolName = request.Params.Name;
         var arguments = request.Params.Arguments;
 
+        logger.LogDebug("Invoking tool {ToolName} with session {SessionId}", toolName, sessionId);
+
         try
         {
-            return await McpToolsHub.InvokeToolOnClient(_hubContext, _sessionId, toolName, arguments);
+            return await toolService.ExecuteToolAsync(sessionId, toolName, arguments, cancellationToken);
         }
         catch (Exception ex)
         {
-            var response = new CallToolResponse
+            logger.LogError(ex, "Unexpected error invoking tool {ToolName} for session {SessionId}", toolName, sessionId);
+            
+            return new CallToolResponse
             {
                 IsError = true,
-                Content = [ new Content { Type = "text", Text = $"Error invoking tool '{toolName}': {ex.Message}" }]
+                Content = [new() { Type = "text", Text = $"Error invoking tool '{toolName}': {ex.Message}" }]
             };
-            
-            return response;
         }
     }
 }
