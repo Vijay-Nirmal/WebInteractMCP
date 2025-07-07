@@ -163,11 +163,11 @@ npm install
 cd lib/web-intract-mcp && npm install
 cd sample/angular-dotnetnet-semantic-kernel && npm install
 
-# Start development environment
+# Start development environment with sample app
 cd sample/angular-dotnetnet-semantic-kernel
-npm run start:server    # .NET MCP server
-npm run start:client    # .NET client backend  
-npm run start          # Angular frontend
+npm run start:server    # Web Intract MCP server
+npm run start:client    # .NET client backend sample app
+npm run start           # Angular frontend sample app
 ```
 
 ## 📄 License

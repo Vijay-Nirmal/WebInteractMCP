@@ -56,9 +56,9 @@ cd sample/angular-dotnetnet-semantic-kernel && npm install
 
 # Start servers
 cd sample/angular-dotnetnet-semantic-kernel
-npm run start:server    # .NET MCP server
-npm run start:client    # .NET client backend
-npm run start          # Angular frontend
+npm run start:server    # Web Intract MCP server
+npm run start:client    # .NET client backend sample app
+npm run start           # Angular frontend sample app
 
 # Testing
 cd lib/web-intract-mcp && npm test
