@@ -1,12 +1,14 @@
 {
-  "name": "auto-bot",
+  "name": "angular-dotnetnet-semantic-kernel",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "start:server": "dotnet run --project ../../server/WebIntractMCPServer/WebIntractMCPServer.csproj --urls=http://localhost:8080/",
+    "start:client": "dotnet run --project src/server/DotnetMCPClient.csproj --urls=http://localhost:5000/"
   },
   "private": true,
   "dependencies": {
@@ -17,8 +19,9 @@
     "@angular/platform-browser": "^20.0.0",
     "@angular/router": "^20.0.0",
     "rxjs": "~7.8.0",
+    "shepherd.js": "^14.5.0",
     "tslib": "^2.3.0",
-    "web-intract-mcp": "file:packages/web-intract-mcp",
+    "web-intract-mcp": "file:../../lib/web-intract-mcp",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

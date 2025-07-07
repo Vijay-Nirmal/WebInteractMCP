@@ -1,6 +1,6 @@
 # WebIntract MCP Server
 
-A production-ready Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication.
+A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication using the web-intract-mcp npm library
 
 ## Overview
 

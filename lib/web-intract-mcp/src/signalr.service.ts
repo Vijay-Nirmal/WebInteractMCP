@@ -21,7 +21,6 @@ export interface WebIntractMCPController {
  */
 export class WebIntractSignalRService {
   private connection: signalR.HubConnection | null = null;
-  private mcpController: WebIntractMCPController | null = null;
   private readonly config: TransportOptions;
   private readonly logger: Pick<Console, 'log' | 'error' | 'warn' | 'info'>;
   private reconnectAttempts = 0;
@@ -141,7 +140,6 @@ export class WebIntractSignalRService {
       });
       this.connection = null;
     }
-    this.mcpController = null;
   }
 
   /**

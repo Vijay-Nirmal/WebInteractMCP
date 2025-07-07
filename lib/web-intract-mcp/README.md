@@ -1,6 +1,6 @@
 # Web Intract MCP
 
-A production-ready TypeScript library that transforms web applications into MCP (Model Context Protocol) servers with robust two-way communication via SignalR.
+A TypeScript library that transforms web applications into MCP (Model Context Protocol) servers with robust two-way communication with a MCP Server called WebIntractMCPServer.
 
 ## Overview
 

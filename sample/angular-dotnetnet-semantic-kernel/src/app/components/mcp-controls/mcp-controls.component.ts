@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MCPElementsService } from '../../services/mcp-elements.service';
-import { ToolConfiguration, CustomFunctionContext, createSuccessResult, createErrorResult } from 'web-intract-mcp';
+import { ToolConfiguration, CustomFunctionContext, createSuccessResult, ReturnValueContext } from 'web-intract-mcp';
 
 function refReplacer() {
   let m = new Map(), v= new Map(), init: any = null;
@@ -945,7 +945,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     this.mcpElementsService.registerReturnValueProviders([
       {
         name: 'calculateNextValue',
-        implementation: function(context) {
+        implementation: function(context: ReturnValueContext) {
           const multiplier = context.stepParams?.['multiplier'] || 1;
           const previousValue = context.previousStepReturnValue || 'No previous value';
           const result = `Calculated: ${previousValue} * ${multiplier}`;
@@ -970,7 +970,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       },
       {
         name: 'combineAllValues',
-        implementation: function(context) {
+        implementation: function(context: ReturnValueContext) {
           // Get all previous step return values from the service (since context.controller is the service wrapper)
           const service = (context as any).mcpElementsService;
           const allValues = service ? service.getLastToolReturnValues() : [];
@@ -996,7 +996,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
     this.mcpElementsService.registerReturnValueProviders([
       {
         name: 'generateToolSummary',
-        implementation: function(context) {
+        implementation: function(context: ReturnValueContext) {
           const includeMetrics = context.toolParams['includeMetrics'] || false;
           const format = context.toolParams['format'] || 'simple';
           
@@ -1038,7 +1038,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
       },
       {
         name: 'combineToolResults',
-        implementation: function(context) {
+        implementation: function(context: ReturnValueContext) {
           // Get all step return values from the service (since context.controller is the service wrapper)
           const service = (context as any).mcpElementsService;
           const allStepReturnValues = service ? service.getLastToolReturnValues() : [];

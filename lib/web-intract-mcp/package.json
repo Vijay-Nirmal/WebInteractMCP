@@ -55,7 +55,8 @@
     "shepherd.js": "^14.5.0"
   },
   "dependencies": {
-    "@microsoft/signalr": "^8.0.0"
+    "@microsoft/signalr": "^8.0.0",
+    "shepherd.js": "^14.5.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
