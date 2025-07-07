@@ -18,12 +18,16 @@ WebIntractMCP consists of two tightly integrated components that work together t
 
 ## ✨ Key Features
 
-- **🔄 Real-time Communication** - Robust bidirectional communication using SignalR
+- **🔧 Support full MCP Tool protocol** - including tool discovery, invocation, and all type of response Text, Image, Audio others
+- **🔄 Real-time Communication** - Robust bidirectional communication using SignalR which support WebSockets, ServerSentEvents, LongPolling
 - **🛠️ Dynamic Tool Registration** - Configure tools with simple JSON files
 - **🎯 Session-based Control** - Per-user session management for secure isolation
 - **🌐 Framework Agnostic** - Works with any JavaScript framework (React, Angular, Vue, etc.)
 - **⚡ Production Ready** - Comprehensive error handling and performance optimization
 - **🔧 Simple Configuration** - Easy setup with JSON-based tool definitions
+- **📦 Docker Support** - Ready-to-use Docker image for easy deployment
+- **📄 Page-specific Tools** - Define tools that can interact with specific pages or elements
+- **🎨 Visual Feedback** - Provides visual feedback for tool execution and user actions
 
 ## 🏗️ Architecture
 
