@@ -256,4 +256,4 @@ The website is now fully configured and ready to use:
 ### Contact
 
 - **Email**: me@vijaynirmal.com
-- **GitHub**: https://github.com/Vijay-Nirmal/AutoBot
+- **GitHub**: https://github.com/Vijay-Nirmal/WebIntractMCP

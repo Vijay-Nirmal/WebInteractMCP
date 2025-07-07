@@ -3,8 +3,8 @@
 > Transform any web application into an MCP server with real-time two-way communication
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Development Status](https://img.shields.io/badge/Status-Active%20Development-orange)](https://github.com/Vijay-Nirmal/AutoBot)
-[![Version](https://img.shields.io/badge/Version-Pre--1.0-red)](https://github.com/Vijay-Nirmal/AutoBot)
+[![Development Status](https://img.shields.io/badge/Status-Active%20Development-orange)](https://github.com/Vijay-Nirmal/WebIntractMCP)
+[![Version](https://img.shields.io/badge/Version-Pre--1.0-red)](https://github.com/Vijay-Nirmal/WebIntractMCP)
 
 WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
@@ -176,8 +176,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [GitHub Issues](https://github.com/Vijay-Nirmal/AutoBot/issues) - Report bugs or request features
-- [Discussions](https://github.com/Vijay-Nirmal/AutoBot/discussions) - Community discussions
+- [GitHub Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues) - Report bugs or request features
+- [Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions) - Community discussions
 
 ---
 

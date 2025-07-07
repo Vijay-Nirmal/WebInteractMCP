@@ -119,6 +119,6 @@ Feel free to use it in your projects, but be prepared for potential breaking cha
 ## Need Help?
 
 - 📖 [Documentation](./api-reference)
-- 🐛 [Report Issues](https://github.com/Vijay-Nirmal/AutoBot/issues)
-- 💬 [Discussions](https://github.com/Vijay-Nirmal/AutoBot/discussions)
+- 🐛 [Report Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues)
+- 💬 [Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions)
 - 📧 [Contact](mailto:me@vijaynirmal.com)

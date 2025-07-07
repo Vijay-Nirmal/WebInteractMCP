@@ -194,7 +194,7 @@ WebIntractMCP is actively being developed with exciting features on the roadmap:
 
 WebIntractMCP is open source and welcomes contributions from the community:
 
-- **GitHub**: [Vijay-Nirmal/AutoBot](https://github.com/Vijay-Nirmal/AutoBot)
+- **GitHub**: [Vijay-Nirmal/WebIntractMCP](https://github.com/Vijay-Nirmal/WebIntractMCP)
 - **Documentation**: [WebIntractMCP.com/docs](https://webintractmcp.com/docs)
 - **Issues**: Report bugs and request features
 - **Discussions**: Join our community discussions
@@ -213,4 +213,4 @@ Ready to transform your web application? [Get started today](https://webintractm
 
 ---
 
-*Have questions or want to contribute? Feel free to [reach out](mailto:me@vijaynirmal.com) or join our [GitHub discussions](https://github.com/Vijay-Nirmal/AutoBot/discussions). I'd love to hear from you!*
+*Have questions or want to contribute? Feel free to [reach out](mailto:me@vijaynirmal.com) or join our [GitHub discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions). I'd love to hear from you!*

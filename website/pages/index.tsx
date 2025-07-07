@@ -111,7 +111,7 @@ export default function Home() {
                 Get started
               </Link>
               <Link
-                href="https://github.com/Vijay-Nirmal/AutoBot"
+                href="https://github.com/Vijay-Nirmal/WebIntractMCP"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"

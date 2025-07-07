@@ -176,12 +176,12 @@ export default function Contact() {
                       <h4 className="text-lg font-semibold text-gray-900 dark:text-white">GitHub</h4>
                       <p className="mt-1 text-base text-gray-600 dark:text-gray-300">
                         <a
-                          href="https://github.com/Vijay-Nirmal/AutoBot"
+                          href="https://github.com/Vijay-Nirmal/WebIntractMCP"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary-600 hover:text-primary-500 transition-colors"
                         >
-                          Vijay-Nirmal/AutoBot
+                          Vijay-Nirmal/WebIntractMCP
                         </a>
                       </p>
                     </div>
@@ -199,7 +199,7 @@ export default function Contact() {
                       <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Discussions</h4>
                       <p className="mt-1 text-base text-gray-600 dark:text-gray-300">
                         <a
-                          href="https://github.com/Vijay-Nirmal/AutoBot/discussions"
+                          href="https://github.com/Vijay-Nirmal/WebIntractMCP/discussions"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary-600 hover:text-primary-500 transition-colors"

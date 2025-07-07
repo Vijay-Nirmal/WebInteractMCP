@@ -507,9 +507,9 @@ await controller.executeTool('single-tool-id');
 If you're still experiencing issues:
 
 1. **Check the documentation**: Review the [API Reference](./api-reference) and [Examples](./examples)
-2. **Search existing issues**: Look through [GitHub Issues](https://github.com/Vijay-Nirmal/AutoBot/issues)
+2. **Search existing issues**: Look through [GitHub Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues)
 3. **Create a minimal reproduction**: Isolate the problem to the smallest possible example
-4. **Join the community**: Participate in [GitHub Discussions](https://github.com/Vijay-Nirmal/AutoBot/discussions)
+4. **Join the community**: Participate in [GitHub Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions)
 5. **Contact support**: Reach out via [email](mailto:me@vijaynirmal.com)
 
 When reporting issues, please include:
