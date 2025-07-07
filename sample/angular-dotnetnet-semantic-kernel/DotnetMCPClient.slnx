@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="src/server/DotnetMCPClient.csproj" Id="31794489-6338-449b-aa7d-bd8a19bc49c8" />
+  <Project Path="../../server/WebIntractMCPServer/WebIntractMCPServer.csproj" />
+</Solution>
