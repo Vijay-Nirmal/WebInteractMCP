@@ -8,6 +8,8 @@
 
 WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
+> **📢 Initial preview version will be published soon!** This project is in active development. Expect breaking changes in future releases as we evolve toward version 1.0.
+
 ## 🚀 Overview
 
 WebIntractMCP consists of two tightly integrated components that work together to create a seamless MCP experience:
@@ -136,14 +138,15 @@ WebIntractMCP/
 
 ## ⚠️ Development Status
 
-**This project is in active development and has not yet reached version 1.0.**
+**Initial preview version will be published soon. This project is in active development and has not yet reached version 1.0.**
 
 - ✅ Core functionality is working
 - ✅ Production-ready components available
-- ⚠️ Breaking changes may occur frequently
+- 🚀 Initial preview version coming soon
+- ⚠️ Breaking changes expected in future releases
 - ⚠️ API is subject to change before 1.0 release
 
-Feel free to use it in your projects, but be prepared for potential breaking changes.
+Feel free to use it in your projects, but be prepared for potential breaking changes as we approach the initial preview release.
 
 ## 📖 Documentation
 
