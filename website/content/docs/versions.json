@@ -1,0 +1,12 @@
+[
+  {
+    "version": "latest",
+    "label": "Latest",
+    "isLatest": true
+  },
+  {
+    "version": "v1.0",
+    "label": "v1.0",
+    "isLatest": false
+  }
+]

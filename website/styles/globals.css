@@ -1,0 +1,170 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* Prism.js theme for code highlighting */
+@import 'prismjs/themes/prism-tomorrow.css';
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-outline {
+    @apply border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+  }
+
+  /* Enhanced documentation styles */
+  .enhanced-content {
+    @apply leading-7;
+  }
+
+  /* Note boxes */
+  .note-box {
+    @apply p-4 rounded-lg border-l-4 my-6;
+  }
+
+  .note-box.note {
+    @apply bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:border-blue-500 dark:text-blue-200;
+  }
+
+  .note-box.important {
+    @apply bg-amber-50 border-amber-400 text-amber-800 dark:bg-amber-900/20 dark:border-amber-500 dark:text-amber-200;
+  }
+
+  .note-box.warning {
+    @apply bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:border-red-500 dark:text-red-200;
+  }
+
+  .note-box.tip {
+    @apply bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:border-green-500 dark:text-green-200;
+  }
+
+  /* Table of contents */
+  .toc {
+    @apply bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700;
+  }
+
+  /* Mermaid diagram styles */
+  .mermaid {
+    @apply flex justify-center my-8 p-6 rounded-lg border transition-colors duration-200;
+    @apply bg-white dark:bg-gray-800/50 border-gray-200 dark:border-gray-700;
+    @apply shadow-sm dark:shadow-lg;
+  }
+
+  .mermaid svg {
+    @apply max-w-full h-auto;
+    /* Ensure SVG text uses the correct font */
+    font-family: 'Inter', system-ui, sans-serif !important;
+  }
+
+  /* Mermaid error styling */
+  .mermaid-error {
+    @apply bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200;
+  }
+
+  /* Enhanced diagram container for better responsive behavior */
+  .diagram-container {
+    @apply w-full overflow-x-auto;
+  }
+
+  .diagram-container .mermaid {
+    @apply min-w-max;
+  }
+
+  /* Mermaid theme transition support */
+  .mermaid * {
+    @apply transition-colors duration-200;
+  }
+
+  /* Enhanced code blocks */
+  .enhanced-content pre {
+    @apply relative;
+  }
+
+  .enhanced-content pre:hover .copy-button {
+    @apply opacity-100;
+  }
+
+  .copy-button {
+    @apply absolute top-2 right-2 opacity-0 transition-opacity bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded text-xs;
+  }
+
+  /* Anchor links */
+  .heading-link {
+    @apply no-underline;
+  }
+
+  .heading-link:hover {
+    @apply underline;
+  }
+
+  /* Responsive tables */
+  .enhanced-content table {
+    @apply w-full overflow-x-auto block sm:table;
+  }
+
+  .enhanced-content thead,
+  .enhanced-content tbody,
+  .enhanced-content tr {
+    @apply block sm:table-header-group sm:table-row-group sm:table-row;
+  }
+
+  .enhanced-content th,
+  .enhanced-content td {
+    @apply block sm:table-cell px-4 py-2 text-left;
+  }
+
+  .enhanced-content th {
+    @apply bg-gray-50 dark:bg-gray-800 font-semibold;
+  }
+
+  @media (max-width: 640px) {
+    .enhanced-content th {
+      @apply absolute left-[-9999px];
+    }
+    
+    .enhanced-content td {
+      @apply border-none relative pl-[50%];
+    }
+    
+    .enhanced-content td:before {
+      content: attr(data-label) ": ";
+      @apply absolute left-6 w-[45%] pr-2 text-left font-semibold;
+    }
+  }
+}
+
+/* Custom scrollbar */
+.toc::-webkit-scrollbar {
+  width: 4px;
+}
+
+.toc::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+.toc::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded;
+}
+
+.toc::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
