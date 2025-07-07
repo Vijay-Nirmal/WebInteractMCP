@@ -574,8 +574,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // Join the slug array back to the original slug format
   const slug = slugArray.join('/')
   
-  console.log('getStaticProps - version:', version, 'slug:', slug)
-  
   const doc = await getDocPage(version, slug)
   const allDocs = await getDocPages(version)
 

@@ -242,7 +242,7 @@ McpIntract__Tool__TimeoutMinutes=10
 McpIntract__Tool__EnableDetailedErrorLogging=false
 ```
 
-### CORS Configuration
+### CORS Configuration Envs
 ```bash
 McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com
 McpIntract__Cors__AllowedOrigins__1=https://www.myapp.example.com

@@ -3,6 +3,7 @@ import path from 'path'
 import matter from 'gray-matter'
 import { remark } from 'remark'
 import html from 'remark-html'
+import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
 
@@ -46,19 +47,20 @@ async function processMarkdown(content: string): Promise<string> {
   try {
     // Process markdown without pre-transforming Mermaid to preserve proper code blocks
     const markdownResult = await remark()
-      .use(html, { 
-        sanitize: false,
-        allowDangerousHtml: true // Allow custom HTML for Mermaid diagrams
-      })
-      .use(rehypeSlug)
-      .use(rehypeAutolinkHeadings, {
+    .use(remarkGfm) // GitHub Flavored Markdown first
+    .use(html, { 
+    sanitize: false,
+    allowDangerousHtml: true // Allow custom HTML for Mermaid diagrams
+    })
+    .use(rehypeSlug)
+    .use(rehypeAutolinkHeadings, {
         behavior: 'wrap',
         properties: {
-          className: ['heading-link'],
-          ariaLabel: 'Link to heading'
+            className: ['heading-link'],
+            ariaLabel: 'Link to heading'
         }
-      })
-      .process(content)
+    })
+    .process(content)
     
     let result = markdownResult.toString()
     
