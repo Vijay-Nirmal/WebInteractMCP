@@ -33,7 +33,7 @@ WebIntractMCP consists of two tightly integrated components that work together t
 
 ## 🎬 Demo
 
-<video src="assets/WebIntractMCP_Demo.mp4" width="320" height="240" controls></video>
+https://github.com/user-attachments/assets/bf9d15a6-fa4a-40a0-8543-cb0fd92bffac
 
 *Click to view the demonstration of WebIntractMCP transforming a web application into an MCP server*
 
