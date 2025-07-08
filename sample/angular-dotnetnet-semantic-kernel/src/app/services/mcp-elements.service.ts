@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider } from 'web-intract-mcp';
 
 /**
- * Angular service for integrating MCP Elements with the AutoBot application
+ * Angular service for integrating MCP Elements with the WebIntractMCP application
  */
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class MCPElementsService {
   constructor() {
     this.mcpController = new WebIntractMCPController({
       useModalOverlay: true,
-      classPrefix: 'autobot-shepherd',
+      classPrefix: 'WebIntractMCP-shepherd',
       defaultStepOptions: {
         scrollTo: true,
         popperOptions: {
@@ -304,7 +304,7 @@ export class MCPElementsService {
         steps: [
           {
             targetElement: 'body',
-            content: 'Welcome to AutoBot! This is a basic tour to get you started.'
+            content: 'Welcome to WebIntractMCP! This is a basic tour to get you started.'
           }
         ]
       }

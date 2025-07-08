@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "AutoBot": {
+    "WebIntractMCP": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -61,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "AutoBot:build:production"
+              "buildTarget": "WebIntractMCP:build:production"
             },
             "development": {
-              "buildTarget": "AutoBot:build:development"
+              "buildTarget": "WebIntractMCP:build:development"
             }
           },
           "defaultConfiguration": "development"

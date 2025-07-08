@@ -54,7 +54,7 @@ Expected response:
 ```bash
 # Clone the repository
 git clone https://github.com/Vijay-Nirmal/WebIntractMCP.git
-cd AutoBot/server
+cd WebIntractMCP/server
 
 # Build the Docker image
 docker build -t webintract-mcp-server:local .
