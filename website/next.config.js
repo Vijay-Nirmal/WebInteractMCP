@@ -5,8 +5,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/WebIntractMCP' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/WebIntractMCP' : '',
+  assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
+  basePath: process.env.NODE_ENV === 'production' ? '' : '',
   experimental: {
     mdxRs: true,
   },
