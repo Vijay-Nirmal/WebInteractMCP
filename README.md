@@ -33,7 +33,12 @@ WebIntractMCP consists of two tightly integrated components that work together t
 
 ## 🎬 Demo
 
+<iframe width="560" height="315" src="assets/WebIntractMCP_Demo.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="/assets/WebIntractMCP_Demo.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://raw.githubusercontent.com/Vijay-Nirmal/WebIntractMCP/refs/heads/master/assets/WebIntractMCP_Demo.mp4" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 <video src="assets/WebIntractMCP_Demo.mp4" width="320" height="240" controls></video>
+<video src="/assets/WebIntractMCP_Demo.mp4" width="320" height="240" controls></video>
+<video src="https://raw.githubusercontent.com/Vijay-Nirmal/WebIntractMCP/refs/heads/master/assets/WebIntractMCP_Demo.mp4" width="320" height="240" controls></video>
 
 *Click to view the demonstration of WebIntractMCP transforming a web application into an MCP server*
 
