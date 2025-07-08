@@ -36,7 +36,8 @@ public class AgenticSemanticKernelService : IAgentService
 
             // Create chat history with context
             var chatHistory = new ChatHistory();
-            
+            chatHistory.AddSystemMessage("You are an AI assistant of StackOverflow UI, where you can control the UI via tools to perform various actions");
+
             // Add conversation history
             var history = await _memoryService.GetConversationHistoryAsync(sessionId, 5);
             foreach (var entry in history)

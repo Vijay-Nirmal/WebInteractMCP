@@ -451,7 +451,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
   private addWelcomeMessage() {
     const welcomeMessage: ChatMessage = {
       id: this.generateId(),
-      content: "Hello! I'm your AI assistant powered by Semantic Kernel with advanced agentic capabilities. I can help you with:\n\n🔍 Web search and information retrieval\n💻 Code analysis and generation\n📋 Task planning and management\n📊 Data analysis and visualization\n🌤️ Weather information\n💭 Context-aware conversations\n🔗 Session-based chat continuity\n\nHow can I assist you today?",
+      content: "Hello! I'm your AI assistant who can control the UI to perform tasks for you.",
       isUser: false,
       timestamp: new Date()
     };

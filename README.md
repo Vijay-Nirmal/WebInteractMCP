@@ -31,6 +31,12 @@ WebIntractMCP consists of two tightly integrated components that work together t
 - **📄 Page-specific Tools** - Define tools that can interact with specific pages or elements
 - **🎨 Visual Feedback** - Provides visual feedback for tool execution and user actions
 
+## 🎬 Demo
+
+![WebIntractMCP Demo](assets/WebIntractMCP_Demo.mp4)
+
+*Click to view the demonstration of WebIntractMCP transforming a web application into an MCP server*
+
 ## 🏗️ Architecture
 
 ```mermaid

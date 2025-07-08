@@ -16,7 +16,6 @@ import {
   CustomFunction,
   CustomFunctionImplementation,
   ReturnValueProviderFunction,
-  ReturnValueProvider,
   ReturnValueContext,
   VisualEffectStyles,
   ParameterDefinition,
@@ -29,15 +28,6 @@ import {
 } from './types';
 import { ToolRegistry } from './tool-registry';
 import { WebIntractSignalRService } from './signalr.service';
-
-/**
- * Validation result interface
- */
-interface ValidationResult {
-  isValid: boolean;
-  errors: string[];
-  warnings: string[];
-}
 
 /**
  * Default configuration options
@@ -968,7 +958,7 @@ export class WebIntractMCPController {
         this.debugLog('Filling input with value:', action.value);
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           // Use typing animation for visual feedback
-          await this.showTypingEffect(element, String(action.value) || '', effectiveOptions);
+          await this.showTypingEffect(element, String(action.value) || '', effectiveOptions, action.delay);
           element.dispatchEvent(new Event('blur', { bubbles: true }));
           actionResult = createSuccessResult('Input filled successfully', { 
             filled: true, 
@@ -1297,7 +1287,7 @@ export class WebIntractMCPController {
    * Shows typing animation on an input element.
    * @private
    */
-  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: WebIntractMCPOptions): Promise<void> {
+  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: WebIntractMCPOptions, delay: number = 10): Promise<void> {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) {
       element.value = text;
@@ -1316,8 +1306,7 @@ export class WebIntractMCPController {
     for (let i = 0; i <= text.length; i++) {
       element.value = text.substring(0, i);
 
-      // Random typing speed between 50-150ms per character
-      const delay = Math.random() * 100 + 50;
+      delay = delay * (Math.random() * (1.2 - 0.8) + 0.8); // Randomize delay between 80% and 120% of base delay
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 
