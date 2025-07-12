@@ -2,41 +2,181 @@
   // For more information, visit: https://go.microsoft.com/fwlink/?LinkId=733558
   "version": "2.0.0",
   "tasks": [
+    // === Library Tasks (web-intract-mcp) ===
     {
-      "type": "npm",
-      "script": "start",
+      "label": "Build Library",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}/lib/web-intract-mcp"
+      },
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Test Library",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}/lib/web-intract-mcp"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test Library (Watch)",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:watch"],
+      "options": {
+        "cwd": "${workspaceFolder}/lib/web-intract-mcp"
+      },
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Lint Library",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lint"],
+      "options": {
+        "cwd": "${workspaceFolder}/lib/web-intract-mcp"
+      },
+      "group": "build",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    // === Server Tasks (WebIntractMCPServer) ===
+    {
+      "label": "Build Server",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["build"],
+      "options": {
+        "cwd": "${workspaceFolder}/server/WebIntractMCPServer"
+      },
+      "group": "build",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "Start MCP Server",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["run", "--urls=http://localhost:8080/"],
+      "options": {
+        "cwd": "${workspaceFolder}/server/WebIntractMCPServer"
+      },
+      "group": "build",
       "isBackground": true,
       "problemMatcher": {
-        "owner": "typescript",
-        "pattern": "$tsc",
+        "owner": "csharp",
+        "pattern": "$msCompile",
         "background": {
           "activeOnStart": true,
-          "beginsPattern": {
-            "regexp": "(.*?)"
-          },
-          "endsPattern": {
-            "regexp": "bundle generation complete"
-          }
+          "beginsPattern": "^\\s*info: Microsoft\\.AspNetCore\\.Hosting\\.Diagnostics.*",
+          "endsPattern": "^\\s*info: Microsoft\\.Hosting\\.Lifetime.*Application started\\."
         }
       }
     },
     {
-      "type": "npm",
-      "script": "test",
+      "label": "Test Server",
+      "type": "shell",
+      "command": "dotnet",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}/server"
+      },
+      "group": "test",
+      "problemMatcher": ["$msCompile"]
+    },
+    // === Sample App Tasks (angular-dotnetnet-semantic-kernel) ===
+    {
+      "label": "Start Angular Frontend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["start"],
+      "options": {
+        "cwd": "${workspaceFolder}/sample/angular-dotnetnet-semantic-kernel"
+      },
+      "group": "build",
       "isBackground": true,
       "problemMatcher": {
         "owner": "typescript",
         "pattern": "$tsc",
         "background": {
           "activeOnStart": true,
-          "beginsPattern": {
-            "regexp": "(.*?)"
-          },
-          "endsPattern": {
-            "regexp": "bundle generation complete"
-          }
+          "beginsPattern": "^.*Angular CLI.*",
+          "endsPattern": "^.*webpack compiled.*"
         }
       }
+    },
+    {
+      "label": "Start .NET Client Backend",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "start:client"],
+      "options": {
+        "cwd": "${workspaceFolder}/sample/angular-dotnetnet-semantic-kernel"
+      },
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "csharp",
+        "pattern": "$msCompile",
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^\\s*info: Microsoft\\.AspNetCore\\.Hosting\\.Diagnostics.*",
+          "endsPattern": "^\\s*info: Microsoft\\.Hosting\\.Lifetime.*Application started\\."
+        }
+      }
+    },
+    {
+      "label": "Build Sample App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}/sample/angular-dotnetnet-semantic-kernel"
+      },
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "Test Sample App",
+      "type": "shell",
+      "command": "npm",
+      "args": ["test"],
+      "options": {
+        "cwd": "${workspaceFolder}/sample/angular-dotnetnet-semantic-kernel"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    // === Website Tasks ===
+    {
+      "label": "Start Website Dev",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/website"
+      },
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Build Website",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build"],
+      "options": {
+        "cwd": "${workspaceFolder}/website"
+      },
+      "group": "build",
+      "problemMatcher": []
     }
   ]
 }
