@@ -887,7 +887,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           });
           
           console.log('Collected form data:', formData);
-          context.debugLog('Custom function collected form data:', formData);
+          context.logger.debug('Custom function collected form data:', formData);
           
           return createSuccessResult('Form data collected successfully', formData);
         },
@@ -900,7 +900,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           const timestamp = new Date().toISOString();
           
           console.log(`[${timestamp}] ${message}`);
-          context.debugLog('logMessage function called:', message);
+          context.logger.debug('logMessage function called:', message);
           
           return createSuccessResult('Message logged successfully', { 
             message: message,
@@ -926,7 +926,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
           };
           
           console.log('processData function result:', processed);
-          context.debugLog('processData function called with:', { inputData, previousValue });
+          context.logger.debug('processData function called with:', { inputData, previousValue });
           
           // This return value will be used as the step's return value
           return createSuccessResult('Data processed successfully', processed);

@@ -11,6 +11,12 @@ export { WebIntractMCPController } from './controller';
 export { WebIntractSignalRService } from './signalr.service';
 
 // Export types
+export {
+  // Enums (export as values)
+  LogLevel,
+  TransportType
+} from './types';
+
 export type {
   // Core types
   Role,
@@ -51,6 +57,9 @@ export type {
   ReturnValueProvider,
   ReturnValueProviderFunction,
   
+  // Logging types
+  ILogger,
+  
   // Service types
   ConnectionStatus
 } from './types';
@@ -80,15 +89,15 @@ import { WebIntractMCPController } from './controller';
 
 /**
  * Create a new WebIntractMCPController instance with custom options
- * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor
  * @param options - Global configuration options
+ * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor
  * @returns A new WebIntractMCPController instance
  */
 export function createWebIntractMCPController(
-  shepherdOptions?: unknown, 
-  options?: Partial<WebIntractMCPOptions>
+  options?: Partial<WebIntractMCPOptions>, 
+  shepherdOptions?: unknown
 ): WebIntractMCPController {
-  return new WebIntractMCPController(shepherdOptions, options);
+  return new WebIntractMCPController(options, shepherdOptions);
 }
 
 /**

@@ -1,6 +1,6 @@
 /**
- * @fileoverview Web Intract MCP Controller - Main controller for MCP tool execution and management
- * @description Production-ready controller that transforms web applications into MCP servers with robust tool execution
+ * @fileoverview Web Intract MCP Controller - Production-ready controller for MCP tool execution and management
+ * @description Enterprise-grade controller that transforms web applications into MCP servers with robust tool execution
  * @version 1.0.0
  * @author Vijay Nirmal
  */
@@ -24,18 +24,97 @@ import {
   createSuccessResult,
   createErrorResult,
   SuccessfulCallToolResult,
-  CustomFunctionContext
+  CustomFunctionContext,
+  LogLevel,
+  ILogger
 } from './types';
 import { ToolRegistry } from './tool-registry';
 import { WebIntractSignalRService } from './signalr.service';
 
 /**
- * Default configuration options
+ * Production-ready console logger implementation
+ */
+class ConsoleLogger implements ILogger {
+  private currentLevel: LogLevel;
+
+  constructor(level: LogLevel = LogLevel.WARN) {
+    this.currentLevel = level;
+  }
+
+  trace(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.TRACE) {
+      // eslint-disable-next-line no-console
+      console.trace(`[MCP TRACE] ${message}`, ...data);
+    }
+  }
+
+  debug(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.DEBUG) {
+      // eslint-disable-next-line no-console
+      console.debug(`[MCP DEBUG] ${message}`, ...data);
+    }
+  }
+
+  info(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.INFO) {
+      // eslint-disable-next-line no-console
+      console.info(`[MCP INFO] ${message}`, ...data);
+    }
+  }
+
+  warn(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.WARN) {
+      // eslint-disable-next-line no-console
+      console.warn(`[MCP WARN] ${message}`, ...data);
+    }
+  }
+
+  error(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.ERROR) {
+      // eslint-disable-next-line no-console
+      console.error(`[MCP ERROR] ${message}`, ...data);
+    }
+  }
+
+  fatal(message: string, ...data: any[]): void {
+    if (this.currentLevel <= LogLevel.FATAL) {
+      // eslint-disable-next-line no-console
+      console.error(`[MCP FATAL] ${message}`, ...data);
+    }
+  }
+
+  setLevel(level: LogLevel): void {
+    this.currentLevel = level;
+  }
+
+  getLevel(): LogLevel {
+    return this.currentLevel;
+  }
+}
+
+/**
+ * Default Shepherd.js configuration for production use
+ */
+const DEFAULT_SHEPHERD_OPTIONS = {
+  useModalOverlay: true,
+  exitOnEsc: true,
+  keyboardNavigation: true,
+  defaultStepOptions: {
+    classes: 'mcp-shepherd-tooltip',
+    scrollTo: true,
+    cancelIcon: {
+      enabled: true
+    }
+  }
+};
+
+/**
+ * Default configuration options for production use
  */
 const DEFAULT_OPTIONS: WebIntractMCPOptions = {
   serverUrl: 'http://localhost:8080',
   enableVisualFeedback: true,
-  debugMode: false,
+  logLevel: LogLevel.WARN,
   stopOnFailure: false,
   elementTimeout: 5000,
   highlightDuration: 2000,
@@ -46,88 +125,158 @@ const DEFAULT_OPTIONS: WebIntractMCPOptions = {
 };
 
 /**
- * Main controller class for Web Intract MCP
+ * Production-ready controller class for Web Intract MCP
  * Provides comprehensive tool execution, registration, and management capabilities
+ * with enterprise-grade logging, error handling, and monitoring
  */
 export class WebIntractMCPController {
   
-  private registry: ToolRegistry;
+  // Core components
+  private readonly registry: ToolRegistry;
+  private readonly logger: ILogger;
+  
+  // Tour and execution state
   private shepherdTour: Tour | null = null;
   private activeTool: ToolConfiguration | null = null;
   private toolQueue: ToolStartConfig[] = [];
-  private eventListeners: Map<WebIntractMCPEvent, Function[]> = new Map();
   private currentStepIndex: number = 0;
+  
+  // Event handling
+  private readonly eventListeners: Map<WebIntractMCPEvent, Function[]> = new Map();
+  
+  // Configuration and options
   private globalOptions: WebIntractMCPOptions;
-  private customFunctions: Map<string, CustomFunction> = new Map();
-  private returnValueProviders: Map<string, ReturnValueProviderFunction> = new Map();
+  private readonly shepherdOptions: any;
+  
+  // Custom functionality
+  private readonly customFunctions: Map<string, CustomFunction> = new Map();
+  private readonly returnValueProviders: Map<string, ReturnValueProviderFunction> = new Map();
+  
+  // Execution tracking
   private stepReturnValues: CallToolResult[] = [];
+  
+  // Visual feedback
   private customStyles: VisualEffectStyles = {};
-  private styleElementId: string = 'mcp-visual-feedback-styles';
+  private readonly styleElementId: string = 'mcp-visual-feedback-styles';
+  
+  // Communication
   private signalRService: WebIntractSignalRService | null = null;
 
   /**
-   * Creates a new WebIntractMCPController instance
-   * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor
+   * Creates a new production-ready WebIntractMCPController instance
    * @param options - Global configuration options
+   * @param shepherdOptions - Optional Shepherd.js tour configuration (uses production defaults if not provided)
+   * @param logger - Optional custom logger implementation (uses ConsoleLogger if not provided)
    */
-  constructor(private shepherdOptions: any = {}, options: Partial<WebIntractMCPOptions> = {}) {
+  constructor(
+    options: Partial<WebIntractMCPOptions> = {},
+    shepherdOptions: any = {},
+    logger?: ILogger
+  ) {
+    // Initialize core components
     this.registry = new ToolRegistry();
-
-    // Set default options
+    
+    // Set up logging
+    this.logger = logger || new ConsoleLogger(options.logLevel || DEFAULT_OPTIONS.logLevel);
+    
+    // Configure global options
     this.globalOptions = {
       ...DEFAULT_OPTIONS,
       ...options
     };
+    
+    // Update logger level if changed
+    this.logger.setLevel(this.globalOptions.logLevel);
+    
+    // Configure Shepherd options with production defaults
+    this.shepherdOptions = {
+      ...DEFAULT_SHEPHERD_OPTIONS,
+      ...shepherdOptions
+    };
 
-    // Initialize custom styles from options
+    // Initialize visual styles from options
     if (options.visualEffectStyles) {
       this.customStyles = { ...options.visualEffectStyles };
     }
+
+    this.logger.info('WebIntractMCPController initialized', {
+      logLevel: LogLevel[this.globalOptions.logLevel],
+      enableVisualFeedback: this.globalOptions.enableVisualFeedback,
+      serverUrl: this.globalOptions.serverUrl
+    });
 
     this.initializeEventListeners();
     this.injectVisualFeedbackStyles();
   }
 
+  // =============================================================================
+  // PUBLIC API METHODS
+  // =============================================================================
+
   /**
-   * Gets the tool registry instance.
-   * @returns The tool registry.
+   * Gets the tool registry instance for managing tool configurations
+   * @returns The tool registry instance
    */
   getRegistry(): ToolRegistry {
     return this.registry;
   }
 
   /**
-   * Gets the current global options.
-   * @returns The current global options.
+   * Gets the current global configuration options
+   * @returns A copy of the current global options
    */
   getGlobalOptions(): WebIntractMCPOptions {
     return { ...this.globalOptions };
   }
- /**
-   * Updates global options.
-   * @param options - Partial options to update.
+
+  /**
+   * Gets the current logger instance
+   * @returns The logger instance
+   */
+  getLogger(): ILogger {
+    return this.logger;
+  }
+
+  /**
+   * Updates global configuration options
+   * @param options - Partial options to update
    */
   updateGlobalOptions(options: Partial<WebIntractMCPOptions>): void {
+    this.logger.debug('Updating global options', options);
+    
+    const previousOptions = { ...this.globalOptions };
     this.globalOptions = { ...this.globalOptions, ...options };
+    
+    // Update logger level if specified
+    if (options.logLevel !== undefined) {
+      this.logger.setLevel(options.logLevel);
+    }
     
     // Update custom styles if provided
     if (options.visualEffectStyles) {
       this.customStyles = { ...this.customStyles, ...options.visualEffectStyles };
     }
     
+    // Re-inject styles if visual feedback was enabled
     if (options.enableVisualFeedback === true) {
       this.injectVisualFeedbackStyles();
     }
+    
+    this.logger.info('Global options updated', {
+      previous: previousOptions,
+      current: this.globalOptions
+    });
   }
 
   /**
-   * Updates the visual effect styles and regenerates the CSS.
-   * @param styles - Partial visual effect styles to update.
+   * Updates the visual effect styles and regenerates the CSS
+   * @param styles - Partial visual effect styles to update
    */
   updateVisualEffectStyles(styles: Partial<VisualEffectStyles>): void {
+    this.logger.debug('Updating visual effect styles', styles);
     this.customStyles = { ...this.customStyles, ...styles };
     this.injectVisualFeedbackStyles();
-    this.debugLog('Updated visual effect styles:', this.customStyles);
+    this.logger.debug('Visual effect styles updated successfully', this.customStyles);
   }
 
   /**
@@ -139,53 +288,59 @@ export class WebIntractMCPController {
   }
 
   /**
-   * Resets visual effect styles to default values.
+   * Resets visual effect styles to default values
    */
   resetVisualEffectStyles(): void {
+    this.logger.debug('Resetting visual effect styles to defaults');
     this.customStyles = {};
     this.injectVisualFeedbackStyles();
-    this.debugLog('Reset visual effect styles to defaults');
+    this.logger.debug('Visual effect styles reset successfully');
   }
 
   /**
-   * Sets a specific style property for a visual effect.
-   * @param effect - The visual effect to modify.
-   * @param property - The property to set.
-   * @param value - The value to set.
+   * Sets a specific style property for a visual effect
+   * @param effect - The visual effect to modify
+   * @param property - The property to set
+   * @param value - The value to set
    */
   setVisualEffectProperty(effect: keyof VisualEffectStyles, property: string, value: any): void {
+    this.logger.debug(`Setting visual effect property ${effect}.${property}`, value);
     if (!this.customStyles[effect]) {
       this.customStyles[effect] = {};
     }
     (this.customStyles[effect] as any)[property] = value;
     this.injectVisualFeedbackStyles();
-    this.debugLog(`Set ${effect}.${property} to:`, value);
+    this.logger.debug(`Visual effect property ${effect}.${property} set successfully`);
   }
 
   /**
-   * Registers a custom function that can be called from tool steps.
-   * @param customFunction - The custom function configuration.
+   * Registers a custom function that can be called from tool steps
+   * @param customFunction - The custom function configuration
    */
   registerCustomFunction(customFunction: CustomFunction): void {
+    this.logger.info(`Registering custom function: ${customFunction.name}`);
     this.customFunctions.set(customFunction.name, customFunction);
-    this.debugLog(`Registered custom function: ${customFunction.name}`);
+    this.logger.debug('Custom function registered successfully', customFunction);
   }
 
   /**
-   * Registers multiple custom functions.
-   * @param functions - Array of custom function configurations.
+   * Registers multiple custom functions
+   * @param functions - Array of custom function configurations
    */
   registerCustomFunctions(functions: CustomFunction[]): void {
+    this.logger.info(`Registering ${functions.length} custom functions`);
     functions.forEach(func => this.registerCustomFunction(func));
+    this.logger.debug('All custom functions registered successfully');
   }
 
   /**
-   * Unregisters a custom function.
-   * @param functionName - The name of the function to unregister.
+   * Unregisters a custom function
+   * @param functionName - The name of the function to unregister
    */
   unregisterCustomFunction(functionName: string): void {
+    const existed = this.customFunctions.has(functionName);
     this.customFunctions.delete(functionName);
-    this.debugLog(`Unregistered custom function: ${functionName}`);
+    this.logger.info(`Custom function ${existed ? 'unregistered' : 'not found'}: ${functionName}`);
   }
 
   /**
@@ -204,29 +359,33 @@ export class WebIntractMCPController {
   }
 
   /**
-   * Registers a return value provider function that can be called from tool steps.
-   * @param provider - The return value provider configuration.
+   * Registers a return value provider function that can be called from tool steps
+   * @param provider - The return value provider configuration
    */
   registerReturnValueProvider(provider: ReturnValueProviderFunction): void {
+    this.logger.info(`Registering return value provider: ${provider.name}`);
     this.returnValueProviders.set(provider.name, provider);
-    this.debugLog(`Registered return value provider: ${provider.name}`);
+    this.logger.debug('Return value provider registered successfully', provider);
   }
 
   /**
-   * Registers multiple return value provider functions.
-   * @param providers - Array of return value provider configurations.
+   * Registers multiple return value provider functions
+   * @param providers - Array of return value provider configurations
    */
   registerReturnValueProviders(providers: ReturnValueProviderFunction[]): void {
+    this.logger.info(`Registering ${providers.length} return value providers`);
     providers.forEach(provider => this.registerReturnValueProvider(provider));
+    this.logger.debug('All return value providers registered successfully');
   }
 
   /**
-   * Unregisters a return value provider function.
-   * @param providerName - The name of the provider to unregister.
+   * Unregisters a return value provider function
+   * @param providerName - The name of the provider to unregister
    */
   unregisterReturnValueProvider(providerName: string): void {
+    const existed = this.returnValueProviders.has(providerName);
     this.returnValueProviders.delete(providerName);
-    this.debugLog(`Unregistered return value provider: ${providerName}`);
+    this.logger.info(`Return value provider ${existed ? 'unregistered' : 'not found'}: ${providerName}`);
   }
 
   /**
@@ -246,27 +405,18 @@ export class WebIntractMCPController {
     return new Map(this.returnValueProviders);
   }
 
+  // =============================================================================
+  // PRIVATE UTILITY METHODS
+  // =============================================================================
 
   /**
-   * Gets the effective options for a tool (merges global and tool-specific options).
+   * Gets the effective options for a tool (merges global and tool-specific options)
    * @private
-   * @param tool - The tool configuration.
-   * @returns The effective options for the tool.
+   * @param tool - The tool configuration
+   * @returns The effective options for the tool
    */
   private getEffectiveOptions(tool: ToolConfiguration): WebIntractMCPOptions {
     return { ...this.globalOptions, ...tool.options };
-  }
-
-  /**
-   * Logs a debug message if debug mode is enabled.
-   * @private
-   * @param message - The message to log.
-   * @param data - Optional data to log.
-   */
-  private debugLog(message: string, ...data: any[]): void {
-    if (this.globalOptions.debugMode) {
-      console.log(`[MCP Debug] ${message}`, ...data);
-    }
   }
 
   /**
@@ -276,7 +426,7 @@ export class WebIntractMCPController {
    */
   async start(toolsToStart: ToolStartConfig[]): Promise<CallToolResult[]> {
     if (!Array.isArray(toolsToStart) || toolsToStart.length === 0) {
-      console.warn('No tools provided to start');
+      this.logger.warn('No tools provided to start');
       return [];
     }
 
@@ -285,7 +435,7 @@ export class WebIntractMCPController {
       const validation = this.validateToolParameters(toolConfig.toolId, toolConfig.params || {});
       if (!validation.isValid) {
         const errorMsg = `Parameter validation failed for tool '${toolConfig.toolId}': ${validation.errors.join(', ')}`;
-        console.error(errorMsg);
+        this.logger.error(errorMsg);
         this.emit('cancel', { 
           tool: this.registry.getToolById(toolConfig.toolId), 
           error: errorMsg,
@@ -294,7 +444,7 @@ export class WebIntractMCPController {
         return [createErrorResult(errorMsg)];
       }
       if (validation.warnings.length > 0) {
-        console.warn(`Parameter validation warnings for tool '${toolConfig.toolId}':`, validation.warnings);
+        this.logger.warn(`Parameter validation warnings for tool '${toolConfig.toolId}':`, validation.warnings);
       }
 
       // Apply default values to parameters
@@ -307,7 +457,7 @@ export class WebIntractMCPController {
     // Queue the tools
     this.toolQueue = [...toolsToStart];
 
-    this.debugLog('Starting tool sequence', toolsToStart.map(t => t.toolId));
+    this.logger.debug('Starting tool sequence', toolsToStart.map(t => t.toolId));
 
     const results: CallToolResult[] = [];
     while (this.toolQueue.length > 0) {
@@ -392,7 +542,7 @@ export class WebIntractMCPController {
       try {
         handler(data);
       } catch (error) {
-        console.error(`Error in event handler for ${eventName}:`, error);
+        this.logger.error(`Error in event handler for ${eventName}:`, error);
       }
     });
   }
@@ -418,11 +568,11 @@ export class WebIntractMCPController {
    * @returns Promise that resolves with the tool execution result.
    */
   private async executeTool(toolId: string, params: Record<string, any> = {}): Promise<CallToolResult> {
-    this.debugLog(`Looking for tool: ${toolId}`);
+    this.logger.debug(`Looking for tool: ${toolId}`);
     const tool = this.registry.getToolById(toolId);
     if (!tool) {
-      console.error(`Tool with ID '${toolId}' not found`);
-      this.debugLog('Available tools:', Array.from(this.registry.getAllTools().keys()));
+      this.logger.error(`Tool with ID '${toolId}' not found`);
+      this.logger.debug('Available tools:', Array.from(this.registry.getAllTools().keys()));
       const error = new Error(`Tool with ID '${toolId}' not found`);
       return createErrorResult(error);
     }
@@ -431,7 +581,7 @@ export class WebIntractMCPController {
     this.currentStepIndex = 0;
     this.stepReturnValues = []; // Reset step return values for new tool
 
-    this.debugLog(`Starting tool: ${tool.title} (${tool.mode} mode)`, { params });
+    this.logger.debug(`Starting tool: ${tool.title} (${tool.mode} mode)`, { params });
     this.emit('start', { tool, params });
 
     try {
@@ -446,15 +596,16 @@ export class WebIntractMCPController {
         case 'silent':
           result = await this.executeSilentMode(tool, params);
           break;
-        default:
+        default: {
           const error = new Error(`Unknown tool mode: ${tool.mode}`);
-          console.error(error.message);
+          this.logger.error(error.message);
           this.emit('cancel', { tool, error });
           return createErrorResult(error);
+        }
       }
       return result;
     } catch (error) {
-      console.error('Error executing tool:', error);
+      this.logger.error('Error executing tool:', error);
       this.emit('cancel', { tool, error });
       return createErrorResult(error instanceof Error ? error : new Error(String(error)));
     }
@@ -525,20 +676,20 @@ export class WebIntractMCPController {
         try {
           const currentStep = this.shepherdTour!.getCurrentStep();
           if (!currentStep || !currentStep.id) {
-            console.warn('No current step found for buttonless mode');
+            this.logger.warn('No current step found for buttonless mode');
             return;
           }
 
           // Extract index from step ID (format: "step-0", "step-1", etc.)
           const stepIndexMatch = currentStep.id.match(/step-(\d+)/);
           if (!stepIndexMatch) {
-            console.warn('Could not parse step index from ID:', currentStep.id);
+            this.logger.warn('Could not parse step index from ID:', currentStep.id);
             return;
           }
 
-          var stepId = stepIndexMatch[1];
+          const stepId = stepIndexMatch[1];
           if (!stepId) {
-            console.warn('No step ID found for buttonless mode');
+            this.logger.warn('No step ID found for buttonless mode');
             return; 
           }
 
@@ -546,7 +697,7 @@ export class WebIntractMCPController {
           const step = steps[stepIndex];
 
           if (!step) {
-            console.warn('Step not found at index:', stepIndex);
+            this.logger.warn('Step not found at index:', stepIndex);
             return;
           }
 
@@ -566,7 +717,7 @@ export class WebIntractMCPController {
             }
           }, delay);
         } catch (error) {
-          console.error('Error in buttonless mode auto-advance:', error);
+          this.logger.error('Error in buttonless mode auto-advance:', error);
         }
       });
 
@@ -582,33 +733,33 @@ export class WebIntractMCPController {
     const steps = this.prepareSteps(tool, params);
     const effectiveOptions = this.getEffectiveOptions(tool);
 
-    this.debugLog('Executing silent mode tool:', tool.title, 'with', steps.length, 'steps');
+    this.logger.debug('Executing silent mode tool:', tool.title, 'with', steps.length, 'steps');
 
     try {
       for (let i = 0; i < steps.length; i++) {
         const step = steps[i];
 
         if (!step) {
-            console.warn(`Step ${i + 1} is undefined, skipping...`);
+            this.logger.warn(`Step ${i + 1} is undefined, skipping...`);
             continue;
         }
 
         this.currentStepIndex = i;
 
-        this.debugLog(`Executing step ${i + 1}/${steps.length}:`, step);
+        this.logger.debug(`Executing step ${i + 1}/${steps.length}:`, step);
         this.emit('step:show', { step, index: i, tool });
 
         let stepResult: CallToolResult;
         let actionResult: CallToolResult | undefined = undefined;
 
         if (step.action) {
-          this.debugLog('Performing action for step', i + 1);
+          this.logger.debug('Performing action for step', i + 1);
           try {
             actionResult = await this.performAction(step.action, step.targetElement, params);
             stepResult = actionResult; // performAction now returns CallToolResult directly
           } catch (stepError) {
             const errorMessage = stepError instanceof Error ? stepError.message : String(stepError);
-            console.error(`Error in step ${i + 1}:`, stepError);
+            this.logger.error(`Error in step ${i + 1}:`, stepError);
             stepResult = createErrorResult(stepError instanceof Error ? stepError : new Error(errorMessage));
 
             // Check if we should stop on failure (step-level or tool-level)
@@ -617,10 +768,10 @@ export class WebIntractMCPController {
               throw new Error(`Step ${i + 1} failed and stopOnFailure is enabled: ${errorMessage}`);
             }
             // Continue with next step if stopOnFailure is false
-            this.debugLog(`Step ${i + 1} failed but continuing due to stopOnFailure=false`);
+            this.logger.debug(`Step ${i + 1} failed but continuing due to stopOnFailure=false`);
           }
         } else {
-          this.debugLog('No action defined for step', i + 1);
+          this.logger.debug('No action defined for step', i + 1);
           stepResult = createSuccessResult(`Step ${i + 1} completed (no action)`, { skipped: true });
         }
 
@@ -628,21 +779,21 @@ export class WebIntractMCPController {
         const stepReturnValue = await this.calculateStepReturnValue(step, params, i, actionResult, stepResult);
         this.stepReturnValues.push(stepReturnValue);
 
-        this.debugLog(`Step ${i + 1} completed with return value:`, stepReturnValue);
+        this.logger.debug(`Step ${i + 1} completed with return value:`, stepReturnValue);
 
         // Delay between actions to ensure DOM updates (configurable)
         const actionDelay = step.action?.delay || effectiveOptions.actionDelay;
         await new Promise(resolve => setTimeout(resolve, actionDelay));
       }
 
-      this.debugLog('Silent mode tool completed successfully');
+      this.logger.debug('Silent mode tool completed successfully');
       
       const toolResult = await this.calculateToolReturnValue(tool, params, steps.length, true);
       
       this.emit('complete', { tool, result: toolResult });
       return toolResult;
     } catch (error) {
-      console.error('Error executing silent mode tool:', error);
+      this.logger.error('Error executing silent mode tool:', error);
       
       const toolResult = await this.calculateToolReturnValue(tool, params, this.currentStepIndex + 1, false, error instanceof Error ? error : new Error(String(error)));
       
@@ -700,7 +851,7 @@ export class WebIntractMCPController {
 
       const targetElement = await this.waitForElement(step.targetElement);
       if (!targetElement) {
-        console.warn(`Target element not found for return value calculation: ${step.targetElement}`);
+        this.logger.warn(`Target element not found for return value calculation: ${step.targetElement}`);
         return createErrorResult(`Target element not found for return value calculation: ${step.targetElement}`);
       }
 
@@ -709,7 +860,7 @@ export class WebIntractMCPController {
         stepParams: returnValueConfig.providerParams || {},
         toolParams,
         controller: this,
-        debugLog: this.debugLog.bind(this),
+        logger: this.logger,
         activeTool: this.activeTool,
         currentStepIndex: stepIndex,
         previousStepReturnValue: stepIndex > 0 ? this.stepReturnValues[stepIndex - 1] : undefined,
@@ -719,7 +870,7 @@ export class WebIntractMCPController {
       try {
         return await provider(context);
       } catch (error) {
-        console.error('Error executing return value provider:', error);
+        this.logger.error('Error executing return value provider:', error);
         return createErrorResult(error instanceof Error ? error : new Error(String(error)));
       }
     }
@@ -764,7 +915,7 @@ export class WebIntractMCPController {
                       undefined);
 
       if (!provider) {
-        console.warn(`Tool return value provider not found: ${returnValueConfig.providerName}`);
+        this.logger.warn(`Tool return value provider not found: ${returnValueConfig.providerName}`);
         // Fallback to last step's return value
         return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
       }
@@ -772,7 +923,7 @@ export class WebIntractMCPController {
       const context: ReturnValueContext = {
         toolParams,
         controller: this,
-        debugLog: this.debugLog.bind(this),
+        logger: this.logger,
         activeTool: tool,
         stepsExecuted,
         lastStepReturnValue: this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1] : SuccessfulCallToolResult,
@@ -782,10 +933,10 @@ export class WebIntractMCPController {
 
       try {
         const result = await provider(context);
-        this.debugLog('Tool return value provider result:', result);
+        this.logger.debug('Tool return value provider result:', result);
         return result; // Provider should return CallToolResult directly
       } catch (error) {
-        console.error('Error executing tool return value provider:', error);
+        this.logger.error('Error executing tool return value provider:', error);
         // Fallback to last step's return value
         return this.stepReturnValues.length > 0 ? this.stepReturnValues[this.stepReturnValues.length - 1]! : SuccessfulCallToolResult;
       }
@@ -899,7 +1050,7 @@ export class WebIntractMCPController {
 
     this.shepherdTour.on('cancel', async () => {
       // Calculate tool-level return value even on cancel
-      const toolReturnValue = await this.calculateToolReturnValue(
+      await this.calculateToolReturnValue(
         this.activeTool!, 
         {}, // Tool params not available in Shepherd context
         this.stepReturnValues.length, 
@@ -925,7 +1076,7 @@ export class WebIntractMCPController {
   private async performAction(action: ToolAction, targetElement: string, params: Record<string, any>): Promise<CallToolResult> {
     const effectiveOptions = this.activeTool ? this.getEffectiveOptions(this.activeTool) : this.globalOptions;
 
-    this.debugLog('Performing action:', action.type, 'on element:', targetElement);
+    this.logger.debug('Performing action:', action.type, 'on element:', targetElement);
 
     // Wait for element to be available
     const element = await this.waitForElement(targetElement, effectiveOptions.elementTimeout);
@@ -933,7 +1084,7 @@ export class WebIntractMCPController {
       throw new Error(`Element not found: ${targetElement}`);
     }
 
-    this.debugLog('Element found:', element);
+    this.logger.debug('Element found:', element);
 
     // Highlight the target element before performing action
     this.highlightElement(element, effectiveOptions.highlightDuration, effectiveOptions);
@@ -942,7 +1093,7 @@ export class WebIntractMCPController {
 
     switch (action.type) {
       case 'click':
-        this.debugLog('Clicking element...');
+        this.logger.debug('Clicking element...');
         // Show visual click effect before actual click
         this.showClickEffect(element, effectiveOptions);
         // Small delay to let visual effect show
@@ -955,10 +1106,10 @@ export class WebIntractMCPController {
         break;
 
       case 'fillInput':
-        this.debugLog('Filling input with value:', action.value);
+        this.logger.debug('Filling input with value:', action.value);
         if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
           // Use typing animation for visual feedback
-          await this.showTypingEffect(element, String(action.value) || '', effectiveOptions, action.delay);
+          await this.showTypingEffect(element, String(action.value) || '', effectiveOptions);
           element.dispatchEvent(new Event('blur', { bubbles: true }));
           actionResult = createSuccessResult('Input filled successfully', { 
             filled: true, 
@@ -966,13 +1117,13 @@ export class WebIntractMCPController {
             element: targetElement 
           });
         } else {
-          console.error('Element is not an input or textarea:', element);
+          this.logger.error('Element is not an input or textarea:', element);
           throw new Error(`Element ${targetElement} is not an input or textarea`);
         }
         break;
 
       case 'selectOption':
-        this.debugLog('Selecting option with value:', action.value);
+        this.logger.debug('Selecting option with value:', action.value);
         if (element instanceof HTMLSelectElement) {
           // Show focus effect before selection
           this.showFocusEffect(element, effectiveOptions.focusEffectDuration, effectiveOptions);
@@ -987,13 +1138,13 @@ export class WebIntractMCPController {
             element: targetElement 
           });
         } else {
-          console.error('Element is not a select:', element);
+          this.logger.error('Element is not a select:', element);
           throw new Error(`Element ${targetElement} is not a select element`);
         }
         break;
 
       case 'navigate':
-        this.debugLog('Navigating to:', action.value);
+        this.logger.debug('Navigating to:', action.value);
         // Show click effect if element is clickable (like a link)
         this.showClickEffect(element, effectiveOptions);
         await new Promise(resolve => setTimeout(resolve, 500));
@@ -1005,7 +1156,7 @@ export class WebIntractMCPController {
         break;
 
       case 'executeFunction':
-        this.debugLog('Executing custom function:', action.functionName || 'inline function');
+        this.logger.debug('Executing custom function:', action.functionName || 'inline function');
         actionResult = await this.executeCustomFunction(action, element, params);
         break;
 
@@ -1033,7 +1184,7 @@ export class WebIntractMCPController {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
-    console.error(`Element not found after ${timeout}ms:`, selector);
+    this.logger.error(`Element not found after ${timeout}ms:`, selector);
     return null;
   }
   /**
@@ -1047,14 +1198,14 @@ export class WebIntractMCPController {
     // Check if function is provided directly
     if (action.function) {
       functionToExecute = action.function as CustomFunctionImplementation;
-      this.debugLog('Using inline function');
+      this.logger.debug('Using inline function');
     } 
     // Check if function name is provided and exists in registry
     else if (action.functionName) {
       const customFunction = this.customFunctions.get(action.functionName);
       if (customFunction) {
         functionToExecute = customFunction.implementation;
-        this.debugLog(`Using registered function: ${action.functionName}`);
+        this.logger.debug(`Using registered function: ${action.functionName}`);
       } else {
         const errorMsg = `Custom function '${action.functionName}' not found in registry`;
         return createErrorResult(errorMsg);
@@ -1075,7 +1226,7 @@ export class WebIntractMCPController {
         params: action.functionParams || {},
         toolParams: toolParams,
         controller: this,
-        debugLog: this.debugLog.bind(this),
+        logger: this.logger,
         activeTool: this.activeTool,
         currentStepIndex: this.currentStepIndex,
         previousStepReturnValue: this.currentStepIndex > 0 ? this.stepReturnValues[this.currentStepIndex - 1] : undefined
@@ -1084,11 +1235,11 @@ export class WebIntractMCPController {
       // Execute the function with context
       const result = await Promise.resolve(functionToExecute.call(context, context));
       
-      this.debugLog('Custom function executed successfully:', result);
+      this.logger.debug('Custom function executed successfully:', result);
       return result; // Function should return CallToolResult directly
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.debugLog('Error executing custom function:', errorMessage);
+      this.logger.debug('Error executing custom function:', errorMessage);
       return createErrorResult(`Custom function execution failed: ${errorMessage}`);
     }
   }
@@ -1244,7 +1395,7 @@ export class WebIntractMCPController {
     `;
     document.head.appendChild(style);
 
-    this.debugLog('Injected visual feedback styles with custom configuration');
+    this.logger.debug('Injected visual feedback styles with custom configuration');
   }  /**
    * Shows a click visual effect on an element.
    * @private
@@ -1454,7 +1605,7 @@ export class WebIntractMCPController {
     }
 
     this.updateVisualEffectStyles(themeStyles);
-    this.debugLog(`Applied ${theme} theme to visual effects`);
+    this.logger.debug(`Applied ${theme} theme to visual effects`);
   }
 
   /**
@@ -1501,7 +1652,7 @@ export class WebIntractMCPController {
 
     if (!tool.parameterSchema) {
       // No schema defined, assume all parameters are valid
-      this.debugLog(`Tool '${toolId}' has no parameter schema defined`);
+      this.logger.debug(`Tool '${toolId}' has no parameter schema defined`);
       return result;
     }
 
@@ -1548,7 +1699,7 @@ export class WebIntractMCPController {
       }
     }
 
-    this.debugLog(`Parameter validation for tool '${toolId}':`, result);
+    this.logger.debug(`Parameter validation for tool '${toolId}':`, result);
     return result;
   }
 
@@ -1689,7 +1840,7 @@ export class WebIntractMCPController {
     for (const [paramName, paramDef] of Object.entries(schema.parameters)) {
       if (!(paramName in result) && paramDef.defaultValue !== undefined) {
         result[paramName] = paramDef.defaultValue;
-        this.debugLog(`Applied default value for parameter '${paramName}':`, paramDef.defaultValue);
+        this.logger.debug(`Applied default value for parameter '${paramName}':`, paramDef.defaultValue);
       }
     }
 
@@ -1731,11 +1882,11 @@ export class WebIntractMCPController {
         throw new Error('Failed to get SignalR connection ID');
       }
       
-      this.debugLog('Session created successfully', { sessionId });
+      this.logger.debug('Session created successfully', { sessionId });
       
       return sessionId;
     } catch (error) {
-      this.debugLog('Error creating session', error);
+      this.logger.debug('Error creating session', error);
       throw error;
     }
   }
@@ -1747,7 +1898,7 @@ export class WebIntractMCPController {
     if (this.signalRService) {
       await this.signalRService.stop();
       this.signalRService = null;
-      this.debugLog('Session closed successfully');
+      this.logger.debug('Session closed successfully');
     }
   }
 
@@ -1776,6 +1927,99 @@ export class WebIntractMCPController {
       isConnected: this.signalRService?.isConnected || false,
       connectionState: this.signalRService?.connectionState?.toString() || null,
       sessionId: this.getCurrentSessionId()
+    };
+  }
+
+  /**
+   * Performs cleanup operations for graceful shutdown
+   * @returns Promise that resolves when cleanup is complete
+   */
+  async dispose(): Promise<void> {
+    this.logger.info('Starting controller disposal...');
+
+    try {
+      // Stop any active tools
+      this.stop();
+
+      // Close SignalR connection
+      if (this.signalRService) {
+        await this.closeSession();
+      }
+
+      // Clear all event listeners
+      this.eventListeners.clear();
+
+      // Clear custom functions and providers
+      this.customFunctions.clear();
+      this.returnValueProviders.clear();
+
+      // Remove visual feedback styles
+      const styleElement = document.getElementById(this.styleElementId);
+      if (styleElement) {
+        styleElement.remove();
+      }
+
+      // Clear step return values
+      this.stepReturnValues = [];
+
+      this.logger.info('Controller disposal completed successfully');
+    } catch (error) {
+      this.logger.error('Error during controller disposal:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Gets comprehensive statistics about the controller state
+   * @returns Controller statistics
+   */
+  getStatistics(): {
+    tools: {
+      total: number;
+      withParameterSchemas: number;
+      byMode: Record<string, number>;
+    };
+    customFunctions: number;
+    returnValueProviders: number;
+    eventListeners: Record<string, number>;
+    execution: {
+      currentlyActive: boolean;
+      activeTool: string | null;
+      queuedTools: number;
+      lastExecutionResults: number;
+    };
+  } {
+    const tools = this.registry.getAllTools();
+    const toolsByMode: Record<string, number> = {};
+    let toolsWithSchemas = 0;
+
+    for (const tool of tools.values()) {
+      toolsByMode[tool.mode] = (toolsByMode[tool.mode] || 0) + 1;
+      if (tool.parameterSchema) {
+        toolsWithSchemas++;
+      }
+    }
+
+    const eventListenerCounts: Record<string, number> = {};
+    for (const [event, handlers] of this.eventListeners) {
+      eventListenerCounts[event] = handlers.length;
+    }
+
+    return {
+      tools: {
+        total: tools.size,
+        withParameterSchemas: toolsWithSchemas,
+        byMode: toolsByMode
+      },
+      customFunctions: this.customFunctions.size,
+      returnValueProviders: this.returnValueProviders.size,
+      eventListeners: eventListenerCounts,
+      execution: {
+        currentlyActive: this.activeTool !== null,
+        activeTool: this.activeTool?.toolId || null,
+        queuedTools: this.toolQueue.length,
+        lastExecutionResults: this.stepReturnValues.length
+      }
     };
   }
 }

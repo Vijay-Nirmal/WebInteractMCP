@@ -6,6 +6,45 @@
  */
 
 /**
+ * Log levels for the logging system
+ */
+export enum LogLevel {
+  TRACE = 0,
+  DEBUG = 1,
+  INFO = 2,
+  WARN = 3,
+  ERROR = 4,
+  FATAL = 5,
+  OFF = 6
+}
+
+/**
+ * Transport types for SignalR connection
+ */
+export enum TransportType {
+  /** Specifies the WebSockets transport. */
+  WebSockets = 1,
+  /** Specifies the Server-Sent Events transport. */
+  ServerSentEvents = 2,
+  /** Specifies the Long Polling transport. */
+  LongPolling = 4
+}
+
+/**
+ * Logger interface for dependency injection and testing
+ */
+export interface ILogger {
+  trace(message: string, ...data: any[]): void;
+  debug(message: string, ...data: any[]): void;
+  info(message: string, ...data: any[]): void;
+  warn(message: string, ...data: any[]): void;
+  error(message: string, ...data: any[]): void;
+  fatal(message: string, ...data: any[]): void;
+  setLevel(level: LogLevel): void;
+  getLevel(): LogLevel;
+}
+
+/**
  * Role types for MCP annotations
  */
 export type Role = 'user' | 'assistant';
@@ -301,8 +340,8 @@ export interface CustomFunctionContext {
   toolParams: Record<string, unknown>;
   /** Reference to the MCPElementsController instance */
   controller: MCPElementsController;
-  /** Debug logging function */
-  debugLog: (message: string, ...data: unknown[]) => void;
+  /** Logger instance for comprehensive logging */
+  logger: ILogger;
   /** Currently active tool configuration */
   activeTool: ToolConfiguration | null;
   /** Current step index in the tool execution */
@@ -346,8 +385,8 @@ export interface ReturnValueContext {
   toolParams: Record<string, unknown>;
   /** Reference to the MCPElementsController instance */
   controller: MCPElementsController;
-  /** Debug logging function */
-  debugLog: (message: string, ...data: unknown[]) => void;
+  /** Logger instance for comprehensive logging */
+  logger: ILogger;
   /** Currently active tool configuration */
   activeTool: ToolConfiguration | null;
   
@@ -458,8 +497,8 @@ export interface WebIntractMCPOptions {
   serverUrl: string;
   /** Whether to show visual feedback for automated actions (default: true) */
   enableVisualFeedback: boolean;
-  /** Whether to enable debug mode logging (default: false) */
-  debugMode: boolean;
+  /** Log level for the application (default: LogLevel.WARN) */
+  logLevel: LogLevel;
   /** Whether to stop execution if a step fails (default: false) */
   stopOnFailure: boolean;
   /** Timeout in milliseconds for waiting for elements (default: 5000) */
@@ -493,10 +532,10 @@ export interface TransportOptions {
   baseRetryDelayMs: number;
   /** Whether to enable detailed logging (default: false) */
   enableLogging: boolean;
-  /** SignalR log level (default: Information) */
-  logLevel: signalR.LogLevel;
-  /** Allowed transport types */
-  transportTypes: signalR.HttpTransportType;
+  /** SignalR log level (default: LogLevel.INFO) */
+  logLevel: LogLevel;
+  /** Allowed transport types (default: WebSockets | ServerSentEvents | LongPolling) */
+  transportTypes: TransportType;
 }
 
 /**
