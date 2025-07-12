@@ -29,6 +29,33 @@ WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly inte
 2. **WebIntractMCPServer changes** → Test web-intract-mcp + Sample app  
 3. **Sample app changes** → Test end-to-end MCP communication
 
+## Documentation Update Requirements
+
+**ALWAYS update `website/content/docs/` when making changes that affect:**
+
+- API signatures, parameters, or return types
+- Configuration options or setup procedures
+- Installation or deployment steps
+- Breaking changes or deprecated features
+- New features or tools
+- Error handling or troubleshooting
+
+**Guidelines:**
+1. **Update First**: Always prefer updating existing documentation over creating new sections
+2. **Create New**: Only create new sections when information cannot logically fit in existing content
+3. **Be Concise**: Keep documentation straight to the point - users prefer brevity
+4. **Use Tables**: Prefer markdown tables for structured data (APIs, configurations, comparisons)
+5. **Validate Examples**: Ensure all code examples work with current versions
+
+**Update Priority:**
+
+| Priority | Location | When to Update |
+|----------|----------|----------------|
+| 1 | Existing relevant section | API changes, configuration updates |
+| 2 | Related section expansion | New parameters, options, features |
+| 3 | New subsection in existing page | Closely related new functionality |
+| 4 | New page | Completely new component or major feature |
+
 ## Development Standards
 
 ### Angular 20+
@@ -131,7 +158,7 @@ sample/angular-dotnetnet-semantic-kernel/src/
 ## Code Review Checklist
 - [ ] Type safety across components
 - [ ] Integration tests pass
-- [ ] Documentation updated
+- [ ] Documentation updated in `website/content/docs/`
 - [ ] Error handling implemented
 - [ ] Performance considered
 - [ ] Security reviewed
