@@ -7,6 +7,7 @@
 
 import * as signalR from '@microsoft/signalr';
 import { ToolStartConfig, CallToolResult, createErrorResult, TransportOptions, TransportType, LogLevel } from './types';
+import { ToolRegistry } from './tool-registry';
 
 /**
  * Forward declaration to avoid circular dependency
@@ -73,9 +74,17 @@ export class WebIntractSignalRService {
 
   /**
    * Creates a new WebIntractSignalRService instance
+   * @param serverUrl - The base URL of the MCP server
+   * @param mcpController - The MCP controller instance
+   * @param toolRegistry - The tool registry instance for tool discovery
    * @param config - Configuration options for the service
    */
-  constructor(private serverUrl: string, private mcpController: WebIntractMCPController, config: Partial<TransportOptions> = {}) {
+  constructor(
+    private serverUrl: string, 
+    private mcpController: WebIntractMCPController,
+    private toolRegistry: ToolRegistry,
+    config: Partial<TransportOptions> = {}
+  ) {
     this.config = {
       hubPath: '/mcptools',
       maxRetryAttempts: 10,
@@ -230,6 +239,20 @@ export class WebIntractSignalRService {
       } catch (error) {
         this.logger.error('Error executing tool:', error);
         return createErrorResult(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+
+    // Listen for tool discovery requests from the server
+    this.connection.on('GetTools', (): string => {
+      this.logger.log('Received tools discovery request from server');
+      
+      try {
+        const toolsJson = this.toolRegistry.getToolsAsJson();
+        this.logger.log(`Returning ${JSON.parse(toolsJson).length} tools to server`);
+        return toolsJson;
+      } catch (error) {
+        this.logger.error('Error getting tools for discovery:', error);
+        return '[]';
       }
     });
 

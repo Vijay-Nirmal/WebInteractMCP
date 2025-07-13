@@ -143,6 +143,17 @@ Returns all registered tools.
 const allTools = controller.getTools();
 ```
 
+#### `getToolsAsJson(): string`
+
+Returns all registered tools as a pre-cached JSON string. This method is optimized for SignalR communication and caches the JSON representation for better performance.
+
+```typescript
+const toolsJson = controller.getToolsAsJson();
+// Returns: '{"tools":[{"name":"click-button","description":"..."}]}'
+```
+
+> **Performance Note**: The JSON is cached and only regenerated when tools are modified, making this method ideal for frequent API calls.
+
 #### `invokeTool(toolCall: ToolCall): Promise<ToolResult>`
 
 Invokes a tool with the specified parameters.

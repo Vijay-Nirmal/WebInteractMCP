@@ -77,7 +77,7 @@ export type { ToolSummary } from './tool-registry';
 
 // Export SignalR service interfaces
 export type { 
-  WebIntractMCPController as IWebIntractMCPController,
+  WebIntractMCPController as IWebIntractMCPController
 } from './signalr.service';
 
 // Import types for function signatures

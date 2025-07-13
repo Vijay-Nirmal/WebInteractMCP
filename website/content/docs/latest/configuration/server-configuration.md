@@ -15,58 +15,30 @@ The server uses the `McpIntract` section in `appsettings.json` for all configura
 ```json
 {
   "McpIntract": {
-    "Client": { /* Client configuration */ },
+    "Client": { /* Reserved for future client-specific settings */ },
     "Tool": { /* Tool execution configuration */ },
     "Cors": { /* CORS configuration */ }
   }
 }
 ```
 
+> **Note**: As of version 1.0, the server uses **SignalR for tool discovery** instead of HTTP requests. The `Client` section is reserved for future extensions but currently unused.
+
+## Architecture Overview
+
+WebIntract MCP Server uses **SignalR for real-time tool discovery and execution**:
+
+1. **Tool Discovery**: Client sends tools via SignalR `GetTools` method
+2. **Tool Execution**: Server invokes tools through SignalR `InvokeTool` method  
+3. **Session Management**: Each SignalR connection represents a unique session
+
+This eliminates the need for HTTP-based tool discovery and provides better performance and real-time capabilities.
+
 ## Client Configuration
 
-Configuration for client web application communication.
+**Important**: The `Client` configuration section is **reserved for future use**. Tool discovery is now handled through SignalR connections.
 
-| Setting | Environment Variable | Default | Type | Range/Options | Description |
-|---------|---------------------|---------|------|---------------|-------------|
-| `BaseUrl` | `McpIntract__Client__BaseUrl` | `http://localhost:4200` | string | Valid URL | The base URL of the client application |
-| `ToolsEndpoint` | `McpIntract__Client__ToolsEndpoint` | `/mcp-tools.json` | string | Valid path | The endpoint path for fetching tools from the client |
-| `TimeoutSeconds` | `McpIntract__Client__TimeoutSeconds` | `30` | integer | 1-300 | HTTP client timeout in seconds |
-| `CacheTools` | `McpIntract__Client__CacheTools` | `true` | boolean | true/false | Whether to cache tools from the client |
-| `CacheDurationMinutes` | `McpIntract__Client__CacheDurationMinutes` | `30` | integer | 1-1440 | Tool cache duration in minutes |
-
-### Client Configuration Examples
-
-**Development Configuration:**
-```json
-{
-  "McpIntract": {
-    "Client": {
-      "BaseUrl": "http://localhost:4200",
-      "ToolsEndpoint": "/mcp-tools.json",
-      "TimeoutSeconds": 30,
-      "CacheTools": true,
-      "CacheDurationMinutes": 5
-    }
-  }
-}
-```
-
-**Production Configuration:**
-```json
-{
-  "McpIntract": {
-    "Client": {
-      "BaseUrl": "https://myapp.example.com",
-      "ToolsEndpoint": "/api/mcp-tools",
-      "TimeoutSeconds": 60,
-      "CacheTools": true,
-      "CacheDurationMinutes": 60
-    }
-  }
-}
-```
-
-> **Important**: In production, always use HTTPS URLs for the `BaseUrl` to ensure secure communication.
+> **Migration Note**: If you're upgrading from a previous version that used HTTP-based tool discovery, you can safely remove all `Client` configuration properties.
 
 ## Tool Configuration
 
@@ -74,8 +46,10 @@ Configuration for tool execution behavior and error handling.
 
 | Setting | Environment Variable | Default | Type | Range/Options | Description |
 |---------|---------------------|---------|------|---------------|-------------|
-| `TimeoutMinutes` | `McpIntract__Tool__TimeoutMinutes` | `5` | integer | 1-60 | Tool execution timeout in minutes |
+| `TimeoutMinutes` | `McpIntract__Tool__TimeoutMinutes` | `5` | integer | 1-60 | Tool execution and discovery timeout in minutes |
 | `EnableDetailedErrorLogging` | `McpIntract__Tool__EnableDetailedErrorLogging` | `false` | boolean | true/false | Whether to enable detailed error logging |
+
+> **Note**: The `TimeoutMinutes` setting applies to both tool execution and SignalR-based tool discovery operations.
 
 ### Tool Configuration Examples
 
@@ -103,19 +77,21 @@ Configuration for tool execution behavior and error handling.
 }
 ```
 
-> **Note**: Enable detailed error logging only in development environments as it may expose sensitive information.
+> **Critical Error Handling**: If a client doesn't respond to a tool discovery request within the timeout period, the server logs a **critical error** and throws an `InvalidOperationException`.
 
 ## CORS Configuration
 
-Cross-Origin Resource Sharing (CORS) configuration for secure client access.
+Cross-Origin Resource Sharing (CORS) configuration for secure client access and SignalR connections.
 
 | Setting | Environment Variable | Default | Type | Range/Options | Description |
 |---------|---------------------|---------|------|---------------|-------------|
-| `AllowedOrigins` | `McpIntract__Cors__AllowedOrigins` | `["http://localhost:4200"]` | array | Valid URLs | Array of allowed origins for CORS |
+| `AllowedOrigins` | `McpIntract__Cors__AllowedOrigins` | `["http://localhost:4200"]` | array | Valid URLs | Array of allowed origins for CORS and SignalR |
 | `AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `false` | boolean | true/false | Whether to allow any origin (use with caution in production) |
-| `AllowCredentials` | `McpIntract__Cors__AllowCredentials` | `true` | boolean | true/false | Whether to allow credentials |
+| `AllowCredentials` | `McpIntract__Cors__AllowCredentials` | `true` | boolean | true/false | Whether to allow credentials (required for SignalR) |
 | `AllowedHeaders` | `McpIntract__Cors__AllowedHeaders` | `[]` | array | Valid headers | Additional allowed headers |
 | `AllowedMethods` | `McpIntract__Cors__AllowedMethods` | `[]` | array | HTTP methods | Additional allowed methods |
+
+> **SignalR Requirement**: `AllowCredentials` must be `true` for SignalR connections to work properly.
 
 ### CORS Configuration Examples
 
@@ -167,10 +143,6 @@ For development, create `appsettings.Development.json`:
 ```json
 {
   "McpIntract": {
-    "Client": {
-      "BaseUrl": "http://localhost:4200",
-      "CacheDurationMinutes": 5
-    },
     "Tool": {
       "TimeoutMinutes": 2,
       "EnableDetailedErrorLogging": true
@@ -198,11 +170,6 @@ For production, ensure these settings in `appsettings.Production.json`:
 ```json
 {
   "McpIntract": {
-    "Client": {
-      "BaseUrl": "https://your-production-client.com",
-      "TimeoutSeconds": 60,
-      "CacheDurationMinutes": 60
-    },
     "Tool": {
       "TimeoutMinutes": 10,
       "EnableDetailedErrorLogging": false
@@ -227,22 +194,13 @@ For production, ensure these settings in `appsettings.Production.json`:
 
 All configuration can be overridden using environment variables. Use double underscores (`__`) to separate nested configuration levels:
 
-### Client Configuration
-```bash
-McpIntract__Client__BaseUrl=https://myapp.example.com
-McpIntract__Client__ToolsEndpoint=/api/mcp-tools
-McpIntract__Client__TimeoutSeconds=60
-McpIntract__Client__CacheTools=true
-McpIntract__Client__CacheDurationMinutes=60
-```
-
 ### Tool Configuration
 ```bash
 McpIntract__Tool__TimeoutMinutes=10
 McpIntract__Tool__EnableDetailedErrorLogging=false
 ```
 
-### CORS Configuration Envs
+### CORS Configuration
 ```bash
 McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com
 McpIntract__Cors__AllowedOrigins__1=https://www.myapp.example.com
@@ -258,8 +216,8 @@ When running in Docker, set environment variables:
 docker run -d \
   --name webintract-mcp-server \
   -p 8080:8080 \
-  -e McpIntract__Client__BaseUrl=https://myapp.example.com \
   -e McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com \
+  -e McpIntract__Tool__TimeoutMinutes=10 \
   -e ASPNETCORE_ENVIRONMENT=Production \
   webintract-mcp-server:latest
 ```
@@ -274,10 +232,9 @@ kind: ConfigMap
 metadata:
   name: webintract-mcp-config
 data:
-  McpIntract__Client__BaseUrl: "https://myapp.example.com"
-  McpIntract__Client__ToolsEndpoint: "/api/mcp-tools"
-  McpIntract__Client__TimeoutSeconds: "60"
   McpIntract__Tool__TimeoutMinutes: "10"
+  McpIntract__Tool__EnableDetailedErrorLogging: "false"
+  McpIntract__SignalR__EnableDetailedErrors: "false"
   McpIntract__Cors__AllowedOrigins__0: "https://myapp.example.com"
 ---
 apiVersion: apps/v1
@@ -302,12 +259,6 @@ spec:
 
 The server validates configuration on startup. Common validation errors:
 
-### Invalid URL Format
-```
-Error: Invalid URL format in McpIntract:Client:BaseUrl
-```
-**Solution**: Ensure the URL includes the protocol (`http://` or `https://`)
-
 ### Invalid Timeout Values
 ```
 Error: McpIntract:Tool:TimeoutMinutes must be between 1 and 60
@@ -325,22 +276,22 @@ Error: At least one origin must be specified in McpIntract:Cors:AllowedOrigins
 ### Security
 1. **Never use `AllowAnyOrigin: true` in production**
 2. **Always use HTTPS URLs in production**
-3. **Set minimal timeout values appropriate for your use case**
+3. **Set `EnableDetailedErrors: false` in production**
 4. **Disable detailed error logging in production**
 
 ### Performance
-1. **Enable tool caching with appropriate duration**
-2. **Set reasonable timeout values**
+1. **Configure appropriate SignalR timeout values**
+2. **Set reasonable tool execution timeouts**
 3. **Use specific CORS origins instead of wildcard**
 
 ### Monitoring
 1. **Configure appropriate logging levels**
-2. **Monitor timeout configurations**
-3. **Track cache hit rates**
+2. **Monitor SignalR connection metrics**
+3. **Track tool execution performance**
 
 ### Environment-Specific
-1. **Use different cache durations for dev/prod**
-2. **Enable detailed logging only in development**
+1. **Use different timeout durations for dev/prod**
+2. **Enable detailed SignalR errors only in development**
 3. **Use environment variables for deployment-specific values**
 
 ## Troubleshooting Configuration
@@ -351,31 +302,37 @@ Error: At least one origin must be specified in McpIntract:Cors:AllowedOrigins
 - Check `AllowedOrigins` matches your client URL exactly
 - Ensure protocol (http/https) matches
 - Verify port numbers if specified
+- Ensure `AllowCredentials: true` for SignalR
 
-**Connection Timeouts:**
-- Increase `TimeoutSeconds` for slow networks
-- Check firewall settings
-- Verify client application is accessible
+**SignalR Connection Issues:**
+- Increase `ClientTimeoutInterval` for slow networks
+- Check firewall settings for WebSocket traffic
+- Verify SignalR hub endpoint is accessible
+- Check for proxy/load balancer WebSocket support
 
 **Tool Execution Failures:**
 - Increase `TimeoutMinutes` for long-running tools
 - Enable `EnableDetailedErrorLogging` to diagnose issues
-- Check tool configuration format
+- Check SignalR connection stability
+- Verify client is properly responding to GetTools requests
 
 ### Configuration Testing
 
 Test your configuration:
 
 ```bash
-# Test client connectivity
-curl http://your-client-url/mcp-tools.json
-
 # Test MCP server health
 curl http://localhost:8080/health
 
-# Test MCP capabilities
+# Test MCP capabilities  
 curl http://localhost:8080/mcp
+
+# Test SignalR hub (should return 404 for GET, but confirms endpoint exists)
+curl http://localhost:8080/mcp-tools-hub
 ```
+
+**SignalR Connection Testing:**
+Use browser developer tools to verify WebSocket connections to `/mcp-tools-hub`
 
 ## Next Steps
 

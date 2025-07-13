@@ -33,35 +33,8 @@ public sealed class McpIntractOptions
 /// </summary>
 public sealed class ClientConfiguration
 {
-    /// <summary>
-    /// The base URL of the client application
-    /// </summary>
-    [Required]
-    [Url]
-    public string BaseUrl { get; set; } = "http://localhost:4200";
-
-    /// <summary>
-    /// The endpoint path for fetching tools from the client
-    /// </summary>
-    [Required]
-    public string ToolsEndpoint { get; set; } = "/mcp-tools.json";
-
-    /// <summary>
-    /// HTTP client timeout in seconds
-    /// </summary>
-    [Range(1, 300)]
-    public int TimeoutSeconds { get; set; } = 30;
-
-    /// <summary>
-    /// Whether to cache tools from the client
-    /// </summary>
-    public bool CacheTools { get; set; } = true;
-
-    /// <summary>
-    /// Tool cache duration in minutes
-    /// </summary>
-    [Range(1, 1440)]
-    public int CacheDurationMinutes { get; set; } = 30;
+    // Configuration class kept for future extensibility
+    // Currently no properties needed since we use SignalR instead of HTTP
 }
 
 /// <summary>

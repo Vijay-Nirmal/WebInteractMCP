@@ -49,7 +49,8 @@ export class MCPElementsService {
       
       try {
         const testParsed = JSON.parse(testText);
-        console.log('Test JSON parsing successful, tools count:', testParsed.length);        testParsed.forEach((tool: any, index: number) => {
+        console.log('Test JSON parsing successful, tools count:', testParsed.length);
+        testParsed.forEach((tool: any, index: number) => {
           console.log(`Test parsed tool ${index + 1}: ${tool.toolId}`);
         });
       } catch (parseError) {
