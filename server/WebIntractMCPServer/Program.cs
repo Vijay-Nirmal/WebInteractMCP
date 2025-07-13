@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddMcpIntract(builder.Configuration);
 builder.Services.AddCors();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -53,5 +54,6 @@ if (app.Environment.IsDevelopment())
 // Map endpoints
 app.MapMcp();
 app.MapHub<McpToolsHub>("/mcptools");
+app.MapHealthChecks("/health");
 
 app.Run();

@@ -34,11 +34,8 @@ curl http://localhost:8080/health
 ```
 
 Expected response:
-```json
-{
-  "status": "Healthy",
-  "timestamp": "2024-01-07T10:30:00Z"
-}
+```
+Healthy
 ```
 
 ## Building from Source
