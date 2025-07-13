@@ -87,11 +87,7 @@ Cross-Origin Resource Sharing (CORS) configuration for secure client access and 
 |---------|---------------------|---------|------|---------------|-------------|
 | `AllowedOrigins` | `McpIntract__Cors__AllowedOrigins` | `["http://localhost:4200"]` | array | Valid URLs | Array of allowed origins for CORS and SignalR |
 | `AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `false` | boolean | true/false | Whether to allow any origin (use with caution in production) |
-| `AllowCredentials` | `McpIntract__Cors__AllowCredentials` | `true` | boolean | true/false | Whether to allow credentials (required for SignalR) |
 | `AllowedHeaders` | `McpIntract__Cors__AllowedHeaders` | `[]` | array | Valid headers | Additional allowed headers |
-| `AllowedMethods` | `McpIntract__Cors__AllowedMethods` | `[]` | array | HTTP methods | Additional allowed methods |
-
-> **SignalR Requirement**: `AllowCredentials` must be `true` for SignalR connections to work properly.
 
 ### CORS Configuration Examples
 
@@ -106,9 +102,7 @@ Cross-Origin Resource Sharing (CORS) configuration for secure client access and 
         "https://localhost:5001"
       ],
       "AllowAnyOrigin": false,
-      "AllowCredentials": true,
-      "AllowedHeaders": ["X-Custom-Header"],
-      "AllowedMethods": ["GET", "POST", "PUT", "DELETE"]
+      "AllowedHeaders": ["X-Custom-Header"]
     }
   }
 }
@@ -124,9 +118,7 @@ Cross-Origin Resource Sharing (CORS) configuration for secure client access and 
         "https://www.myapp.example.com"
       ],
       "AllowAnyOrigin": false,
-      "AllowCredentials": true,
-      "AllowedHeaders": [],
-      "AllowedMethods": []
+      "AllowedHeaders": []
     }
   }
 }
@@ -177,7 +169,6 @@ For production, ensure these settings in `appsettings.Production.json`:
     "Cors": {
       "AllowedOrigins": ["https://your-production-client.com"],
       "AllowAnyOrigin": false,
-      "AllowCredentials": true
     }
   },
   "Logging": {
@@ -205,7 +196,6 @@ McpIntract__Tool__EnableDetailedErrorLogging=false
 McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com
 McpIntract__Cors__AllowedOrigins__1=https://www.myapp.example.com
 McpIntract__Cors__AllowAnyOrigin=false
-McpIntract__Cors__AllowCredentials=true
 ```
 
 ## Docker Configuration
@@ -302,7 +292,6 @@ Error: At least one origin must be specified in McpIntract:Cors:AllowedOrigins
 - Check `AllowedOrigins` matches your client URL exactly
 - Ensure protocol (http/https) matches
 - Verify port numbers if specified
-- Ensure `AllowCredentials: true` for SignalR
 
 **SignalR Connection Issues:**
 - Increase `ClientTimeoutInterval` for slow networks

@@ -746,8 +746,7 @@ Get current server configuration.
       "enableDetailedErrorLogging": false
     },
     "cors": {
-      "allowedOrigins": ["http://localhost:4200"],
-      "allowCredentials": true
+      "allowedOrigins": ["http://localhost:4200"]
     }
   },
   "logging": {

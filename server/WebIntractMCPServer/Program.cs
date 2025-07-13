@@ -19,29 +19,27 @@ app.UseCors(corsBuilder =>
 {
     if (mcpOptions.Cors.AllowAnyOrigin)
     {
-        corsBuilder.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-    }
-    else
-    {
-        corsBuilder.WithOrigins(mcpOptions.Cors.AllowedOrigins)
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-
-        if (mcpOptions.Cors.AllowCredentials)
-        {
-            corsBuilder.AllowCredentials();
-        }
+        corsBuilder.AllowAnyHeader()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .SetIsOriginAllowed((host) => true)
+                   .AllowCredentials();
 
         if (mcpOptions.Cors.AllowedHeaders.Any())
         {
             corsBuilder.WithHeaders(mcpOptions.Cors.AllowedHeaders);
         }
+    }
+    else
+    {
+        corsBuilder.WithOrigins(mcpOptions.Cors.AllowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
 
-        if (mcpOptions.Cors.AllowedMethods.Any())
+        if (mcpOptions.Cors.AllowedHeaders.Any())
         {
-            corsBuilder.WithMethods(mcpOptions.Cors.AllowedMethods);
+            corsBuilder.WithHeaders(mcpOptions.Cors.AllowedHeaders);
         }
     }
 });

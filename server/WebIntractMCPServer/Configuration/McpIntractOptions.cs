@@ -67,20 +67,10 @@ public sealed class CorsConfiguration
     /// <summary>
     /// Whether to allow any origin (use with caution in production)
     /// </summary>
-    public bool AllowAnyOrigin { get; set; } = false;
-
-    /// <summary>
-    /// Whether to allow credentials
-    /// </summary>
-    public bool AllowCredentials { get; set; } = true;
+    public bool AllowAnyOrigin { get; set; } = true;
 
     /// <summary>
     /// Additional allowed headers
     /// </summary>
     public string[] AllowedHeaders { get; set; } = [];
-
-    /// <summary>
-    /// Additional allowed methods
-    /// </summary>
-    public string[] AllowedMethods { get; set; } = [];
 }

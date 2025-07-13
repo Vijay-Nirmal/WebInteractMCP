@@ -65,10 +65,7 @@ The application uses the `McpIntract` section in `appsettings.json` for configur
 | `McpIntract:Tool:EnableDetailedErrorLogging` | `McpIntract__Tool__EnableDetailedErrorLogging` | `false` | boolean | true/false | Whether to enable detailed error logging |
 | **CORS Configuration** |
 | `McpIntract:Cors:AllowedOrigins` | `McpIntract__Cors__AllowedOrigins` | `["http://localhost:4200"]` | array | Valid URLs | Array of allowed origins for CORS |
-| `McpIntract:Cors:AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `false` | boolean | true/false | Whether to allow any origin (use with caution in production) |
-| `McpIntract:Cors:AllowCredentials` | `McpIntract__Cors__AllowCredentials` | `true` | boolean | true/false | Whether to allow credentials (required for SignalR) |
-| `McpIntract:Cors:AllowedHeaders` | `McpIntract__Cors__AllowedHeaders` | `[]` | array | Valid headers | Additional allowed headers |
-| `McpIntract:Cors:AllowedMethods` | `McpIntract__Cors__AllowedMethods` | `[]` | array | HTTP methods | Additional allowed methods |
+| `McpIntract:Cors:AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `true` | boolean | true/false | Whether to allow any origin (use with caution in production) |
 
 > **Migration Note**: As of version 1.0, the server uses **SignalR for tool discovery** instead of HTTP requests. Client configuration properties have been removed.
 
@@ -83,10 +80,7 @@ The application uses the `McpIntract` section in `appsettings.json` for configur
     },
     "Cors": {
       "AllowedOrigins": ["http://localhost:4200"],
-      "AllowAnyOrigin": false,
-      "AllowCredentials": true,
-      "AllowedHeaders": [],
-      "AllowedMethods": []
+      "AllowAnyOrigin": false
     }
   }
 }

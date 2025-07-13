@@ -165,7 +165,6 @@ config:
     cors:
       allowedOrigins:
         - "https://myapp.example.com"
-      allowCredentials: true
 
 nodeSelector: {}
 tolerations: []
@@ -242,8 +241,7 @@ data:
           "EnableDetailedErrorLogging": false
         },
         "Cors": {
-          "AllowedOrigins": ["https://myapp.example.com"],
-          "AllowCredentials": true
+          "AllowedOrigins": ["https://myapp.example.com"]
         }
       },
       "Logging": {

@@ -139,7 +139,6 @@ env:
   
   McpIntract__Cors__AllowedOrigins__0: "http://localhost:4200"
   McpIntract__Cors__AllowAnyOrigin: "false"
-  McpIntract__Cors__AllowCredentials: "true"
 
 # Configuration for Redis (if using distributed caching)
 redis:

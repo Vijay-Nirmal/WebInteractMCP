@@ -10,12 +10,12 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy the project file and restore dependencies
-COPY ["WebIntractMCPServer.csproj", "."]
+COPY ["WebIntractMCPServer/WebIntractMCPServer.csproj", "."]
 RUN dotnet restore "WebIntractMCPServer.csproj"
 
 # Copy the entire source code
 COPY . .
-WORKDIR "/src"
+WORKDIR "/src/WebIntractMCPServer"
 
 # Build the application
 RUN dotnet build "WebIntractMCPServer.csproj" -c $BUILD_CONFIGURATION -o /app/build
