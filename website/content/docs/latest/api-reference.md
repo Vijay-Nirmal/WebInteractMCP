@@ -64,7 +64,7 @@ When `shepherdOptions` is not provided, the controller uses these production-rea
 #### Example
 
 ```typescript
-import { WebIntractMCPController, LogLevel, TransportType } from 'web-intract-mcp';
+import { WebIntractMCPController, LogLevel, TransportType } from '@web-intract-mcp/client';
 
 const controller = new WebIntractMCPController({
   logLevel: LogLevel.INFO,
@@ -313,7 +313,7 @@ interface ILogger {
 #### Configuration Examples
 
 ```typescript
-import { WebIntractMCPController, LogLevel } from 'web-intract-mcp';
+import { WebIntractMCPController, LogLevel } from '@web-intract-mcp/client';
 
 // Development configuration
 const devController = new WebIntractMCPController({
@@ -551,7 +551,7 @@ const executeToolSafely = async (toolCall: ToolCall) => {
 ### Complete Integration Example
 
 ```typescript
-import { WebIntractMCPController, LogLevel, MCPTool } from 'web-intract-mcp';
+import { WebIntractMCPController, LogLevel, MCPTool } from '@web-intract-mcp/client';
 
 // Create controller with production settings
 const controller = new WebIntractMCPController({
@@ -657,7 +657,7 @@ process.on('SIGTERM', cleanup);
 ### Custom Logger Implementation
 
 ```typescript
-import { ILogger, LogLevel } from 'web-intract-mcp';
+import { ILogger, LogLevel } from '@web-intract-mcp/client';
 
 class CustomLogger implements ILogger {
   private logLevel: LogLevel;

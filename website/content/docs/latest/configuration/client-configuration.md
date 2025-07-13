@@ -36,7 +36,7 @@ For quick reference, the main configuration properties:
 ## Basic Setup
 
 ```typescript
-import { WebIntractMCPController, LogLevel } from 'web-intract-mcp';
+import { WebIntractMCPController, LogLevel } from '@web-intract-mcp/client';
 
 const controller = new WebIntractMCPController({
   logLevel: LogLevel.DEBUG,

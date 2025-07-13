@@ -9,7 +9,7 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ## Basic Setup
@@ -17,9 +17,9 @@ npm install web-intract-mcp
 ### 1. Create Angular Service
 
 ```typescript
-// services/web-intract-mcp.service.ts
+// services/@web-intract-mcp/client.service.ts
 import { Injectable } from '@angular/core';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
 
 @Injectable({
   providedIn: 'root'
@@ -49,7 +49,7 @@ export class WebIntractMCPService {
 ```typescript
 // app.component.ts
 import { Component, OnInit } from '@angular/core';
-import { WebIntractMCPService } from './services/web-intract-mcp.service';
+import { WebIntractMCPService } from './services/@web-intract-mcp/client.service';
 
 @Component({
   selector: 'app-root',

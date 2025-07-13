@@ -10,14 +10,14 @@ Common issues and their solutions when working with WebIntractMCP.
 
 ## Installation Issues
 
-### Cannot find module 'web-intract-mcp'
+### Cannot find module '@web-intract-mcp/client'
 
 **Problem**: Getting module not found error when importing WebIntractMCP.
 
 **Solution**:
 1. Ensure the package is installed:
    ```bash
-   npm install web-intract-mcp
+   npm install @web-intract-mcp/client
    ```
 
 2. Check your import statement:

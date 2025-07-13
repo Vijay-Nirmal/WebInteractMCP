@@ -119,7 +119,7 @@ export const VERSION = '1.0.0';
  * Library information
  */
 export const LIBRARY_INFO = {
-  name: 'web-intract-mcp',
+  name: '@web-intract-mcp/client',
   version: VERSION,
   description: 'A production-ready TypeScript library that transforms web applications into MCP servers with robust two-way communication',
   author: 'GitHub Copilot',

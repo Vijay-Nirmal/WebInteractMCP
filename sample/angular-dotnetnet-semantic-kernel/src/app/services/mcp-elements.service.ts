@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider, LogLevel } from 'web-intract-mcp';
+import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider, LogLevel } from '@web-intract-mcp/client';
 
 /**
  * Angular service for integrating MCP Elements with the WebIntractMCP application

@@ -9,7 +9,7 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ## Basic Setup
@@ -19,7 +19,7 @@ npm install web-intract-mcp
 ```typescript
 // hooks/useWebIntractMCP.ts
 import { useState, useCallback } from 'react';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
 
 export function useWebIntractMCP() {
   const [controller, setController] = useState<WebIntractMCPController | null>(null);

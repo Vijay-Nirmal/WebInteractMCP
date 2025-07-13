@@ -558,7 +558,7 @@ Real-world implementation examples and use cases for WebIntractMCP.
 
 ```typescript
 import { useEffect, useRef } from 'react';
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 function useMCP() {
   const controllerRef = useRef(null);
@@ -608,7 +608,7 @@ function MyComponent() {
 
 ```typescript
 import { Injectable, OnDestroy } from '@angular/core';
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 @Injectable({
   providedIn: 'root'
@@ -667,7 +667,7 @@ export class DemoComponent {
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 const controller = ref(null);
 

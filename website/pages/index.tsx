@@ -176,7 +176,7 @@ export default function Home() {
                 </div>
                 <div className="sm:min-w-0 sm:flex-1">
                   <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white">
-                    web-intract-mcp
+                    @web-intract-mcp/client
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-300">
                     TypeScript library for client-side integration. Framework-agnostic and easy to integrate into any web application.

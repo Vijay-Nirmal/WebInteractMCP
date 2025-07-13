@@ -34,11 +34,11 @@ WebIntractMCP solves these challenges by creating a standardized way for web app
 
 The ecosystem consists of two main components:
 
-### 1. web-intract-mcp (TypeScript Library)
+### 1. @web-intract-mcp/client (TypeScript Library)
 A lightweight, framework-agnostic library that integrates into your web application:
 
 ```typescript
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 const controller = createWebIntractMCPController();
 await controller.loadTools('/mcp-tools.json');
@@ -142,7 +142,7 @@ Session-based isolation ensures that multiple users can safely use the system si
 
 ### 1. Install the Library
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ### 2. Create Your Tools Configuration

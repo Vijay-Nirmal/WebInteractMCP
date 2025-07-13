@@ -50,7 +50,7 @@ graph TB
 ## Installation
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ### Peer Dependencies
@@ -68,7 +68,7 @@ import {
   createWebIntractMCPController, 
   ToolConfiguration,
   ToolMode 
-} from 'web-intract-mcp';
+} from '@web-intract-mcp/client';
 
 // Create controller instance
 const controller = createWebIntractMCPController();
@@ -106,7 +106,7 @@ import {
   createWebIntractMCPController,
   WebIntractMCPOptions,
   VisualEffectStyles
-} from 'web-intract-mcp';
+} from '@web-intract-mcp/client';
 
 // Configure controller options
 const options: Partial<WebIntractMCPOptions> = {
@@ -215,7 +215,7 @@ const automationTool: ToolConfiguration = {
 #### Custom Functions
 
 ```typescript
-import { CustomFunction, CustomFunctionContext } from 'web-intract-mcp';
+import { CustomFunction, CustomFunctionContext } from '@web-intract-mcp/client';
 
 const customFunction: CustomFunction = {
   name: 'validateForm',
@@ -307,7 +307,7 @@ const parameterizedTool: ToolConfiguration = {
 ### Basic Connection
 
 ```typescript
-import { WebIntractSignalRService } from 'web-intract-mcp';
+import { WebIntractSignalRService } from '@web-intract-mcp/client';
 
 const signalRService = new WebIntractSignalRService({
   serverUrl: 'http://localhost:8080',
@@ -321,7 +321,7 @@ await signalRService.start();
 ### Advanced Configuration
 
 ```typescript
-import { SignalRServiceConfig } from 'web-intract-mcp';
+import { SignalRServiceConfig } from '@web-intract-mcp/client';
 
 const config: SignalRServiceConfig = {
   serverUrl: 'https://production-server.com',
@@ -339,7 +339,7 @@ const service = new WebIntractSignalRService(config);
 ## Event Handling
 
 ```typescript
-import { WebIntractMCPEvent } from 'web-intract-mcp';
+import { WebIntractMCPEvent } from '@web-intract-mcp/client';
 
 // Listen for tool execution events
 controller.addEventListener('start', (data) => {
@@ -365,7 +365,7 @@ controller.addEventListener('cancel', (data) => {
 
 ```tsx
 import React, { useEffect, useState } from 'react';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
 
 const MCPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [controller, setController] = useState<WebIntractMCPController | null>(null);
@@ -402,7 +402,7 @@ const MCPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
 ```typescript
 import { Injectable } from '@angular/core';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
 
 @Injectable({
   providedIn: 'root'
@@ -431,7 +431,7 @@ export class MCPService {
 
 ```typescript
 import { createApp } from 'vue';
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 const app = createApp(App);
 
@@ -463,7 +463,7 @@ MCP_HIGHLIGHT_DURATION=3000
 
 ```typescript
 // mcp.config.ts
-import { WebIntractMCPOptions } from 'web-intract-mcp';
+import { WebIntractMCPOptions } from '@web-intract-mcp/client';
 
 export const mcpConfig: WebIntractMCPOptions = {
   enableVisualFeedback: true,

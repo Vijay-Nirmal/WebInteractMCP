@@ -2,11 +2,11 @@
 
 ## Project Overview
 
-WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly integrated components (web-intract-mcp and WebIntractMCPServer) that transform web applications into MCP servers with real-time two-way communication.
+WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly integrated components (@web-intract-mcp/client and WebIntractMCPServer) that transform web applications into MCP servers with real-time two-way communication.
 
 ## Components
 
-### 📁 `lib/web-intract-mcp` - TypeScript MCP Library
+### 📁 `lib/@web-intract-mcp/client` - TypeScript MCP Library
 - **Tech**: TypeScript 5.8+, SignalR, Shepherd.js, Jest
 - **Purpose**: Framework-agnostic library that transforms web apps into MCP servers
 - **Key**: Real-time communication, tool registration, UI automation
@@ -25,8 +25,8 @@ WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly inte
 
 **ALWAYS test cross-component compatibility when making changes could affect that:**
 
-1. **web-intract-mcp changes** → Test WebIntractMCPServer + Sample app
-2. **WebIntractMCPServer changes** → Test web-intract-mcp + Sample app  
+1. **@web-intract-mcp/client changes** → Test WebIntractMCPServer + Sample app
+2. **WebIntractMCPServer changes** → Test @web-intract-mcp/client + Sample app  
 3. **Sample app changes** → Test end-to-end MCP communication
 
 ## Documentation Update Requirements
@@ -78,7 +78,7 @@ WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly inte
 ```bash
 # Setup
 npm install
-cd lib/web-intract-mcp && npm install
+cd lib/@web-intract-mcp/client && npm install
 cd sample/angular-dotnetnet-semantic-kernel && npm install
 
 # Start servers
@@ -88,7 +88,7 @@ npm run start:client    # .NET client backend sample app
 npm run start           # Angular frontend sample app
 
 # Testing
-cd lib/web-intract-mcp && npm test
+cd lib/@web-intract-mcp/client && npm test
 cd server/WebIntractMCPServer && dotnet test
 cd sample/angular-dotnetnet-semantic-kernel && npm test
 ```
@@ -137,7 +137,7 @@ sample/angular-dotnetnet-semantic-kernel/src/
 - Implement proper error handling
 
 ### Type Compatibility  
-- Run `npm run build` in web-intract-mcp after changes
+- Run `npm run build` in @web-intract-mcp/client after changes
 - Verify type exports in index.ts
 - Check Angular imports match library exports
 

@@ -21,7 +21,7 @@
     "rxjs": "~7.8.0",
     "shepherd.js": "^14.5.0",
     "tslib": "^2.3.0",
-    "web-intract-mcp": "file:../../lib/web-intract-mcp",
+    "@web-intract-mcp/client": "file:../../lib/web-intract-mcp",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {

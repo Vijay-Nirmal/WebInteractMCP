@@ -9,7 +9,7 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ## Basic Setup
@@ -17,9 +17,9 @@ npm install web-intract-mcp
 ### 1. Create Vue Composable
 
 ```typescript
-// composables/use-web-intract-mcp.ts
+// composables/use-@web-intract-mcp/client.ts
 import { ref, onMounted } from 'vue';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
 
 export function useWebIntractMCP(serverUrl: string = 'http://localhost:8080') {
   const controller = ref<WebIntractMCPController | null>(null);
@@ -68,7 +68,7 @@ export function useWebIntractMCP(serverUrl: string = 'http://localhost:8080') {
 </template>
 
 <script setup lang="ts">
-import { useWebIntractMCP } from './composables/use-web-intract-mcp';
+import { useWebIntractMCP } from './composables/use-@web-intract-mcp/client';
 
 const { controller, isConnected, error } = useWebIntractMCP(); // Connect to WebIntractMCPServer
 </script>
