@@ -2,24 +2,11 @@
 title: "Quick Start"
 order: 2
 category: "Quick Start Guides"
---## Vue.js Integration
+---
 
-```bash
-npm install @web-intract-mcp/client
-```
+# Quick Start Guides
 
-```vue
-<!-- App.vue -->
-<template>
-  <div id="app">
-    <h1>My Vue App with WebIntractMCP</h1>
-    <button data-testid="submit-btn">Click Me</button>
-  </div>
-</template>
-
-<script setup>
-import { onMounted } from 'vue';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';pecific Quick Start Guides
+Framework-specific Quick Start Guides
 
 Choose your framework and get started in minutes with minimal setup!
 
@@ -87,7 +74,7 @@ export class AppComponent implements OnInit {
 ## Vue.js Integration
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ```vue
@@ -101,7 +88,7 @@ npm install web-intract-mcp
 
 <script setup>
 import { onMounted } from 'vue';
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 onMounted(async () => {
   const controller = createWebIntractMCPController();
