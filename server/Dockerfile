@@ -1,5 +1,14 @@
 # Use the official .NET 9.0 runtime as the base image
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
+
+# Add metadata labels
+LABEL org.opencontainers.image.title="WebIntract MCP Server"
+LABEL org.opencontainers.image.description="A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication"
+LABEL org.opencontainers.image.vendor="WebIntractMCP"
+LABEL org.opencontainers.image.source="https://github.com/Vijay-Nirmal/WebIntractMCP"
+LABEL org.opencontainers.image.documentation="https://github.com/Vijay-Nirmal/WebIntractMCP/blob/master/README.md"
+LABEL org.opencontainers.image.licenses="MIT"
+
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -37,8 +46,9 @@ USER appuser
 # Set environment variables
 ENV ASPNETCORE_URLS=http://+:8080
 
-# Health check
+# Health check using dotnet instead of curl for better reliability
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8080/health || exit 1
+    CMD dotnet --version > /dev/null && \
+        timeout 3s bash -c "</dev/tcp/localhost/8080" || exit 1
 
 ENTRYPOINT ["dotnet", "WebIntractMCPServer.dll"]

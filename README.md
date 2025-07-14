@@ -108,8 +108,8 @@ await controller.createSession('http://localhost:8080');
 ### 4. Run the MCP Server
 
 ```bash
-# Using Docker
-docker run -p 8080:8080 webintract-mcp-server
+# Using Docker (Recommended)
+docker run -p 8080:8080 vijaynirmalpon/web-intract-mcp-server:latest
 
 # Or build from source
 cd server/WebIntractMCPServer

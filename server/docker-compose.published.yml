@@ -1,9 +1,7 @@
 services:
   webintract-mcp-server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: webintract-mcp-server
+    image: vijaynirmalpon/web-intract-mcp-server:latest
+    container_name: webintract-mcp-server-published
     ports:
       - "8080:8080"
     environment:
@@ -31,28 +29,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    
-    # depends_on:
-    #   - redis
 
-  # Optional Redis service for caching and SignalR backplane. TODO: Doesn't support Redis Backplane yet to scale out
-  # redis:
-  #   image: redis:7-alpine
-  #   container_name: webintract-redis
+# Alternative preview version
+  # webintract-mcp-server-preview:
+  #   image: vijaynirmalpon/web-intract-mcp-server:preview
+  #   container_name: webintract-mcp-server-preview
   #   ports:
-  #     - "6379:6379"
-  #   command: redis-server --appendonly yes
-  #   volumes:
-  #     - redis-data:/data
-  #   networks:
-  #     - webintract-network
+  #     - "8081:8080"
+  #   environment:
+  #     - ASPNETCORE_ENVIRONMENT=Development
+  #     - McpIntract__Tool__EnableDetailedErrorLogging=true
+  #     - McpIntract__Cors__AllowAnyOrigin=true
   #   restart: unless-stopped
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 30s
-  #     timeout: 10s
-  #     retries: 3
-
-# volumes:
-#   redis-data:
-#     driver: local

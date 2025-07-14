@@ -332,41 +332,133 @@ See [DOCKER.md](DOCKER.md) for detailed Docker deployment instructions.
 
 ### Docker Hub Deployment
 
-The WebIntract MCP Server is containerized and can be deployed using Docker.
+The WebIntract MCP Server is available as a pre-built Docker image on DockerHub.
 
-#### Building and Publishing to Docker Hub
+**Docker Hub Repository:** [`vijaynirmalpon/web-intract-mcp-server`](https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server)
+
+#### Available Tags
+
+| Tag | Description | Use Case |
+|-----|-------------|----------|
+| `latest` | Latest stable production release | Production deployments |
+| `preview` | Latest preview build from master | Testing new features |
+| `vX.Y.Z` | Specific version releases | Version-pinned deployments |
+| `vX.Y.Z-preview.N` | Specific preview builds | Testing specific builds |
+
+#### Quick Start with DockerHub
+
+1. **Pull and run the latest stable version:**
+```bash
+docker run -d \
+  --name web-intract-mcp-server \
+  -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e McpIntract__Cors__AllowedOrigins__0=http://localhost:4200 \
+  vijaynirmalpon/web-intract-mcp-server:latest
+```
+
+2. **Or run preview version for testing:**
+```bash
+docker run -d \
+  --name web-intract-mcp-server-preview \
+  -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Development \
+  -e McpIntract__Tool__EnableDetailedErrorLogging=true \
+  vijaynirmalpon/web-intract-mcp-server:preview
+```
+
+3. **Using Docker Compose with published image:**
+```bash
+# Use the pre-configured compose file
+docker-compose -f docker-compose.published.yml up -d
+```
+
+4. **Verify the service is running:**
+```bash
+curl http://localhost:8080/health
+```
+
+#### Quick Start Scripts
+
+For the easiest setup experience, use the provided quick start scripts:
+
+**Linux/macOS:**
+```bash
+# Run latest stable version
+./start-server.sh
+
+# Run preview version
+./start-server.sh --preview
+
+# Run on custom port with production URL
+./start-server.sh --port 8081 --client-url https://myapp.com
+```
+
+**Windows PowerShell:**
+```powershell
+# Run latest stable version
+.\start-server.ps1
+
+# Run preview version
+.\start-server.ps1 -Preview
+
+# Run on custom port with production URL
+.\start-server.ps1 -Port 8081 -ClientUrl https://myapp.com
+```
+
+The scripts will:
+- ✅ Check if Docker is running
+- ✅ Pull the latest image
+- ✅ Handle existing containers
+- ✅ Configure environment variables
+- ✅ Test the health endpoint
+- ✅ Provide management commands
+
+#### Building and Publishing to Docker Hub (For Development)
 
 1. **Build the Docker image:**
 ```bash
-docker build -t your-dockerhub-username/webintract-mcp-server:latest .
+docker build -t vijaynirmalpon/web-intract-mcp-server:latest .
 ```
 
 2. **Tag for versioning:**
 ```bash
-docker tag your-dockerhub-username/webintract-mcp-server:latest your-dockerhub-username/webintract-mcp-server:v1.0.0
+docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:v0.1.0
 ```
 
 3. **Push to Docker Hub:**
 ```bash
 docker login
-docker push your-dockerhub-username/webintract-mcp-server:latest
-docker push your-dockerhub-username/webintract-mcp-server:v1.0.0
+docker push vijaynirmalpon/web-intract-mcp-server:latest
+docker push vijaynirmalpon/web-intract-mcp-server:v0.1.0
 ```
 
-#### Running from Docker Hub
+#### Advanced Docker Compose Configuration
 
-1. **Pull and run the container:**
-```bash
-docker run -d \
-  --name webintract-mcp-server \
-  -p 8080:8080 \
-  -e McpIntract__Cors__AllowedOrigins__0=http://your-client-app:4200 \
-  -e McpIntract__Tool__TimeoutMinutes=10 \
-  -e ASPNETCORE_ENVIRONMENT=Production \
-  your-dockerhub-username/webintract-mcp-server:latest
+For production use with the published image:
+
+```yaml
+version: '3.8'
+services:
+  webintract-mcp-server:
+    image: vijaynirmalpon/web-intract-mcp-server:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - McpIntract__Cors__AllowedOrigins__0=https://your-production-app.com
+      - McpIntract__Tool__EnableDetailedErrorLogging=false
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 3s bash -c '</dev/tcp/localhost/8080' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 ```
 
-2. **Using Docker Compose:**
+#### Environment Configuration for Production
+
+Set the following environment variables when using the Docker image:
 ```yaml
 version: '3.8'
 services:

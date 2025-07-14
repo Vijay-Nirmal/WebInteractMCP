@@ -1,4 +1,4 @@
-name: Publish NPM Package
+name: Build and Publish NPM Package
 
 on:
   workflow_dispatch:
@@ -12,13 +12,23 @@ on:
           - preview
           - production
 
+env:
+  PACKAGE_PATH: lib/web-intract-mcp
+
 jobs:
-  publish:
+  build:
+    name: Build NPM Package
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.package-version.outputs.version }}
+      release-type: ${{ steps.determine-release.outputs.release_type }}
+      build-version: ${{ steps.determine-release.outputs.build_version }}
+      npm-tag: ${{ steps.determine-release.outputs.npm_tag }}
+      is-production: ${{ steps.determine-release.outputs.is_production }}
     
     defaults:
       run:
-        working-directory: lib/web-intract-mcp
+        working-directory: ${{ env.PACKAGE_PATH }}
 
     steps:
       - name: Checkout repository
@@ -30,7 +40,7 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
-          cache-dependency-path: lib/web-intract-mcp/package-lock.json
+          cache-dependency-path: ${{ env.PACKAGE_PATH }}/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -41,57 +51,147 @@ jobs:
       - name: Run linting
         run: npm run lint
 
-      - name: Build package
-        run: npm run build
-
       - name: Get package version
         id: package-version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Extracted version: $VERSION"
 
-      - name: Set preview version
-        if: ${{ github.event.inputs.release_type == 'preview' }}
+      - name: Determine release type and version
+        id: determine-release
         run: |
-          PREVIEW_VERSION="${{ steps.package-version.outputs.version }}-preview.${{ github.run_number }}"
-          npm version $PREVIEW_VERSION --no-git-tag-version
-          echo "Publishing preview version: $PREVIEW_VERSION"
+          # Default to preview for push events, use input for manual dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          else
+            RELEASE_TYPE="preview"
+          fi
+          
+          VERSION="${{ steps.package-version.outputs.version }}"
+          
+          if [ "$RELEASE_TYPE" = "production" ]; then
+            BUILD_VERSION="$VERSION"
+            NPM_TAG="latest"
+            IS_PRODUCTION="true"
+          else
+            BUILD_VERSION="$VERSION-preview.${{ github.run_number }}"
+            NPM_TAG="preview"
+            IS_PRODUCTION="false"
+          fi
+          
+          echo "release_type=$RELEASE_TYPE" >> $GITHUB_OUTPUT
+          echo "build_version=$BUILD_VERSION" >> $GITHUB_OUTPUT
+          echo "npm_tag=$NPM_TAG" >> $GITHUB_OUTPUT
+          echo "is_production=$IS_PRODUCTION" >> $GITHUB_OUTPUT
+          
+          echo "📋 Release Configuration:"
+          echo "   Release Type: $RELEASE_TYPE"
+          echo "   Build Version: $BUILD_VERSION"
+          echo "   NPM Tag: $NPM_TAG"
+          echo "   Is Production: $IS_PRODUCTION"
+
+      - name: Set package version
+        run: |
+          BUILD_VERSION="${{ steps.determine-release.outputs.build_version }}"
+          if [ "${{ steps.determine-release.outputs.is_production }}" = "false" ]; then
+            npm version $BUILD_VERSION --no-git-tag-version
+            echo "📝 Set preview version: $BUILD_VERSION"
+          else
+            echo "📝 Using production version: $BUILD_VERSION"
+          fi
+
+      - name: Build package
+        run: npm run build
 
       - name: Verify package contents
         run: |
           echo "=== Package Contents ==="
           npm pack --dry-run
 
-      - name: Publish preview to NPM
-        if: ${{ github.event.inputs.release_type == 'preview' }}
+      - name: Create package tarball
         run: |
-          echo "Publishing preview package with preview tag..."
-          npm publish --tag preview --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          npm pack
+          TARBALL_NAME=$(npm pack --dry-run | tail -1)
+          echo "📦 Created tarball: $TARBALL_NAME"
+          echo "tarball_name=$TARBALL_NAME" >> $GITHUB_OUTPUT
+        id: create-tarball
 
-      - name: Publish production to NPM
-        if: ${{ github.event.inputs.release_type == 'production' }}
+      - name: Upload package artifact
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: ${{ env.PACKAGE_PATH }}/${{ steps.create-tarball.outputs.tarball_name }}
+          retention-days: 1
+
+      - name: Upload package.json artifact
+        if: github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-json
+          path: ${{ env.PACKAGE_PATH }}/package.json
+          retention-days: 1
+
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    environment: 
+      name: ${{ needs.build.outputs.is-production == 'true' && 'production' || 'preview' }}
+      url: https://www.npmjs.com/package/@web-intract-mcp/client
+    
+    defaults:
+      run:
+        working-directory: ${{ env.PACKAGE_PATH }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: ${{ env.PACKAGE_PATH }}
+
+      - name: Download package.json artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package-json
+          path: ${{ env.PACKAGE_PATH }}
+
+      - name: Publish to NPM
         run: |
-          echo "Publishing production package with latest tag..."
-          npm publish --tag latest --access public
+          BUILD_VERSION="${{ needs.build.outputs.build-version }}"
+          NPM_TAG="${{ needs.build.outputs.npm-tag }}"
+          
+          echo "🚀 Publishing @web-intract-mcp/client@$BUILD_VERSION with tag: $NPM_TAG"
+          npm publish --tag $NPM_TAG --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        if: ${{ github.event.inputs.release_type == 'production' }}
+        if: needs.build.outputs.is-production == 'true'
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: "v${{ steps.package-version.outputs.version }}"
-          release_name: "@web-intract-mcp/client v${{ steps.package-version.outputs.version }}"
+          tag_name: "v${{ needs.build.outputs.version }}"
+          release_name: "@web-intract-mcp/client v${{ needs.build.outputs.version }}"
           body: |
-            ## @web-intract-mcp/client v${{ steps.package-version.outputs.version }}
+            ## @web-intract-mcp/client v${{ needs.build.outputs.version }}
             
             ### Installation
             ```bash
-            npm install @web-intract-mcp/client@${{ steps.package-version.outputs.version }}
+            npm install @web-intract-mcp/client@${{ needs.build.outputs.version }}
             ```
             
             ### What's Changed
@@ -104,28 +204,61 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Summary
+  summary:
+    name: Generate Summary
+    runs-on: ubuntu-latest
+    needs: [build, publish]
+    if: always()
+    
+    steps:
+      - name: Generate Job Summary
         run: |
-          if [ "${{ github.event.inputs.release_type }}" = "preview" ]; then
-            PUBLISHED_VERSION="${{ steps.package-version.outputs.version }}-preview.${{ github.run_number }}"
-            NPM_TAG="preview"
-          else
-            PUBLISHED_VERSION="${{ steps.package-version.outputs.version }}"
-            NPM_TAG="latest"
-          fi
-          
-          echo "## 📦 Package Published Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 NPM Build & Publish Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Package:** @web-intract-mcp/client" >> $GITHUB_STEP_SUMMARY
-          echo "**Version:** $PUBLISHED_VERSION" >> $GITHUB_STEP_SUMMARY
-          echo "**Tag:** $NPM_TAG" >> $GITHUB_STEP_SUMMARY
-          echo "**Release Type:** ${{ github.event.inputs.release_type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Release Type:** ${{ needs.build.outputs.release-type }}" >> $GITHUB_STEP_SUMMARY
+          echo "**NPM Tag:** ${{ needs.build.outputs.npm-tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build Status:** ${{ needs.build.result }}" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ github.ref }}" = "refs/heads/master" ]; then
+            echo "**Publish Status:** ${{ needs.publish.result }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            if [ "${{ needs.publish.result }}" = "success" ]; then
+              echo "### ✅ Package Published Successfully! 🎉" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
+              echo '```bash' >> $GITHUB_STEP_SUMMARY
+              echo "npm install @web-intract-mcp/client@${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "### 🏷️ NPM Tag" >> $GITHUB_STEP_SUMMARY
+              echo "Published with tag: \`${{ needs.build.outputs.npm-tag }}\`" >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ needs.publish.result }}" = "failure" ]; then
+              echo "### ❌ Publish Failed" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "The build was successful but publishing failed. Check the publish job logs for details." >> $GITHUB_STEP_SUMMARY
+            elif [ "${{ needs.publish.result }}" = "skipped" ]; then
+              echo "### ⏭️ Publish Skipped" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Publishing was skipped due to conditions not being met." >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "**Publish Status:** Skipped (not on master branch)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### ℹ️ Build Only (Non-master branch)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Package was built successfully but not published to NPM because this is not the master branch." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Would have been published as:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Package: \`@web-intract-mcp/client@${{ needs.build.outputs.build-version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Tag: \`${{ needs.build.outputs.npm-tag }}\`" >> $GITHUB_STEP_SUMMARY
+          fi
+          
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Installation" >> $GITHUB_STEP_SUMMARY
-          echo '```bash' >> $GITHUB_STEP_SUMMARY
-          echo "npm install @web-intract-mcp/client@$PUBLISHED_VERSION" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Links" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
           echo "- [NPM Package](https://www.npmjs.com/package/@web-intract-mcp/client)" >> $GITHUB_STEP_SUMMARY
           echo "- [Documentation](https://github.com/Vijay-Nirmal/WebIntractMCP)" >> $GITHUB_STEP_SUMMARY
