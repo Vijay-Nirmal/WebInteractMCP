@@ -2,35 +2,55 @@
 
 This directory contains Docker and Docker Compose configurations for deploying the WebIntract MCP Server.
 
-## Files Overview
+## 🐳 DockerHub Image
 
-- `Dockerfile` - Multi-stage Docker build for the .NET 9 application
-- `docker-compose.yml` - Production deployment with Redis
-- `docker-compose.dev.yml` - Development deployment with enhanced logging
+The WebIntract MCP Server is available as a Docker image on DockerHub:
+
+**Repository:** [`vijaynirmalpon/web-intract-mcp-server`](https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server)
+
+### Available Tags
+
+- `latest` - Latest stable production release
+- `preview` - Latest preview build from master branch  
+- `vX.Y.Z` - Specific version releases (e.g., `v0.1.0`)
+- `vX.Y.Z-preview.N` - Specific preview builds (e.g., `v0.1.0-preview.123`)
 
 ## Quick Start
 
-### Production Deployment
+### Using DockerHub Image (Recommended)
 
 ```bash
-# Build and start all services
+# Pull and run the latest stable version
+docker run -d \
+  --name web-intract-mcp-server \
+  -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Production \
+  -e McpIntract__Cors__AllowedOrigins__0=http://localhost:4200 \
+  vijaynirmalpon/web-intract-mcp-server:latest
+
+# Or run preview version
+docker run -d \
+  --name web-intract-mcp-server \
+  -p 8080:8080 \
+  -e ASPNETCORE_ENVIRONMENT=Development \
+  -e McpIntract__Tool__EnableDetailedErrorLogging=true \
+  vijaynirmalpon/web-intract-mcp-server:preview
+```
+
+### Using Docker Compose
+
+```bash
+# Production deployment
 docker-compose up -d
+
+# Development deployment
+docker-compose -f docker-compose.dev.yml up -d
 
 # View logs
 docker-compose logs -f webintract-mcp-server
 
 # Stop services
 docker-compose down
-```
-
-### Development Deployment
-
-```bash
-# Use development configuration
-docker-compose -f docker-compose.dev.yml up -d
-
-# View detailed logs
-docker-compose -f docker-compose.dev.yml logs -f webintract-mcp-server
 ```
 
 ## Configuration
@@ -78,11 +98,11 @@ The Docker Compose files include comprehensive environment variable configuratio
 ### Build Docker Image
 
 ```bash
-# Build the image
-docker build -t your-dockerhub-username/webintract-mcp-server:latest .
+# Build the image locally
+docker build -t vijaynirmalpon/web-intract-mcp-server:latest .
 
 # Tag for versioning
-docker tag your-dockerhub-username/webintract-mcp-server:latest your-dockerhub-username/webintract-mcp-server:v1.0.0
+docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:v0.1.0
 ```
 
 ### Push to Docker Hub
@@ -92,19 +112,18 @@ docker tag your-dockerhub-username/webintract-mcp-server:latest your-dockerhub-u
 docker login
 
 # Push images
-docker push your-dockerhub-username/webintract-mcp-server:latest
-docker push your-dockerhub-username/webintract-mcp-server:v1.0.0
+docker push vijaynirmalpon/web-intract-mcp-server:latest
+docker push vijaynirmalpon/web-intract-mcp-server:v0.1.0
 ```
 
 ### Use Published Image
 
-Update the `docker-compose.yml` to use your published image:
+The `docker-compose.yml` is configured to build locally. To use the published image instead:
 
 ```yaml
 services:
   webintract-mcp-server:
-    image: your-dockerhub-username/webintract-mcp-server:latest
-    # Remove the build section when using published image
+    image: vijaynirmalpon/web-intract-mcp-server:latest
 ```
 
 ## Health Checks

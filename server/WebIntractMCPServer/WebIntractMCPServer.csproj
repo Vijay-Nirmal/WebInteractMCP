@@ -4,6 +4,39 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    
+    <!-- Version Information -->
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0</InformationalVersion>
+    
+    <!-- Package Metadata -->
+    <Product>WebIntract MCP Server</Product>
+    <Title>WebIntract MCP Server</Title>
+    <Description>A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication using SignalR</Description>
+    <Summary>Transform any web application into an MCP server with real-time two-way communication</Summary>
+    <Authors>WebIntractMCP Team</Authors>
+    <Company>WebIntractMCP</Company>
+    <Copyright>Copyright © 2025 WebIntractMCP. All rights reserved.</Copyright>
+    
+    <!-- Repository Information -->
+    <RepositoryUrl>https://github.com/Vijay-Nirmal/WebIntractMCP</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryBranch>master</RepositoryBranch>
+    <PackageProjectUrl>https://github.com/Vijay-Nirmal/WebIntractMCP</PackageProjectUrl>
+    
+    <!-- License and Legal -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    
+    <!-- Package Tags and Classification -->
+    <PackageTags>mcp;model-context-protocol;signalr;automation;web-server;docker;dotnet;aspnetcore</PackageTags>
+    <PackageReleaseNotes>Initial preview release of WebIntract MCP Server with SignalR-based communication</PackageReleaseNotes>
+    
+    <!-- Docker and Container Metadata -->
+    <ContainerImageName>vijaynirmalpon/web-intract-mcp-server</ContainerImageName>
+    <ContainerImageTags>latest;$(Version)</ContainerImageTags>
   </PropertyGroup>
 
   <ItemGroup>
