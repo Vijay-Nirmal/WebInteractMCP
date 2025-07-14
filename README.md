@@ -48,7 +48,7 @@ graph TB
     
     subgraph "WebIntractMCP Ecosystem"
         B[WebIntractMCPServer]
-        C[@web-intract-mcp/client<br/>TypeScript Library]
+        C["@web-intract-mcp/client"<br/>TypeScript Library]
     end
     
     subgraph "MCP Client (Chatbot/AI)"
