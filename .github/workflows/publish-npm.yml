@@ -111,8 +111,8 @@ jobs:
 
       - name: Create package tarball
         run: |
-          npm pack
           TARBALL_NAME=$(npm pack --dry-run | tail -1)
+          npm pack
           echo "📦 Created tarball: $TARBALL_NAME"
           echo "tarball_name=$TARBALL_NAME" >> $GITHUB_OUTPUT
         id: create-tarball
@@ -123,14 +123,6 @@ jobs:
         with:
           name: npm-package
           path: ${{ env.PACKAGE_PATH }}/${{ steps.create-tarball.outputs.tarball_name }}
-          retention-days: 1
-
-      - name: Upload package.json artifact
-        if: github.ref == 'refs/heads/master'
-        uses: actions/upload-artifact@v4
-        with:
-          name: package-json
-          path: ${{ env.PACKAGE_PATH }}/package.json
           retention-days: 1
 
   publish:
@@ -162,19 +154,21 @@ jobs:
           name: npm-package
           path: ${{ env.PACKAGE_PATH }}
 
-      - name: Download package.json artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: package-json
-          path: ${{ env.PACKAGE_PATH }}
-
-      - name: Publish to NPM
+      - name: Publish tarball to NPM
         run: |
           BUILD_VERSION="${{ needs.build.outputs.build-version }}"
           NPM_TAG="${{ needs.build.outputs.npm-tag }}"
           
+          # Find the tarball file
+          TARBALL=$(find . -name "*.tgz" -type f | head -1)
+          if [ -z "$TARBALL" ]; then
+            echo "❌ No tarball found!"
+            exit 1
+          fi
+          
           echo "🚀 Publishing @web-intract-mcp/client@$BUILD_VERSION with tag: $NPM_TAG"
-          npm publish --tag $NPM_TAG --access public
+          echo "📦 Publishing tarball: $TARBALL"
+          npm publish "$TARBALL" --tag $NPM_TAG --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
