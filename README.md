@@ -67,7 +67,11 @@ graph TB
 ### 1. Install the Client Library
 
 ```bash
+# Install the stable version (Not yet available)
 npm install @web-intract-mcp/client
+
+# Or install the latest preview version
+npm install @web-intract-mcp/client@preview
 ```
 
 ### 2. Configure Your Tools

@@ -1,6 +1,6 @@
 {
   "name": "@web-intract-mcp/client",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A production-ready TypeScript library that transforms web applications into MCP (Model Context Protocol) servers with robust two-way communication via SignalR",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -45,12 +45,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/web-intract-mcp.git"
+    "url": "https://github.com/Vijay-Nirmal/WebIntractMCP.git"
   },
   "bugs": {
-    "url": "https://github.com/your-org/web-intract-mcp/issues"
+    "url": "https://github.com/Vijay-Nirmal/WebIntractMCP/issues"
   },
-  "homepage": "https://github.com/your-org/web-intract-mcp#readme",
+  "homepage": "https://github.com/Vijay-Nirmal/WebIntractMCP#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "peerDependencies": {
     "shepherd.js": "^14.5.0"
   },
