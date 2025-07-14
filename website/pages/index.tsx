@@ -87,7 +87,7 @@ export default function Home() {
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="hidden sm:mb-8 sm:flex sm:justify-center">
             <div className="relative rounded-full px-3 py-1 text-sm leading-6 text-gray-600 dark:text-gray-400 ring-1 ring-gray-900/10 dark:ring-gray-100/10 hover:ring-gray-900/20 dark:hover:ring-gray-100/20">
-              📢 Initial preview version coming soon!{' '}
+              📢 Check out the preview version available now!{' '}
               <Link href="/docs" className="font-semibold text-primary-600 dark:text-primary-400">
                 <span className="absolute inset-0" aria-hidden="true" />
                 Read the docs <span aria-hidden="true">&rarr;</span>
