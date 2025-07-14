@@ -300,7 +300,7 @@ spec:
         runAsUser: 1001
       containers:
       - name: webintract-mcp-server
-        image: webintract-mcp-server:v1.0.0
+        image: webintract-mcp-server:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: http

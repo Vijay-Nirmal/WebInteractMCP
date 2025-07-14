@@ -423,14 +423,14 @@ docker build -t vijaynirmalpon/web-intract-mcp-server:latest .
 
 2. **Tag for versioning:**
 ```bash
-docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:v0.1.0
+docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:0.1.0
 ```
 
 3. **Push to Docker Hub:**
 ```bash
 docker login
 docker push vijaynirmalpon/web-intract-mcp-server:latest
-docker push vijaynirmalpon/web-intract-mcp-server:v0.1.0
+docker push vijaynirmalpon/web-intract-mcp-server:0.1.0
 ```
 
 #### Advanced Docker Compose Configuration
