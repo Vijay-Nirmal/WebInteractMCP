@@ -63,7 +63,7 @@ docker build -t webintract-mcp-server:local .
 docker build \
   --build-arg ASPNETCORE_ENVIRONMENT=Production \
   --build-arg BUILD_CONFIGURATION=Release \
-  -t webintract-mcp-server:v1.0.0 .
+  -t webintract-mcp-server:1.0.0 .
 ```
 
 ## Environment Configuration

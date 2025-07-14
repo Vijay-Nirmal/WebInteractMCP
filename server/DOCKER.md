@@ -102,7 +102,7 @@ The Docker Compose files include comprehensive environment variable configuratio
 docker build -t vijaynirmalpon/web-intract-mcp-server:latest .
 
 # Tag for versioning
-docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:v0.1.0
+docker tag vijaynirmalpon/web-intract-mcp-server:latest vijaynirmalpon/web-intract-mcp-server:0.1.0
 ```
 
 ### Push to Docker Hub
@@ -113,7 +113,7 @@ docker login
 
 # Push images
 docker push vijaynirmalpon/web-intract-mcp-server:latest
-docker push vijaynirmalpon/web-intract-mcp-server:v0.1.0
+docker push vijaynirmalpon/web-intract-mcp-server:0.1.0
 ```
 
 ### Use Published Image
@@ -255,7 +255,7 @@ services:
 version: '3.8'
 services:
   webintract-mcp-server:
-    image: your-dockerhub-username/webintract-mcp-server:v1.0.0
+    image: your-dockerhub-username/webintract-mcp-server:1.0.0
     deploy:
       replicas: 3
       resources:

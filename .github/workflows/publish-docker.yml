@@ -55,12 +55,12 @@ jobs:
           VERSION="${{ steps.extract-version.outputs.version }}"
           
           if [ "$RELEASE_TYPE" = "production" ]; then
-            TAGS="${{ env.DOCKER_IMAGE }}:latest,${{ env.DOCKER_IMAGE }}:v$VERSION"
+            TAGS="${{ env.DOCKER_IMAGE }}:latest,${{ env.DOCKER_IMAGE }}:$VERSION"
             BUILD_VERSION="$VERSION"
             IS_PRODUCTION="true"
           else
             PREVIEW_VERSION="$VERSION-preview.${{ github.run_number }}"
-            TAGS="${{ env.DOCKER_IMAGE }}:preview,${{ env.DOCKER_IMAGE }}:v$PREVIEW_VERSION"
+            TAGS="${{ env.DOCKER_IMAGE }}:preview,${{ env.DOCKER_IMAGE }}:$PREVIEW_VERSION"
             BUILD_VERSION="$PREVIEW_VERSION"
             IS_PRODUCTION="false"
           fi
