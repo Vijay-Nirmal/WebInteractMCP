@@ -155,7 +155,6 @@ jobs:
           DOCKER_SCOUT_HUB_PASSWORD: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
       - name: Update Docker Hub description
-        if: needs.build.outputs.is-production == 'true'
         uses: peter-evans/dockerhub-description@v4
         with:
           username: vijaynirmalpon
