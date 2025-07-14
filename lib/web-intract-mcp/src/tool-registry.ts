@@ -31,6 +31,7 @@ export interface ToolSummary {
 export class ToolRegistry {
   private readonly tools = new Map<string, ToolConfiguration>();
   private readonly logger: Console;
+  private cachedToolsJson: string = '[]';
 
   /**
    * Creates a new ToolRegistry instance
@@ -149,6 +150,14 @@ export class ToolRegistry {
   }
 
   /**
+   * Gets all tools as a JSON string for MCP server communication
+   * @returns JSON string representation of all tool configurations
+   */
+  getToolsAsJson(): string {
+    return this.cachedToolsJson;
+  }
+
+  /**
    * Gets a summary of all tools with their parameter information for MCP server discovery
    * @returns Array of tool summaries including parameter information
    */
@@ -221,6 +230,7 @@ export class ToolRegistry {
    */
   clearTools(): void {
     this.tools.clear();
+    this.cachedToolsJson = '[]';
   }
 
   /**
@@ -268,7 +278,25 @@ export class ToolRegistry {
       }
     }
 
+    // Pre-calculate JSON representation for MCP server communication
+    this.cacheToolsJson();
+
     return results;
+  }
+
+  /**
+   * Pre-calculates and caches the JSON representation of all tools
+   * @private
+   */
+  private cacheToolsJson(): void {
+    try {
+      const toolsArray = Array.from(this.tools.values());
+      this.cachedToolsJson = JSON.stringify(toolsArray, null, 0);
+      this.logger.log(`Cached JSON representation of ${toolsArray.length} tools`);
+    } catch (error) {
+      this.logger.error('Error caching tools JSON:', error);
+      this.cachedToolsJson = '[]';
+    }
   }
 
   /**

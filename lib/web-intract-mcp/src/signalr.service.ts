@@ -6,7 +6,8 @@
  */
 
 import * as signalR from '@microsoft/signalr';
-import { ToolStartConfig, CallToolResult, createErrorResult, TransportOptions } from './types';
+import { ToolStartConfig, CallToolResult, createErrorResult, TransportOptions, TransportType, LogLevel } from './types';
+import { ToolRegistry } from './tool-registry';
 
 /**
  * Forward declaration to avoid circular dependency
@@ -27,17 +28,70 @@ export class WebIntractSignalRService {
   private isManuallyDisconnected = false;
 
   /**
+   * Maps our TransportType enum to SignalR's HttpTransportType
+   * Explicitly maps each transport type and handles flag combinations
+   */
+  private mapTransportType(transportType: TransportType): signalR.HttpTransportType {
+    let result = signalR.HttpTransportType.None;
+    
+    if (transportType & TransportType.WebSockets) {
+      result |= signalR.HttpTransportType.WebSockets;
+    }
+    
+    if (transportType & TransportType.ServerSentEvents) {
+      result |= signalR.HttpTransportType.ServerSentEvents;
+    }
+    
+    if (transportType & TransportType.LongPolling) {
+      result |= signalR.HttpTransportType.LongPolling;
+    }
+    
+    return result;
+  }
+
+  /**
+   * Maps our LogLevel enum to SignalR's LogLevel
+   */
+  private mapLogLevel(logLevel: LogLevel): signalR.LogLevel {
+    switch (logLevel) {
+      case LogLevel.TRACE:
+        return signalR.LogLevel.Trace;
+      case LogLevel.DEBUG:
+        return signalR.LogLevel.Debug;
+      case LogLevel.INFO:
+        return signalR.LogLevel.Information;
+      case LogLevel.WARN:
+        return signalR.LogLevel.Warning;
+      case LogLevel.ERROR:
+      case LogLevel.FATAL:
+        return signalR.LogLevel.Error;
+      case LogLevel.OFF:
+        return signalR.LogLevel.None;
+      default:
+        return signalR.LogLevel.Information;
+    }
+  }
+
+  /**
    * Creates a new WebIntractSignalRService instance
+   * @param serverUrl - The base URL of the MCP server
+   * @param mcpController - The MCP controller instance
+   * @param toolRegistry - The tool registry instance for tool discovery
    * @param config - Configuration options for the service
    */
-  constructor(private serverUrl: string, private mcpController: WebIntractMCPController, config: Partial<TransportOptions> = {}) {
+  constructor(
+    private serverUrl: string, 
+    private mcpController: WebIntractMCPController,
+    private toolRegistry: ToolRegistry,
+    config: Partial<TransportOptions> = {}
+  ) {
     this.config = {
       hubPath: '/mcptools',
       maxRetryAttempts: 10,
       baseRetryDelayMs: 1000,
       enableLogging: false,
-      logLevel: signalR.LogLevel.Information,
-      transportTypes: signalR.HttpTransportType.WebSockets | signalR.HttpTransportType.ServerSentEvents | signalR.HttpTransportType.LongPolling,
+      logLevel: LogLevel.INFO,
+      transportTypes: TransportType.WebSockets | TransportType.ServerSentEvents | TransportType.LongPolling,
       ...config
     };
 
@@ -151,7 +205,7 @@ export class WebIntractSignalRService {
     
     this.connection = new signalR.HubConnectionBuilder()
       .withUrl(hubUrl, {
-        transport: this.config.transportTypes
+        transport: this.mapTransportType(this.config.transportTypes)
       })
       .withAutomaticReconnect({
         nextRetryDelayInMilliseconds: (retryContext) => {
@@ -163,7 +217,7 @@ export class WebIntractSignalRService {
           return delay + Math.random() * 1000; // Add jitter
         }
       })
-      .configureLogging(this.config.logLevel)
+      .configureLogging(this.mapLogLevel(this.config.logLevel))
       .build();
 
     this.setupEventHandlers();
@@ -185,6 +239,20 @@ export class WebIntractSignalRService {
       } catch (error) {
         this.logger.error('Error executing tool:', error);
         return createErrorResult(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
+
+    // Listen for tool discovery requests from the server
+    this.connection.on('GetTools', (): string => {
+      this.logger.log('Received tools discovery request from server');
+      
+      try {
+        const toolsJson = this.toolRegistry.getToolsAsJson();
+        this.logger.log(`Returning ${JSON.parse(toolsJson).length} tools to server`);
+        return toolsJson;
+      } catch (error) {
+        this.logger.error('Error getting tools for discovery:', error);
+        return '[]';
       }
     });
 

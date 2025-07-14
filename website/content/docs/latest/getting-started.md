@@ -14,7 +14,7 @@ WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enabl
 
 ## Key Components
 
-### 📚 web-intract-mcp
+### 📚 @web-intract-mcp/client
 TypeScript library for client-side integration. This framework-agnostic library can be integrated into any JavaScript framework (React, Angular, Vue, etc.).
 
 ### 🖥️ WebIntractMCPServer
@@ -34,7 +34,7 @@ graph TB
     
     subgraph "WebIntractMCP Ecosystem"
         B[WebIntractMCPServer]
-        C[web-intract-mcp<br/>TypeScript Library]
+        C[@web-intract-mcp/client<br/>TypeScript Library]
     end
     
     subgraph "MCP Client (Chatbot/AI)"
@@ -53,7 +53,7 @@ graph TB
 ### 1. Install the Client Library
 
 ```bash
-npm install web-intract-mcp
+npm install @web-intract-mcp/client
 ```
 
 ### 2. Run the MCP Server
@@ -91,7 +91,7 @@ Create a `mcp-tools.json` file in your web application's public directory:
 ### 4. Initialize in Your Web App
 
 ```typescript
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
 const controller = createWebIntractMCPController();
 await controller.loadTools('/mcp-tools.json');

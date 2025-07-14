@@ -134,18 +134,11 @@ env:
   ASPNETCORE_URLS: "http://+:8080"
   
   # McpIntract Configuration
-  McpIntract__Client__BaseUrl: "http://localhost:4200"
-  McpIntract__Client__ToolsEndpoint: "/mcp-tools.json"
-  McpIntract__Client__TimeoutSeconds: "30"
-  McpIntract__Client__CacheTools: "true"
-  McpIntract__Client__CacheDurationMinutes: "30"
-  
   McpIntract__Tool__TimeoutMinutes: "5"
   McpIntract__Tool__EnableDetailedErrorLogging: "false"
   
   McpIntract__Cors__AllowedOrigins__0: "http://localhost:4200"
   McpIntract__Cors__AllowAnyOrigin: "false"
-  McpIntract__Cors__AllowCredentials: "true"
 
 # Configuration for Redis (if using distributed caching)
 redis:

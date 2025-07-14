@@ -12,486 +12,777 @@ Complete API documentation for WebIntractMCP.
 
 The main controller class for managing MCP sessions and tool execution.
 
-### createWebIntractMCPController(options?)
+### Constructor
 
-Creates a new instance of the WebIntractMCP controller.
+```typescript
+new WebIntractMCPController(
+  options: WebIntractMCPOptions,
+  shepherdOptions?: ShepherdOptions,
+  logger?: ILogger
+)
+```
 
 #### Parameters
 
-- `options` (optional): Configuration options
-  - `serverUrl`: MCP server URL (default: 'http://localhost:8080')
-  - `enableLogging`: Enable debug logging (default: false)
-  - `reconnectAttempts`: Number of reconnection attempts (default: 3)
-  - `reconnectDelay`: Delay between reconnection attempts in ms (default: 1000)
+- `options` - Configuration options for the controller  
+- `shepherdOptions` (optional) - Shepherd.js configuration for UI tours (defaults to production-ready configuration)
+- `logger` (optional) - Custom logger implementation (defaults to ConsoleLogger)
 
-#### Returns
+#### WebIntractMCPOptions
 
-`WebIntractMCPController` instance
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `logLevel` | `LogLevel` | `LogLevel.WARN` | Set logging level (TRACE, DEBUG, INFO, WARN, ERROR, FATAL, OFF) |
+| `serverUrl` | `string` | `'http://localhost:8080'` | MCP server URL |
+| `enableVisualFeedback` | `boolean` | `true` | Enable visual feedback for actions |
+| `transport` | `TransportOptions` | `undefined` | SignalR transport configuration |
+
+#### Default Shepherd Options
+
+When `shepherdOptions` is not provided, the controller uses these production-ready defaults:
+
+```typescript
+{
+  useModalOverlay: true,
+  defaultStepOptions: {
+    scrollTo: { behavior: 'smooth', block: 'center' },
+    modalOverlayOpeningPadding: 4,
+    modalOverlayOpeningRadius: 4,
+    arrow: true,
+    buttons: [{
+      text: 'Next',
+      action: () => tour.next()
+    }],
+    when: {
+      show: function() { document.body.style.pointerEvents = 'none'; },
+      hide: function() { document.body.style.pointerEvents = 'auto'; }
+    }
+  }
+}
+```
 
 #### Example
 
 ```typescript
-import { createWebIntractMCPController } from 'web-intract-mcp';
+import { WebIntractMCPController, LogLevel, TransportType } from '@web-intract-mcp/client';
 
-const controller = createWebIntractMCPController({
+const controller = new WebIntractMCPController({
+  logLevel: LogLevel.INFO,
   serverUrl: 'https://my-mcp-server.com',
-  enableLogging: true,
-  reconnectAttempts: 5
+  enableVisualFeedback: true,
+  transport: {
+    hubPath: '/mcptools',
+    logLevel: LogLevel.WARN,
+    transportTypes: TransportType.WebSockets | TransportType.ServerSentEvents
+  }
 });
 ```
 
-### controller.loadTools(toolsPath)
+### Core Methods
 
-Loads tool configurations from a JSON file.
+#### `initialize(): Promise<void>`
 
-#### Parameters
+Initializes the MCP controller and establishes connections.
 
-- `toolsPath`: Path to the tools JSON file
-
-#### Returns
-
-`Promise<void>`
-
-#### Example
+**Throws:**
+- Error if already initialized
+- Error if invalid configuration
 
 ```typescript
-await controller.loadTools('/mcp-tools.json');
+await controller.initialize();
 ```
 
-### controller.createSession(serverUrl?)
+#### `dispose(): void`
 
-Creates a new MCP session with the server.
-
-#### Parameters
-
-- `serverUrl` (optional): Override the default server URL
-
-#### Returns
-
-`Promise<string>` - Session ID
-
-#### Example
+Cleans up resources and closes connections. Safe to call multiple times.
 
 ```typescript
-const sessionId = await controller.createSession();
-console.log('Session created:', sessionId);
+controller.dispose();
 ```
 
-### controller.executeTool(toolId, parameters?)
+#### `registerTool(tool: MCPTool): void`
 
-Executes a specific tool with optional parameters.
+Registers a tool with the MCP system.
 
-#### Parameters
+**Parameters:**
+- `tool` - The tool definition conforming to the MCP Tool schema
 
-- `toolId`: ID of the tool to execute
-- `parameters` (optional): Tool parameters object
-
-#### Returns
-
-`Promise<ToolExecutionResult>`
-
-#### Example
+**Throws:**
+- Error if tool name already exists
+- Error if tool schema is invalid
 
 ```typescript
-const result = await controller.executeTool('click-button', {
-  buttonId: 'submit-btn'
+const tool: MCPTool = {
+  name: 'click-button',
+  description: 'Clicks a button element',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      selector: { type: 'string', description: 'CSS selector for the button' }
+    },
+    required: ['selector']
+  }
+};
+
+controller.registerTool(tool);
+```
+
+#### `getTool(name: string): MCPTool | undefined`
+
+Retrieves a registered tool by name.
+
+```typescript
+const tool = controller.getTool('click-button');
+```
+
+#### `getTools(): MCPTool[]`
+
+Returns all registered tools.
+
+```typescript
+const allTools = controller.getTools();
+```
+
+#### `getToolsAsJson(): string`
+
+Returns all registered tools as a pre-cached JSON string. This method is optimized for SignalR communication and caches the JSON representation for better performance.
+
+```typescript
+const toolsJson = controller.getToolsAsJson();
+// Returns: '{"tools":[{"name":"click-button","description":"..."}]}'
+```
+
+> **Performance Note**: The JSON is cached and only regenerated when tools are modified, making this method ideal for frequent API calls.
+
+#### `invokeTool(toolCall: ToolCall): Promise<ToolResult>`
+
+Invokes a tool with the specified parameters.
+
+**Returns:**
+- Promise resolving to tool execution result
+
+**Throws:**
+- Error if tool not found
+- Error if tool execution fails
+- Error if parameters are invalid
+
+```typescript
+const result = await controller.invokeTool({
+  name: 'click-button',
+  arguments: { selector: '#submit-btn' }
 });
 ```
 
-### controller.getAvailableTools()
+#### `updateToolsFile(): Promise<void>`
 
-Gets a list of all available tools.
-
-#### Returns
-
-`Tool[]` - Array of available tools
-
-#### Example
+Updates the tools file with current registered tools.
 
 ```typescript
-const tools = controller.getAvailableTools();
-console.log('Available tools:', tools);
+await controller.updateToolsFile();
 ```
 
-### controller.disconnect()
+### Production Utilities
 
-Disconnects from the MCP server and cleans up resources.
+#### `getHealthStatus(): HealthStatus`
 
-#### Returns
-
-`Promise<void>`
-
-#### Example
+Returns the current health status of the controller.
 
 ```typescript
-await controller.disconnect();
+interface HealthStatus {
+  isHealthy: boolean;
+  connectionStatus: 'connected' | 'disconnected' | 'connecting' | 'reconnecting';
+  lastHeartbeat: Date | null;
+  signalrConnected: boolean;
+  toolsLoaded: boolean;
+  errors: string[];
+  warnings: string[];
+  uptime: number;
+}
+
+const health = controller.getHealthStatus();
+console.log('Controller health:', health);
 ```
 
-## Types
+#### `validateConfiguration(): ConfigurationValidationResult`
 
-### Tool
-
-Represents an MCP tool configuration.
+Validates the current configuration and returns validation result.
 
 ```typescript
-interface Tool {
-  toolId: string;
-  title: string;
+interface ConfigurationValidationResult {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
+  recommendations: string[];
+}
+
+const validation = controller.validateConfiguration();
+if (!validation.isValid) {
+  console.error('Configuration errors:', validation.errors);
+}
+```
+
+#### `getStatistics(): ControllerStatistics`
+
+Returns operational statistics for monitoring and debugging.
+
+```typescript
+interface ControllerStatistics {
+  toolsRegistered: number;
+  totalInvocations: number;
+  successfulInvocations: number;
+  failedInvocations: number;
+  averageResponseTime: number;
+  lastInvocation: Date | null;
+  signalrReconnections: number;
+  memoryUsage: {
+    used: number;
+    total: number;
+  };
+}
+
+const stats = controller.getStatistics();
+console.log('Success rate:', stats.successfulInvocations / stats.totalInvocations);
+```
+
+### Properties
+
+#### `isInitialized: boolean`
+
+Indicates whether the controller has been initialized.
+
+```typescript
+if (controller.isInitialized) {
+  console.log('Controller is ready to use');
+}
+```
+
+#### `tools: MCPTool[]`
+
+Read-only array of registered tools.
+
+```typescript
+console.log('Registered tools:', controller.tools.length);
+```
+
+#### `version: string`
+
+Returns the current version of the WebIntractMCP library.
+
+```typescript
+console.log('Library version:', controller.version);
+```
+
+#### `logger: ILogger`
+
+Access to the internal logger instance for custom logging.
+
+```typescript
+controller.logger.info('Custom log message');
+controller.logger.error('Error occurred', error);
+```
+
+### Logging System
+
+The controller includes a comprehensive logging system with multiple log levels.
+
+#### Log Levels
+
+| Level | Description | Production Use |
+|-------|-------------|----------------|
+| `TRACE` | Detailed execution traces | Development only |
+| `DEBUG` | Debug information | Development only |
+| `INFO` | General information | Production |
+| `WARN` | Warning messages | Production |
+| `ERROR` | Error messages | Production |
+| `FATAL` | Fatal errors | Production |
+| `OFF` | Disable all logging | Special cases |
+
+#### ILogger Interface
+
+```typescript
+interface ILogger {
+  trace(message: string, ...args: any[]): void;
+  debug(message: string, ...args: any[]): void;
+  info(message: string, ...args: any[]): void;
+  warn(message: string, ...args: any[]): void;
+  error(message: string, ...args: any[]): void;
+  fatal(message: string, ...args: any[]): void;
+}
+```
+
+#### Configuration Examples
+
+```typescript
+import { WebIntractMCPController, LogLevel } from '@web-intract-mcp/client';
+
+// Development configuration
+const devController = new WebIntractMCPController({
+  logLevel: LogLevel.DEBUG,
+  serverUrl: 'http://localhost:5000'
+});
+
+// Production configuration
+const prodController = new WebIntractMCPController({
+  logLevel: LogLevel.WARN,
+  serverUrl: 'https://api.myapp.com'
+});
+
+// Disable all logging
+const silentController = new WebIntractMCPController({
+  logLevel: LogLevel.OFF
+});
+```
+
+## Types and Interfaces
+
+### MCPTool
+
+Core MCP tool definition conforming to the Model Context Protocol specification.
+
+```typescript
+interface MCPTool {
+  name: string;
   description: string;
-  mode: 'silent' | 'guided' | 'interactive';
-  parameters?: ToolParameters;
-  steps: ToolStep[];
+  inputSchema: {
+    type: 'object';
+    properties: Record<string, any>;
+    required?: string[];
+  };
 }
 ```
 
-### ToolParameters
+### ToolCall
 
-Schema for tool parameters.
+Represents a request to invoke a tool.
 
 ```typescript
-interface ToolParameters {
-  type: 'object';
-  properties: Record<string, ParameterSchema>;
-  required?: string[];
-}
-
-interface ParameterSchema {
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
-  description: string;
-  enum?: string[];
-  default?: any;
+interface ToolCall {
+  name: string;
+  arguments: Record<string, any>;
 }
 ```
 
-### ToolStep
-
-Represents a single step in a tool execution.
-
-```typescript
-interface ToolStep {
-  targetElement: string;
-  action: ToolAction;
-  description?: string;
-  validation?: ToolValidation;
-  condition?: ToolCondition;
-}
-```
-
-### ToolAction
-
-Defines the action to perform in a tool step.
-
-```typescript
-interface ToolAction {
-  type: 'click' | 'type' | 'select' | 'wait' | 'custom' | 'highlight';
-  element: string;
-  value?: string;
-  options?: ActionOptions;
-}
-
-interface ActionOptions {
-  waitForElement?: boolean;
-  timeout?: number;
-  clearFirst?: boolean;
-  typeDelay?: number;
-  byValue?: boolean;
-  waitFor?: 'appear' | 'disappear';
-  script?: string;
-}
-```
-
-### ToolValidation
-
-Validation rules for tool steps.
-
-```typescript
-interface ToolValidation {
-  type: 'exists' | 'visible' | 'text' | 'value' | 'count';
-  expected: any;
-  errorMessage?: string;
-}
-```
-
-### ToolExecutionResult
+### ToolResult
 
 Result of tool execution.
 
 ```typescript
-interface ToolExecutionResult {
-  success: boolean;
-  toolId: string;
-  sessionId: string;
-  steps: StepResult[];
-  error?: string;
-  duration: number;
+interface ToolResult {
+  content: Array<{
+    type: 'text' | 'image';
+    text?: string;
+    data?: string;
+    mimeType?: string;
+  }>;
+  isError?: boolean;
+}
+```
+
+### LogLevel
+
+Enumeration of available log levels.
+
+```typescript
+enum LogLevel {
+  TRACE = 0,
+  DEBUG = 1,
+  INFO = 2,
+  WARN = 3,
+  ERROR = 4,
+  FATAL = 5,
+  OFF = 6
+}
+```
+
+### WebIntractMCPOptions
+
+Configuration options for the controller.
+
+```typescript
+interface WebIntractMCPOptions {
+  logLevel?: LogLevel;
+  debugMode?: boolean; // Deprecated: Use logLevel instead
+  serverUrl?: string;
+  reconnectAttempts?: number;
+  reconnectDelay?: number;
+  [key: string]: any;
+}
+```
+
+### ShepherdOptions
+
+Configuration for Shepherd.js UI tours.
+
+```typescript
+interface ShepherdOptions {
+  useModalOverlay?: boolean;
+  defaultStepOptions?: {
+    scrollTo?: ScrollToOptions;
+    modalOverlayOpeningPadding?: number;
+    modalOverlayOpeningRadius?: number;
+    arrow?: boolean;
+    buttons?: ShepherdButton[];
+    when?: {
+      show?: () => void;
+      hide?: () => void;
+    };
+  };
 }
 
-interface StepResult {
-  stepIndex: number;
-  success: boolean;
-  duration: number;
-  error?: string;
-  screenshot?: string;
+interface ShepherdButton {
+  text: string;
+  action: () => void;
+  classes?: string;
 }
 ```
 
 ## Events
 
-The controller emits various events during tool execution.
+The controller emits events for monitoring and debugging.
 
-### toolExecutionStarted
+### toolRegistered
 
-Fired when tool execution begins.
+Fired when a tool is successfully registered.
 
 ```typescript
-controller.on('toolExecutionStarted', (event) => {
-  console.log('Tool execution started:', event.toolId);
+controller.on('toolRegistered', (tool: MCPTool) => {
+  console.log('Tool registered:', tool.name);
 });
 ```
 
-### toolExecutionCompleted
+### toolInvoked
 
-Fired when tool execution completes.
-
-```typescript
-controller.on('toolExecutionCompleted', (result) => {
-  console.log('Tool execution completed:', result);
-});
-```
-
-### stepExecuted
-
-Fired when a tool step is executed.
+Fired when a tool is invoked.
 
 ```typescript
-controller.on('stepExecuted', (stepResult) => {
-  console.log('Step executed:', stepResult);
+controller.on('toolInvoked', (toolCall: ToolCall) => {
+  console.log('Tool invoked:', toolCall.name);
 });
 ```
 
 ### connectionStateChanged
 
-Fired when the connection state changes.
+Fired when SignalR connection state changes.
 
 ```typescript
-controller.on('connectionStateChanged', (state) => {
-  console.log('Connection state:', state);
+controller.on('connectionStateChanged', (state: string) => {
+  console.log('Connection state changed:', state);
+});
+```
+
+### error
+
+Fired when an error occurs.
+
+```typescript
+controller.on('error', (error: Error) => {
+  console.error('Controller error:', error.message);
 });
 ```
 
 ## Error Handling
 
-WebIntractMCP provides comprehensive error handling with specific error types.
+The controller provides comprehensive error handling with categorized errors.
 
-### MCPConnectionError
+### Error Categories
 
-Thrown when connection to the MCP server fails.
+- **Configuration Errors**: Invalid options or setup
+- **Connection Errors**: SignalR connectivity issues  
+- **Tool Errors**: Tool registration or execution failures
+- **Validation Errors**: Parameter or schema validation failures
+
+### Error Examples
 
 ```typescript
 try {
-  await controller.createSession();
+  await controller.initialize();
 } catch (error) {
-  if (error instanceof MCPConnectionError) {
-    console.error('Failed to connect to MCP server:', error.message);
+  if (error.message.includes('configuration')) {
+    console.error('Configuration error:', error.message);
+  } else if (error.message.includes('connection')) {
+    console.error('Connection error:', error.message);
   }
+}
+
+try {
+  await controller.invokeTool({ name: 'invalid-tool', arguments: {} });
+} catch (error) {
+  console.error('Tool execution failed:', error.message);
+}
+
+try {
+  controller.registerTool({
+    name: '',
+    description: 'Invalid tool',
+    inputSchema: { type: 'object', properties: {} }
+  });
+} catch (error) {
+  console.error('Tool registration failed:', error.message);
 }
 ```
 
-### ToolExecutionError
-
-Thrown when tool execution fails.
+### Error Recovery
 
 ```typescript
-try {
-  await controller.executeTool('invalid-tool');
-} catch (error) {
-  if (error instanceof ToolExecutionError) {
-    console.error('Tool execution failed:', error.message);
-    console.error('Failed step:', error.stepIndex);
+// Automatic reconnection on connection loss
+controller.on('connectionStateChanged', (state) => {
+  if (state === 'disconnected') {
+    console.log('Connection lost, attempting to reconnect...');
+    // Controller will automatically attempt reconnection
   }
-}
-```
+});
 
-### ValidationError
-
-Thrown when tool validation fails.
-
-```typescript
-try {
-  await controller.executeTool('form-submit');
-} catch (error) {
-  if (error instanceof ValidationError) {
-    console.error('Validation failed:', error.message);
+// Graceful error handling
+const executeToolSafely = async (toolCall: ToolCall) => {
+  try {
+    return await controller.invokeTool(toolCall);
+  } catch (error) {
+    controller.logger.error('Tool execution failed:', error);
+    return {
+      content: [{ type: 'text', text: `Error: ${error.message}` }],
+      isError: true
+    };
   }
-}
+};
 ```
 
 ## Advanced Usage
 
-### Custom Action Handlers
-
-Register custom action handlers for specialized functionality.
+### Complete Integration Example
 
 ```typescript
-controller.registerActionHandler('customScroll', (element, options) => {
-  element.scrollIntoView({ 
-    behavior: options.behavior || 'smooth',
-    block: options.block || 'center'
-  });
+import { WebIntractMCPController, LogLevel, MCPTool } from '@web-intract-mcp/client';
+
+// Create controller with production settings
+const controller = new WebIntractMCPController({
+  logLevel: LogLevel.INFO,
+  serverUrl: 'https://api.myapp.com',
+  reconnectAttempts: 5,
+  reconnectDelay: 2000
 });
-```
 
-### Middleware
-
-Add middleware to intercept and modify tool execution.
-
-```typescript
-controller.use((context, next) => {
-  console.log('Executing step:', context.step);
-  return next();
-});
-```
-
-### Session Management
-
-Manage multiple sessions for different users or contexts.
-
-```typescript
-const session1 = await controller.createSession();
-const session2 = await controller.createSession();
-
-// Execute tools in different sessions
-await controller.executeTool('tool1', {}, session1);
-await controller.executeTool('tool2', {}, session2);
-```
-
-## Configuration Examples
-
-### Complete Tool Configuration
-
-```json
-{
-  "toolId": "complete-checkout",
-  "title": "Complete Checkout Process",
-  "description": "Automates the entire e-commerce checkout process",
-  "mode": "guided",
-  "parameters": {
-    "type": "object",
-    "properties": {
-      "customerInfo": {
-        "type": "object",
-        "properties": {
-          "email": { "type": "string", "description": "Customer email" },
-          "firstName": { "type": "string", "description": "First name" },
-          "lastName": { "type": "string", "description": "Last name" }
+// Initialize and register tools
+async function setupMCP() {
+  try {
+    await controller.initialize();
+    
+    // Register a form submission tool
+    const formTool: MCPTool = {
+      name: 'submit-form',
+      description: 'Submits a form with provided data',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          formSelector: { type: 'string', description: 'CSS selector for the form' },
+          data: { type: 'object', description: 'Form data to submit' }
         },
-        "required": ["email", "firstName", "lastName"]
-      },
-      "paymentMethod": {
-        "type": "string",
-        "enum": ["credit", "debit", "paypal"],
-        "description": "Payment method"
+        required: ['formSelector', 'data']
       }
-    },
-    "required": ["customerInfo", "paymentMethod"]
-  },
-  "steps": [
-    {
-      "targetElement": "#checkout-btn",
-      "action": {
-        "type": "click",
-        "element": "#checkout-btn",
-        "options": { "waitForElement": true, "timeout": 5000 }
-      },
-      "description": "Proceeding to checkout...",
-      "validation": {
-        "type": "visible",
-        "expected": true,
-        "errorMessage": "Checkout page not loaded"
-      }
-    }
-  ],
-  "errorHandling": {
-    "retries": 3,
-    "onError": [
-      {
-        "action": { "type": "click", "element": ".error-close" }
-      }
-    ]
+    };
+    
+    controller.registerTool(formTool);
+    
+    // Set up event listeners
+    controller.on('toolInvoked', (toolCall) => {
+      console.log(`Executing tool: ${toolCall.name}`);
+    });
+    
+    controller.on('error', (error) => {
+      console.error('MCP Error:', error.message);
+    });
+    
+    console.log('MCP Controller initialized successfully');
+    
+  } catch (error) {
+    console.error('Failed to initialize MCP:', error);
   }
 }
-```
 
-## Server Configuration
-
-### MCP Server Setup
-
-The WebIntractMCP server can be configured via environment variables or configuration files.
-
-#### Environment Variables
-
-```bash
-MCP_PORT=8080
-MCP_CORS_ORIGINS=https://myapp.com,http://localhost:3000
-MCP_LOG_LEVEL=info
-MCP_SESSION_TIMEOUT=3600
-```
-
-#### Configuration File
-
-```json
-{
-  "server": {
-    "port": 8080,
-    "cors": {
-      "origins": ["https://myapp.com", "http://localhost:3000"],
-      "credentials": true
-    },
-    "logging": {
-      "level": "info",
-      "console": true,
-      "file": "mcp-server.log"
-    },
-    "session": {
-      "timeout": 3600,
-      "cleanupInterval": 300
+// Execute tool with error handling
+async function executeFormSubmission(formData: any) {
+  try {
+    const result = await controller.invokeTool({
+      name: 'submit-form',
+      arguments: {
+        formSelector: '#checkout-form',
+        data: formData
+      }
+    });
+    
+    if (result.isError) {
+      console.error('Form submission failed:', result.content[0].text);
+    } else {
+      console.log('Form submitted successfully:', result.content[0].text);
     }
+    
+    return result;
+  } catch (error) {
+    console.error('Tool execution error:', error);
+    throw error;
   }
 }
+
+// Monitor controller health
+function monitorHealth() {
+  const health = controller.getHealthStatus();
+  const stats = controller.getStatistics();
+  
+  console.log('Health Status:', {
+    healthy: health.isHealthy,
+    connected: health.signalrConnected,
+    uptime: health.uptime,
+    successRate: stats.totalInvocations > 0 
+      ? (stats.successfulInvocations / stats.totalInvocations * 100).toFixed(2) + '%'
+      : 'N/A'
+  });
+}
+
+// Cleanup on app shutdown
+function cleanup() {
+  controller.dispose();
+  console.log('MCP Controller disposed');
+}
+
+// Initialize
+setupMCP();
+
+// Monitor health every 30 seconds
+setInterval(monitorHealth, 30000);
+
+// Cleanup on process exit
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
 ```
 
-## Performance Optimization
-
-### Best Practices
-
-1. **Use specific selectors**: Avoid overly broad CSS selectors
-2. **Set appropriate timeouts**: Balance reliability with performance
-3. **Minimize DOM queries**: Cache element references when possible
-4. **Use efficient validation**: Choose appropriate validation types
-5. **Implement error recovery**: Handle failures gracefully
-
-### Monitoring
+### Custom Logger Implementation
 
 ```typescript
-// Enable performance monitoring
-const controller = createWebIntractMCPController({
-  enableLogging: true,
-  performanceTracking: true
+import { ILogger, LogLevel } from '@web-intract-mcp/client';
+
+class CustomLogger implements ILogger {
+  private logLevel: LogLevel;
+  
+  constructor(level: LogLevel = LogLevel.INFO) {
+    this.logLevel = level;
+  }
+  
+  private shouldLog(level: LogLevel): boolean {
+    return level >= this.logLevel;
+  }
+  
+  trace(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.TRACE)) {
+      console.log(`[TRACE] ${message}`, ...args);
+    }
+  }
+  
+  debug(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.DEBUG)) {
+      console.log(`[DEBUG] ${message}`, ...args);
+    }
+  }
+  
+  info(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.INFO)) {
+      console.info(`[INFO] ${message}`, ...args);
+    }
+  }
+  
+  warn(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.WARN)) {
+      console.warn(`[WARN] ${message}`, ...args);
+    }
+  }
+  
+  error(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.ERROR)) {
+      console.error(`[ERROR] ${message}`, ...args);
+    }
+  }
+  
+  fatal(message: string, ...args: any[]): void {
+    if (this.shouldLog(LogLevel.FATAL)) {
+      console.error(`[FATAL] ${message}`, ...args);
+    }
+  }
+}
+
+// Use custom logger
+const controller = new WebIntractMCPController({
+  logLevel: LogLevel.DEBUG
 });
 
-// Monitor tool execution times
-controller.on('toolExecutionCompleted', (result) => {
-  console.log(`Tool ${result.toolId} took ${result.duration}ms`);
-});
+// Access the logger for custom logging
+controller.logger.info('Custom log message');
 ```
 
-## Migration Guide
+### Production Monitoring
 
-### From v0.x to v1.x
+```typescript
+// Health monitoring service
+class MCPHealthMonitor {
+  private controller: WebIntractMCPController;
+  private healthCheckInterval: NodeJS.Timeout;
+  
+  constructor(controller: WebIntractMCPController) {
+    this.controller = controller;
+  }
+  
+  startMonitoring(intervalMs = 30000) {
+    this.healthCheckInterval = setInterval(() => {
+      this.performHealthCheck();
+    }, intervalMs);
+  }
+  
+  stopMonitoring() {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+    }
+  }
+  
+  private performHealthCheck() {
+    const health = this.controller.getHealthStatus();
+    const stats = this.controller.getStatistics();
+    const validation = this.controller.validateConfiguration();
+    
+    // Log health metrics
+    this.controller.logger.info('Health Check', {
+      healthy: health.isHealthy,
+      connected: health.signalrConnected,
+      uptime: health.uptime,
+      toolsLoaded: health.toolsLoaded,
+      configValid: validation.isValid,
+      successRate: stats.totalInvocations > 0 
+        ? (stats.successfulInvocations / stats.totalInvocations)
+        : 0
+    });
+    
+    // Alert on issues
+    if (!health.isHealthy) {
+      this.controller.logger.error('Health check failed', {
+        errors: health.errors,
+        warnings: health.warnings
+      });
+    }
+    
+    if (!validation.isValid) {
+      this.controller.logger.error('Configuration validation failed', {
+        errors: validation.errors,
+        warnings: validation.warnings
+      });
+    }
+  }
+  
+  getMetrics() {
+    return {
+      health: this.controller.getHealthStatus(),
+      statistics: this.controller.getStatistics(),
+      validation: this.controller.validateConfiguration()
+    };
+  }
+}
 
-1. Update import statements
-2. Replace deprecated methods
-3. Update tool configurations
-4. Test thoroughly
-
-See the [Migration Guide](./migration) for detailed instructions.
+// Usage
+const monitor = new MCPHealthMonitor(controller);
+monitor.startMonitoring(30000); // Check every 30 seconds
+```

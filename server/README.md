@@ -1,6 +1,6 @@
 # WebIntract MCP Server
 
-A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication using the web-intract-mcp npm library
+A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication using the @web-intract-mcp/client npm library
 
 ## Overview
 
@@ -60,44 +60,27 @@ The application uses the `McpIntract` section in `appsettings.json` for configur
 
 | Setting | Environment Variable | Default Value | Type | Range/Options | Description |
 |---------|---------------------|---------------|------|---------------|-------------|
-| **Client Configuration** |
-| `McpIntract:Client:BaseUrl` | `McpIntract__Client__BaseUrl` | `http://localhost:4200` | string | Valid URL | The base URL of the client application |
-| `McpIntract:Client:ToolsEndpoint` | `McpIntract__Client__ToolsEndpoint` | `/mcp-tools.json` | string | Valid path | The endpoint path for fetching tools from the client |
-| `McpIntract:Client:TimeoutSeconds` | `McpIntract__Client__TimeoutSeconds` | `30` | integer | 1-300 | HTTP client timeout in seconds |
-| `McpIntract:Client:CacheTools` | `McpIntract__Client__CacheTools` | `true` | boolean | true/false | Whether to cache tools from the client |
-| `McpIntract:Client:CacheDurationMinutes` | `McpIntract__Client__CacheDurationMinutes` | `30` | integer | 1-1440 | Tool cache duration in minutes |
 | **Tool Configuration** |
 | `McpIntract:Tool:TimeoutMinutes` | `McpIntract__Tool__TimeoutMinutes` | `5` | integer | 1-60 | Tool execution timeout in minutes |
 | `McpIntract:Tool:EnableDetailedErrorLogging` | `McpIntract__Tool__EnableDetailedErrorLogging` | `false` | boolean | true/false | Whether to enable detailed error logging |
 | **CORS Configuration** |
 | `McpIntract:Cors:AllowedOrigins` | `McpIntract__Cors__AllowedOrigins` | `["http://localhost:4200"]` | array | Valid URLs | Array of allowed origins for CORS |
-| `McpIntract:Cors:AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `false` | boolean | true/false | Whether to allow any origin (use with caution in production) |
-| `McpIntract:Cors:AllowCredentials` | `McpIntract__Cors__AllowCredentials` | `true` | boolean | true/false | Whether to allow credentials |
-| `McpIntract:Cors:AllowedHeaders` | `McpIntract__Cors__AllowedHeaders` | `[]` | array | Valid headers | Additional allowed headers |
-| `McpIntract:Cors:AllowedMethods` | `McpIntract__Cors__AllowedMethods` | `[]` | array | HTTP methods | Additional allowed methods |
+| `McpIntract:Cors:AllowAnyOrigin` | `McpIntract__Cors__AllowAnyOrigin` | `true` | boolean | true/false | Whether to allow any origin (use with caution in production) |
+
+> **Migration Note**: As of version 1.0, the server uses **SignalR for tool discovery** instead of HTTP requests. Client configuration properties have been removed.
 
 ### Example Configuration
 
 ```json
 {
   "McpIntract": {
-    "Client": {
-      "BaseUrl": "http://localhost:4200",
-      "ToolsEndpoint": "/mcp-tools.json",
-      "TimeoutSeconds": 30,
-      "CacheTools": true,
-      "CacheDurationMinutes": 30
-    },
     "Tool": {
       "TimeoutMinutes": 5,
       "EnableDetailedErrorLogging": false
     },
     "Cors": {
       "AllowedOrigins": ["http://localhost:4200"],
-      "AllowAnyOrigin": false,
-      "AllowCredentials": true,
-      "AllowedHeaders": [],
-      "AllowedMethods": []
+      "AllowAnyOrigin": false
     }
   }
 }
@@ -227,7 +210,6 @@ image:
 
 env:
   ASPNETCORE_ENVIRONMENT: "Production"
-  McpIntract__Client__BaseUrl: "https://your-production-client.com"
   McpIntract__Cors__AllowedOrigins__0: "https://your-production-client.com"
   McpIntract__Tool__EnableDetailedErrorLogging: "false"
 
@@ -378,8 +360,8 @@ docker push your-dockerhub-username/webintract-mcp-server:v1.0.0
 docker run -d \
   --name webintract-mcp-server \
   -p 8080:8080 \
-  -e McpIntract__Client__BaseUrl=http://your-client-app:4200 \
   -e McpIntract__Cors__AllowedOrigins__0=http://your-client-app:4200 \
+  -e McpIntract__Tool__TimeoutMinutes=10 \
   -e ASPNETCORE_ENVIRONMENT=Production \
   your-dockerhub-username/webintract-mcp-server:latest
 ```
@@ -394,7 +376,6 @@ services:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - McpIntract__Client__BaseUrl=http://client-app:4200
       - McpIntract__Cors__AllowedOrigins__0=http://client-app:4200
       - McpIntract__Tool__EnableDetailedErrorLogging=false
     restart: unless-stopped
@@ -412,12 +393,10 @@ Set the following environment variables for production deployment:
 ```bash
 # Required
 ASPNETCORE_ENVIRONMENT=Production
-McpIntract__Client__BaseUrl=https://your-production-client.com
 McpIntract__Cors__AllowedOrigins__0=https://your-production-client.com
 
 # Optional but recommended
 McpIntract__Tool__EnableDetailedErrorLogging=false
-McpIntract__Client__TimeoutSeconds=60
 McpIntract__Tool__TimeoutMinutes=10
 ```
 
@@ -518,13 +497,13 @@ flowchart TD
     D -->|Yes| F{Tools Loading?}
     
     E --> E1[Verify AllowedOrigins]
-    E1 --> E2[Check Client BaseUrl]
+    E1 --> E2[Check SignalR Connection]
     
-    F -->|No| G[Check Tools Endpoint]
+    F -->|No| G[Check SignalR Hub]
     F -->|Yes| H{Tool Execution Working?}
     
-    G --> G1[Verify /mcp-tools.json accessible]
-    G1 --> G2[Check Client Application Status]
+    G --> G1[Verify /mcp-tools-hub accessible]
+    G1 --> G2[Check Client SignalR Connection]
     
     H -->|No| I[Check Timeouts & Errors]
     H -->|Yes| J[System Healthy]
@@ -551,8 +530,8 @@ docker logs webintract-mcp-server
 # Check environment variables
 docker exec webintract-mcp-server env | grep McpIntract
 
-# Test client tools endpoint
-curl http://your-client-app:4200/mcp-tools.json
+# Test SignalR hub endpoint (should return 404 for GET, but confirms endpoint exists)
+curl http://localhost:8080/mcp-tools-hub
 ```
 
 ## Contributing

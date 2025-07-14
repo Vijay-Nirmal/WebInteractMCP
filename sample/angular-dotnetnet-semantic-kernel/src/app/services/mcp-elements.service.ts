@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider } from 'web-intract-mcp';
+import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider, LogLevel } from '@web-intract-mcp/client';
 
 /**
  * Angular service for integrating MCP Elements with the WebIntractMCP application
@@ -13,6 +13,9 @@ export class MCPElementsService {
   
   constructor() {
     this.mcpController = new WebIntractMCPController({
+      enableVisualFeedback: true,
+      logLevel: LogLevel.DEBUG, // Set to DEBUG for development
+    }, {
       useModalOverlay: true,
       classPrefix: 'WebIntractMCP-shepherd',
       defaultStepOptions: {
@@ -20,9 +23,10 @@ export class MCPElementsService {
         popperOptions: {
           modifiers: [
             { name: 'offset', options: { offset: [0, 20] } }
-          ]        }
+          ]
+        }
       }
-    }, { enableVisualFeedback: true }); // Enable visual feedback by default
+    }); // Options first, then shepherd options
 
     this.setupEventListeners();
   }
@@ -45,7 +49,8 @@ export class MCPElementsService {
       
       try {
         const testParsed = JSON.parse(testText);
-        console.log('Test JSON parsing successful, tools count:', testParsed.length);        testParsed.forEach((tool: any, index: number) => {
+        console.log('Test JSON parsing successful, tools count:', testParsed.length);
+        testParsed.forEach((tool: any, index: number) => {
           console.log(`Test parsed tool ${index + 1}: ${tool.toolId}`);
         });
       } catch (parseError) {

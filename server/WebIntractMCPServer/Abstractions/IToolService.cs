@@ -10,9 +10,10 @@ public interface IToolService
     /// <summary>
     /// Retrieves available tools from the client
     /// </summary>
+    /// <param name="sessionId">Session identifier for the client connection</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns>List of available tools</returns>
-    Task<IReadOnlyList<Tool>> GetToolsAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Tool>> GetToolsAsync(string sessionId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Executes a tool on the client

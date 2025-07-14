@@ -32,7 +32,6 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IValidateOptions<McpIntractOptions>, McpIntractOptionsValidator>();
 
         // Register core services
-        services.AddHttpClient("McpIntractClient");
         services.AddMcpServer().WithHttpTransport();
         services.AddSignalR();
 
@@ -90,7 +89,7 @@ public static class ServiceCollectionExtensions
             var toolFactory = serviceProvider.GetRequiredService<IMcpServerToolFactory>();
 
             // Fetch tools from client
-            var clientTools = await toolService.GetToolsAsync(cancellationToken);
+            var clientTools = await toolService.GetToolsAsync(sessionId, cancellationToken);
 
             if (!clientTools.Any())
             {
@@ -176,30 +175,6 @@ internal sealed class McpIntractOptionsValidator : IValidateOptions<McpIntractOp
     public ValidateOptionsResult Validate(string? name, McpIntractOptions options)
     {
         List<string> failures = [];
-
-        if (string.IsNullOrWhiteSpace(options.Client.BaseUrl))
-        {
-            failures.Add($"{nameof(McpIntractOptions.Client)}.{nameof(ClientConfiguration.BaseUrl)} is required");
-        }
-        else if (!Uri.TryCreate(options.Client.BaseUrl, UriKind.Absolute, out _))
-        {
-            failures.Add($"{nameof(McpIntractOptions.Client)}.{nameof(ClientConfiguration.BaseUrl)} must be a valid URL");
-        }
-
-        if (string.IsNullOrWhiteSpace(options.Client.ToolsEndpoint))
-        {
-            failures.Add($"{nameof(McpIntractOptions.Client)}.{nameof(ClientConfiguration.ToolsEndpoint)} is required");
-        }
-
-        if (options.Client.TimeoutSeconds <= 0)
-        {
-            failures.Add($"{nameof(McpIntractOptions.Client)}.{nameof(ClientConfiguration.TimeoutSeconds)} must be greater than 0");
-        }
-
-        if (options.Client.CacheDurationMinutes <= 0)
-        {
-            failures.Add($"{nameof(McpIntractOptions.Client)}.{nameof(ClientConfiguration.CacheDurationMinutes)} must be greater than 0");
-        }
 
         if (options.Tool.TimeoutMinutes <= 0)
         {

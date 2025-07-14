@@ -1,648 +1,228 @@
-# Web Intract MCP
+# WebIntractMCP
 
-A TypeScript library that transforms web applications into MCP (Model Context Protocol) servers with robust two-way communication with a MCP Server called WebIntractMCPServer.
+> Transform any web application into an MCP server with real-time two-way communication
 
-## Overview
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Development Status](https://img.shields.io/badge/Status-Active%20Development-orange)](https://github.com/Vijay-Nirmal/WebIntractMCP)
+[![Version](https://img.shields.io/badge/Version-Pre--1.0-red)](https://github.com/Vijay-Nirmal/WebIntractMCP)
 
-Web Intract MCP enables client web applications to expose their functionality as MCP tools through a powerful automation and communication framework. It acts as a bridge between MCP clients and web applications, allowing seamless tool registration, execution, and real-time communication.
+WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
-## Key Features
+> **📢 Initial preview version will be published soon!** This project is in active development. Expect breaking changes in future releases as we evolve toward version 1.0.
 
-- **🔄 Real-time Communication**: Robust bidirectional communication using SignalR
-- **🛠️ Tool Management**: Dynamic tool registration and execution with comprehensive validation
-- **🎯 UI Automation**: Advanced web automation with visual feedback and guided tours
-- **📐 Type Safety**: Full TypeScript support with comprehensive type definitions
-- **🧩 Framework Agnostic**: Works with any JavaScript framework (React, Angular, Vue, etc.)
-- **⚡ Production Ready**: Comprehensive error handling, logging, and performance optimization
-- **🔧 Configurable**: Extensive configuration options for different deployment scenarios
-- **🎨 Visual Effects**: Rich visual feedback system with customizable animations
+## 🚀 Overview
 
-## Architecture
+WebIntractMCP consists of two tightly integrated components that work together to create a seamless MCP experience:
+
+- **📚 [@web-intract-mcp/client](lib/web-intract-mcp)** - TypeScript library for client-side integration
+- **🖥️ [WebIntractMCPServer](server/WebIntractMCPServer)** - Ready to deploy Docker MCP server image for protocol handling
+- **🎯 [Sample Implementation](sample/angular-dotnetnet-semantic-kernel)** - Complete Angular + .NET example
+
+## ✨ Key Features
+
+- **🔧 Support full MCP Tool protocol** - including tool discovery, invocation, and all type of response Text, Image, Audio others
+- **🔄 Real-time Communication** - Robust bidirectional communication using SignalR which support WebSockets, ServerSentEvents, LongPolling
+- **🛠️ Dynamic Tool Registration** - Configure tools with simple JSON files
+- **🎯 Session-based Control** - Per-user session management for secure isolation
+- **🌐 Framework Agnostic** - Works with any JavaScript framework (React, Angular, Vue, etc.)
+- **⚡ Production Ready** - Comprehensive error handling and performance optimization
+- **🔧 Simple Configuration** - Easy setup with JSON-based tool definitions
+- **📦 Docker Support** - Ready-to-use Docker image for easy deployment
+- **📄 Page-specific Tools** - Define tools that can interact with specific pages or elements
+- **🎨 Visual Feedback** - Provides visual feedback for tool execution and user actions
+
+## 🎬 Demo
+
+https://github.com/user-attachments/assets/bf9d15a6-fa4a-40a0-8543-cb0fd92bffac
+
+*Click to view the demonstration of WebIntractMCP transforming a web application into an MCP server*
+
+## 🏗️ Architecture
 
 ```mermaid
 graph TB
-    subgraph "MCP Client"
+    subgraph "Your Web Application"
+        D[Client Web App<br/>Any Framework]
+        E[Tools Configuration<br/>JSON File]
+    end
+    
+    subgraph "WebIntractMCP Ecosystem"
+        B[WebIntractMCPServer]
+        C[@web-intract-mcp/client<br/>TypeScript Library]
+    end
+    
+    subgraph "MCP Client (Chatbot/AI)"
         A[MCP Client Application]
     end
     
-    subgraph "Web Intract MCP Library"
-        B[WebIntractMCPController]
-        C[ToolRegistry]
-        D[SignalR Service]
-        E[Tool Executor]
-    end
-    
-    subgraph "Web Application"
-        F[Your Web App]
-        G[UI Components]
-        H[Business Logic]
-    end
-    
-    A -->|MCP Protocol| D
-    D --> B
-    B --> C
-    B --> E
-    E --> G
-    E --> H
-    F --> B
+    D -->|Initiates Request| A
+    A -->|MCP Protocol| B
+    B -->|Real-time Communication| C
+    C -->|Integrate| D
+    E -->|Configure| C
 ```
 
-## Installation
+## 🚀 Quick Start
+
+### 1. Install the Client Library
 
 ```bash
-npm install web-intract-mcp
+# Install the stable version
+npm install @web-intract-mcp/client
+
+# Or install the latest preview version
+npm install @web-intract-mcp/client@preview
 ```
 
-### Peer Dependencies
+### 2. Configure Your Tools
 
-```bash
-npm install shepherd.js @microsoft/signalr
+Create a `mcp-tools.json` file:
+
+```json
+[
+  {
+    "toolId": "click-button",
+    "title": "Click Button",
+    "description": "Clicks a specific button on the page",
+    "mode": "silent",
+    "steps": [
+      {
+        "targetElement": "#submit-btn",
+        "action": { "type": "click", "element": "#submit-btn" }
+      }
+    ]
+  }
+]
 ```
 
-## Quick Start
-
-### Basic Setup
+### 3. Initialize in Your Web App
 
 ```typescript
-import { 
-  createWebIntractMCPController, 
-  ToolConfiguration,
-  ToolMode 
-} from 'web-intract-mcp';
+import { createWebIntractMCPController } from '@web-intract-mcp/client';
 
-// Create controller instance
 const controller = createWebIntractMCPController();
-
-// Define a simple tool
-const sampleTool: ToolConfiguration = {
-  toolId: 'click-button',
-  title: 'Click Button',
-  description: 'Clicks a specific button on the page',
-  mode: 'silent' as ToolMode,
-  steps: [
-    {
-      targetElement: '#submit-btn',
-      content: 'Clicking the submit button',
-      action: {
-        type: 'click',
-        element: '#submit-btn'
-      }
-    }
-  ]
-};
-
-// Load tools
-await controller.loadTools([sampleTool]);
-
-// Create session with MCP server
-const sessionId = await controller.createSession('http://localhost:8080');
-console.log('Session created:', sessionId);
+await controller.loadTools('/mcp-tools.json');
+await controller.createSession('http://localhost:8080');
 ```
 
-### Advanced Configuration
-
-```typescript
-import { 
-  createWebIntractMCPController,
-  WebIntractMCPOptions,
-  VisualEffectStyles
-} from 'web-intract-mcp';
-
-// Configure controller options
-const options: Partial<WebIntractMCPOptions> = {
-  enableVisualFeedback: true,
-  debugMode: true,
-  elementTimeout: 10000,
-  highlightDuration: 3000,
-  actionDelay: 1000
-};
-
-// Custom visual styles
-const customStyles: VisualEffectStyles = {
-  highlight: {
-    primaryColor: 'rgba(34, 197, 94, 0.5)',
-    duration: 2
-  },
-  clickRipple: {
-    backgroundColor: 'rgba(34, 197, 94, 0.6)',
-    size: 30
-  }
-};
-
-const controller = createWebIntractMCPController(undefined, options);
-controller.updateVisualEffectStyles(customStyles);
-```
-
-## Tool Configuration
-
-### Tool Modes
-
-#### 1. Normal Mode
-Interactive guided tours with navigation buttons:
-
-```typescript
-const guidedTool: ToolConfiguration = {
-  toolId: 'user-onboarding',
-  title: 'User Onboarding Tour',
-  description: 'Guides new users through the application',
-  mode: 'normal',
-  steps: [
-    {
-      targetElement: '.welcome-section',
-      content: 'Welcome to our application! Let\'s start with a quick tour.',
-      shepherdOptions: {
-        buttons: [
-          { text: 'Next', action: 'next' }
-        ]
-      }
-    }
-  ]
-};
-```
-
-#### 2. Buttonless Mode
-Automatic progression with timed delays:
-
-```typescript
-const autoTool: ToolConfiguration = {
-  toolId: 'auto-demo',
-  title: 'Automatic Demo',
-  description: 'Automatically demonstrates features',
-  mode: 'buttonless',
-  steps: [
-    {
-      targetElement: '.feature-1',
-      content: 'This is our first feature...',
-      delay: 3000 // Auto-advance after 3 seconds
-    }
-  ]
-};
-```
-
-#### 3. Silent Mode
-Background automation without UI:
-
-```typescript
-const automationTool: ToolConfiguration = {
-  toolId: 'data-entry',
-  title: 'Automated Data Entry',
-  description: 'Fills out forms automatically',
-  mode: 'silent',
-  steps: [
-    {
-      targetElement: '#name-input',
-      content: 'Entering name...',
-      action: {
-        type: 'fillInput',
-        element: '#name-input',
-        value: 'John Doe'
-      }
-    },
-    {
-      targetElement: '#submit-btn',
-      content: 'Submitting form...',
-      action: {
-        type: 'click',
-        element: '#submit-btn'
-      }
-    }
-  ]
-};
-```
-
-### Advanced Tool Features
-
-#### Custom Functions
-
-```typescript
-import { CustomFunction, CustomFunctionContext } from 'web-intract-mcp';
-
-const customFunction: CustomFunction = {
-  name: 'validateForm',
-  implementation: async (context: CustomFunctionContext) => {
-    const { element, params, toolParams } = context;
-    
-    // Custom validation logic
-    const isValid = element.checkValidity();
-    
-    if (isValid) {
-      return createSuccessResult('Form validation passed');
-    } else {
-      return createErrorResult('Form validation failed');
-    }
-  }
-};
-
-controller.registerCustomFunction(customFunction);
-
-// Use in tool configuration
-const toolWithCustomFunction: ToolConfiguration = {
-  toolId: 'form-processor',
-  title: 'Form Processor',
-  description: 'Processes form with validation',
-  mode: 'silent',
-  steps: [
-    {
-      targetElement: '#myForm',
-      content: 'Validating form...',
-      action: {
-        type: 'executeFunction',
-        element: '#myForm',
-        functionName: 'validateForm'
-      }
-    }
-  ]
-};
-```
-
-#### Parameter Schemas
-
-```typescript
-const parameterizedTool: ToolConfiguration = {
-  toolId: 'dynamic-form-filler',
-  title: 'Dynamic Form Filler',
-  description: 'Fills forms with provided data',
-  mode: 'silent',
-  parameterSchema: {
-    parameters: {
-      name: {
-        type: 'string',
-        description: 'User name to fill in the form',
-        required: true,
-        minLength: 2,
-        maxLength: 50
-      },
-      email: {
-        type: 'string',
-        description: 'User email address',
-        required: true,
-        pattern: '^[^@]+@[^@]+\\.[^@]+$'
-      },
-      age: {
-        type: 'number',
-        description: 'User age',
-        minimum: 18,
-        maximum: 120,
-        defaultValue: 25
-      }
-    },
-    required: ['name', 'email']
-  },
-  steps: [
-    {
-      targetElement: '#name-input',
-      content: 'Filling name...',
-      action: {
-        type: 'fillInput',
-        element: '#name-input',
-        value: '{{name}}' // Parameter substitution
-      }
-    }
-  ]
-};
-```
-
-## SignalR Integration
-
-### Basic Connection
-
-```typescript
-import { WebIntractSignalRService } from 'web-intract-mcp';
-
-const signalRService = new WebIntractSignalRService({
-  serverUrl: 'http://localhost:8080',
-  enableLogging: true
-});
-
-signalRService.setMCPController(controller);
-await signalRService.start();
-```
-
-### Advanced Configuration
-
-```typescript
-import { SignalRServiceConfig } from 'web-intract-mcp';
-
-const config: SignalRServiceConfig = {
-  serverUrl: 'https://production-server.com',
-  hubPath: '/mcptools',
-  maxRetryAttempts: 5,
-  baseRetryDelayMs: 2000,
-  enableLogging: false,
-  logLevel: signalR.LogLevel.Warning,
-  transportTypes: signalR.HttpTransportType.WebSockets
-};
-
-const service = new WebIntractSignalRService(config);
-```
-
-## Event Handling
-
-```typescript
-import { WebIntractMCPEvent } from 'web-intract-mcp';
-
-// Listen for tool execution events
-controller.addEventListener('start', (data) => {
-  console.log('Tool started:', data);
-});
-
-controller.addEventListener('complete', (data) => {
-  console.log('Tool completed:', data);
-});
-
-controller.addEventListener('step:show', (data) => {
-  console.log('Step shown:', data);
-});
-
-controller.addEventListener('cancel', (data) => {
-  console.log('Tool cancelled:', data);
-});
-```
-
-## Framework Integration
-
-### React Integration
-
-```tsx
-import React, { useEffect, useState } from 'react';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
-
-const MCPProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [controller, setController] = useState<WebIntractMCPController | null>(null);
-
-  useEffect(() => {
-    const mcpController = createWebIntractMCPController(undefined, {
-      debugMode: process.env.NODE_ENV === 'development'
-    });
-
-    // Load your tools
-    mcpController.loadTools('/api/mcp-tools');
-    
-    // Create session
-    mcpController.createSession().then(sessionId => {
-      console.log('MCP Session created:', sessionId);
-    });
-
-    setController(mcpController);
-
-    return () => {
-      mcpController.dispose();
-    };
-  }, []);
-
-  return (
-    <MCPContext.Provider value={controller}>
-      {children}
-    </MCPContext.Provider>
-  );
-};
-```
-
-### Angular Integration
-
-```typescript
-import { Injectable } from '@angular/core';
-import { createWebIntractMCPController, WebIntractMCPController } from 'web-intract-mcp';
-
-@Injectable({
-  providedIn: 'root'
-})
-export class MCPService {
-  private controller: WebIntractMCPController;
-
-  constructor() {
-    this.controller = createWebIntractMCPController(undefined, {
-      debugMode: !environment.production
-    });
-  }
-
-  async initialize(): Promise<void> {
-    await this.controller.loadTools('/assets/mcp-tools.json');
-    await this.controller.createSession();
-  }
-
-  getController(): WebIntractMCPController {
-    return this.controller;
-  }
-}
-```
-
-### Vue.js Integration
-
-```typescript
-import { createApp } from 'vue';
-import { createWebIntractMCPController } from 'web-intract-mcp';
-
-const app = createApp(App);
-
-const mcpController = createWebIntractMCPController();
-
-app.provide('mcpController', mcpController);
-app.config.globalProperties.$mcp = mcpController;
-```
-
-## Configuration
-
-### Environment Variables
+### 4. Run the MCP Server
 
 ```bash
-# Server Configuration
-MCP_SERVER_URL=http://localhost:8080
-MCP_HUB_PATH=/mcptools
+# Using Docker
+docker run -p 8080:8080 webintract-mcp-server
 
-# Debug Settings
-MCP_DEBUG_MODE=true
-MCP_ENABLE_LOGGING=true
-
-# Timeout Settings
-MCP_ELEMENT_TIMEOUT=10000
-MCP_HIGHLIGHT_DURATION=3000
+# Or build from source
+cd server/WebIntractMCPServer
+dotnet run
 ```
 
-### Configuration File
+## 📁 Project Structure
 
-```typescript
-// mcp.config.ts
-import { WebIntractMCPOptions } from 'web-intract-mcp';
-
-export const mcpConfig: WebIntractMCPOptions = {
-  enableVisualFeedback: true,
-  debugMode: process.env.NODE_ENV === 'development',
-  stopOnFailure: false,
-  elementTimeout: 10000,
-  highlightDuration: 3000,
-  focusEffectDuration: 1500,
-  clickEffectDuration: 800,
-  actionDelay: 750,
-  defaultButtonlessDelay: 4000,
-  visualEffectStyles: {
-    highlight: {
-      primaryColor: 'rgba(59, 130, 246, 0.6)',
-      duration: 2.5
-    },
-    clickRipple: {
-      backgroundColor: 'rgba(34, 197, 94, 0.7)',
-      size: 25
-    }
-  }
-};
+```
+WebIntractMCP/
+├── lib/web-intract-mcp/           # TypeScript MCP Library
+│   ├── src/                       # Source code
+│   └── README.md                  # Library documentation
+├── server/WebIntractMCPServer/    # .NET MCP Server
+│   ├── Program.cs                 # Server entry point
+│   └── README.md                  # Server documentation
+├── sample/                        # Reference implementations
+│   └── angular-dotnetnet-semantic-kernel/
 ```
 
-## API Reference
+## 🎯 Use Cases
 
-### WebIntractMCPController
+- **Automated Testing** - Control web applications for E2E testing
+- **User Onboarding** - Create guided tours and tutorials
+- **Process Automation** - Automate repetitive web-based tasks
+- **Accessibility** - Provide AI-powered navigation assistance
+- **Data Entry** - Automate form filling and data collection
 
-Main controller class for managing MCP tools and communication.
+## 🔧 Technology Stack
 
-#### Methods
+| Component | Technologies |
+|-----------|-------------|
+| **Client Library** | TypeScript 5.8+, SignalR, Shepherd.js |
+| **MCP Server** | .NET 9, ASP.NET Core, SignalR |
+| **Sample App** | Angular 20, Semantic Kernel |
 
-- `loadTools(source: ToolConfiguration[] | string): Promise<void>`
-- `start(tools: ToolStartConfig[]): Promise<CallToolResult[]>`
-- `createSession(serverUrl?: string): Promise<string>`
-- `closeSession(): Promise<void>`
-- `registerCustomFunction(fn: CustomFunction): void`
-- `validateToolParameters(toolId: string, params: Record<string, unknown>): ValidationResult`
-- `addEventListener(event: WebIntractMCPEvent, callback: Function): void`
-- `updateOptions(options: Partial<WebIntractMCPOptions>): void`
-- `dispose(): void`
+## ⚠️ Development Status
 
-### ToolRegistry
+**Initial preview version will be published soon. This project is in active development and has not yet reached version 1.0.**
 
-Manages tool configurations with validation and discovery.
+- ✅ Core functionality is working
+- ✅ Production-ready components available
+- 🚀 Initial preview version coming soon
+- ⚠️ Breaking changes expected in future releases
+- ⚠️ API is subject to change before 1.0 release
 
-#### Methods
+Feel free to use it in your projects, but be prepared for potential breaking changes as we approach the initial preview release.
 
-- `loadTools(source: ToolConfiguration[] | string): Promise<void>`
-- `getToolById(toolId: string): ToolConfiguration | undefined`
-- `getAvailableTools(url: string): Map<string, ToolConfiguration>`
-- `getAllTools(): Map<string, ToolConfiguration>`
-- `getToolsSummaryForMCP(): ToolSummary[]`
+## 📖 Documentation
 
-### WebIntractSignalRService
+- [Client Library Guide](lib/web-intract-mcp/README.md) - Complete TypeScript library documentation
+- [Server Setup Guide](server/README.md) - MCP server configuration and deployment
+- [Sample Implementation](sample/angular-dotnetnet-semantic-kernel/README.md) - Working example with Angular and .NET
 
-Handles SignalR communication with MCP servers.
+## 🤝 Contributing
 
-#### Methods
+We welcome contributions! Please see our [contributing guidelines](.github/copilot-instructions.md) for development standards and workflow.
 
-- `start(): Promise<void>`
-- `stop(): Promise<void>`
-- `getConnectionId(): string | null`
-- `ping(): Promise<string>`
+### Publishing to NPM
 
-## Best Practices
+This repository uses GitHub Actions to publish the `@web-intract-mcp/client` package to npm registry.
 
-### 1. Error Handling
+#### Setup NPM Token
+1. Create an npm account and generate an access token
+2. Add the token as `NPM_TOKEN` in repository secrets (Settings → Secrets and variables → Actions)
 
-```typescript
-try {
-  const results = await controller.start([toolConfig]);
-  
-  for (const result of results) {
-    if (result.isError) {
-      console.error('Tool execution failed:', result.content);
-      // Handle error appropriately
-    }
-  }
-} catch (error) {
-  console.error('Tool execution error:', error);
-}
+#### Publishing Process
+1. **Preview Release**: Go to Actions → "Publish NPM Package" → Run workflow → Select "preview"
+   - Creates version: `{version}-preview.{build-number}` 
+   - Published with `preview` tag
+   - Example: `0.1.0-preview.123`
+
+2. **Production Release**: Go to Actions → "Publish NPM Package" → Run workflow → Select "production"
+   - Uses exact version from `package.json`
+   - Published with `latest` tag
+   - Creates GitHub release
+
+#### Installation Commands
+```bash
+# Install stable version
+npm install @web-intract-mcp/client
+
+# Install preview version
+npm install @web-intract-mcp/client@preview
+
+# Install specific version
+npm install @web-intract-mcp/client@0.1.0-preview.123
 ```
 
-### 2. Parameter Validation
+### Development Workflow
 
-```typescript
-// Always validate parameters before tool execution
-const validation = controller.validateToolParameters('my-tool', params);
+```bash
+# Setup
+npm install
+cd lib/web-intract-mcp && npm install
+cd sample/angular-dotnetnet-semantic-kernel && npm install
 
-if (!validation.isValid) {
-  throw new Error(`Invalid parameters: ${validation.errors.join(', ')}`);
-}
-
-if (validation.warnings.length > 0) {
-  console.warn('Parameter warnings:', validation.warnings);
-}
+# Start development environment with sample app
+cd sample/angular-dotnetnet-semantic-kernel
+npm run start:server    # Web Intract MCP server
+npm run start:client    # .NET client backend sample app
+npm run start           # Angular frontend sample app
 ```
 
-### 3. Resource Cleanup
+## 📄 License
 
-```typescript
-// Always dispose controller when done
-useEffect(() => {
-  return () => {
-    controller.dispose();
-  };
-}, [controller]);
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### 4. Production Configuration
+## 🔗 Links
 
-```typescript
-const productionConfig: Partial<WebIntractMCPOptions> = {
-  debugMode: false,
-  enableVisualFeedback: false, // Disable for headless automation
-  elementTimeout: 15000, // Longer timeout for slower networks
-  stopOnFailure: true // Stop on first failure in production
-};
-```
+- [GitHub Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues) - Report bugs or request features
+- [Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions) - Community discussions
 
-## Troubleshooting
+---
 
-### Common Issues
-
-1. **Connection Failed**
-   ```typescript
-   // Check server URL and ensure CORS is configured
-   const status = controller.getConnectionStatus();
-   console.log('Connection status:', status);
-   ```
-
-2. **Element Not Found**
-   ```typescript
-   // Increase timeout or check selector
-   controller.updateOptions({ elementTimeout: 10000 });
-   ```
-
-3. **Tool Validation Errors**
-   ```typescript
-   // Use validation before execution
-   const validation = controller.validateToolParameters(toolId, params);
-   if (!validation.isValid) {
-     console.error('Validation errors:', validation.errors);
-   }
-   ```
-
-### Debug Mode
-
-```typescript
-const controller = createWebIntractMCPController(undefined, {
-  debugMode: true // Enables comprehensive logging
-});
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new features
-4. Ensure all tests pass
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details.
-
-## Support
-
-- 📖 [Documentation](https://github.com/your-org/web-intract-mcp/wiki)
-- 🐛 [Issue Tracker](https://github.com/your-org/web-intract-mcp/issues)
-- 💬 [Discussions](https://github.com/your-org/web-intract-mcp/discussions)
-
-## Changelog
-
-### 1.0.0
-- Initial production release
-- Full TypeScript support
-- SignalR integration
-- Comprehensive tool management
-- Visual feedback system
-- Framework-agnostic design
+**Built with ❤️ for the MCP ecosystem**

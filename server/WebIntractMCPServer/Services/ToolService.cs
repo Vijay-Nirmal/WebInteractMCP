@@ -1,5 +1,3 @@
-using System.Collections.Concurrent;
-using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
@@ -14,87 +12,74 @@ namespace WebIntractMCPServer.Services;
 /// </summary>
 internal sealed class ToolService : IToolService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
     private readonly IHubContext<McpToolsHub> _hubContext;
     private readonly IOptionsMonitor<McpIntractOptions> _options;
     private readonly ILogger<ToolService> _logger;
-    private readonly ConcurrentDictionary<string, CacheEntry> _toolsCache = [];
 
     public ToolService(
-        IHttpClientFactory httpClientFactory,
         IHubContext<McpToolsHub> hubContext,
         IOptionsMonitor<McpIntractOptions> options,
         ILogger<ToolService> logger)
     {
-        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
         _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));
         _options = options ?? throw new ArgumentNullException(nameof(options));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <inheritdoc />
-    public async Task<IReadOnlyList<Tool>> GetToolsAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<Tool>> GetToolsAsync(string sessionId, CancellationToken cancellationToken = default)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
+
         var options = _options.CurrentValue;
-        var cacheKey = $"{options.Client.BaseUrl}{options.Client.ToolsEndpoint}";
-
-        if (options.Client.CacheTools && _toolsCache.TryGetValue(cacheKey, out var cacheEntry))
-        {
-            if (DateTime.UtcNow - cacheEntry.Timestamp < TimeSpan.FromMinutes(options.Client.CacheDurationMinutes))
-            {
-                _logger.LogDebug("Returning cached tools for key: {CacheKey}", cacheKey);
-                return cacheEntry.Tools;
-            }
-
-            // Remove expired cache entry
-            _toolsCache.TryRemove(cacheKey, out _);
-        }
 
         try
         {
-            using var httpClient = _httpClientFactory.CreateClient("McpIntractClient");
-            httpClient.Timeout = TimeSpan.FromSeconds(options.Client.TimeoutSeconds);
+            _logger.LogDebug("Requesting tools from client session {SessionId}", sessionId);
 
-            var toolsUrl = $"{options.Client.BaseUrl.TrimEnd('/')}{options.Client.ToolsEndpoint}";
-            _logger.LogDebug("Fetching tools from: {ToolsUrl}", toolsUrl);
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromMinutes(options.Tool.TimeoutMinutes));
+            using var combinedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
-            var tools = await httpClient.GetFromJsonAsync<List<Tool>>(toolsUrl, Constants.JsonSerializerOptions, cancellationToken);
+            var toolsJson = await _hubContext.Clients.Client(sessionId)
+                .InvokeAsync<string>("GetTools", combinedCts.Token);
+
+            if (string.IsNullOrWhiteSpace(toolsJson))
+            {
+                _logger.LogWarning("Received null or empty tools response from session {SessionId}", sessionId);
+                return [];
+            }
+
+            var tools = System.Text.Json.JsonSerializer.Deserialize<List<Tool>>(toolsJson, Constants.JsonSerializerOptions);
 
             if (tools is null)
             {
-                _logger.LogWarning("Received null response when fetching tools from {ToolsUrl}", toolsUrl);
+                _logger.LogWarning("Failed to deserialize tools from session {SessionId}", sessionId);
                 return [];
             }
 
             var toolsList = tools.AsReadOnly();
-
-            if (options.Client.CacheTools)
-            {
-                _toolsCache.TryAdd(cacheKey, new CacheEntry(toolsList, DateTime.UtcNow));
-                _logger.LogDebug("Cached {ToolCount} tools for key: {CacheKey}", toolsList.Count, cacheKey);
-            }
-
-            _logger.LogInformation("Successfully retrieved {ToolCount} tools from client", toolsList.Count);
+            _logger.LogInformation("Successfully retrieved {ToolCount} tools from session {SessionId}", toolsList.Count, sessionId);
             return toolsList;
         }
-        catch (HttpRequestException ex)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            _logger.LogError(ex, "HTTP error occurred while fetching tools from client");
-            throw new InvalidOperationException("Failed to fetch tools from client due to network error", ex);
+            _logger.LogWarning("Tool discovery was cancelled for session {SessionId}", sessionId);
+            throw new InvalidOperationException("Tool discovery was cancelled");
         }
-        catch (TaskCanceledException ex)
+        catch (OperationCanceledException)
         {
-            _logger.LogError(ex, "Request to fetch tools from client timed out");
-            throw new InvalidOperationException("Request to fetch tools from client timed out", ex);
+            var errorMessage = $"Tool discovery timed out for session {sessionId}. Client did not respond within {options.Tool.TimeoutMinutes} minutes.";
+            _logger.LogCritical("CRITICAL: {ErrorMessage}", errorMessage);
+            throw new InvalidOperationException(errorMessage);
         }
-        catch (JsonException ex)
+        catch (System.Text.Json.JsonException ex)
         {
-            _logger.LogError(ex, "Failed to deserialize tools response from client");
+            _logger.LogError(ex, "Failed to deserialize tools response from session {SessionId}", sessionId);
             throw new InvalidOperationException("Failed to parse tools response from client", ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while fetching tools from client");
+            _logger.LogError(ex, "Unexpected error occurred while fetching tools from session {SessionId}", sessionId);
             throw;
         }
     }
@@ -153,6 +138,4 @@ internal sealed class ToolService : IToolService
             Content = [new() { Type = "text", Text = message }],
             IsError = true
         };
-
-    private sealed record CacheEntry(IReadOnlyList<Tool> Tools, DateTime Timestamp);
 }

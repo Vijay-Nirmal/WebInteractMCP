@@ -34,11 +34,8 @@ curl http://localhost:8080/health
 ```
 
 Expected response:
-```json
-{
-  "status": "Healthy",
-  "timestamp": "2024-01-07T10:30:00Z"
-}
+```
+Healthy
 ```
 
 ## Building from Source
@@ -103,7 +100,6 @@ docker run -d \
   -e McpIntract__Tool__TimeoutMinutes=10 \
   -e McpIntract__Tool__EnableDetailedErrorLogging=false \
   -e McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com \
-  -e McpIntract__Cors__AllowCredentials=true \
   webintract-mcp-server:latest
 ```
 
@@ -174,7 +170,6 @@ services:
       - McpIntract__Tool__TimeoutMinutes=10
       - McpIntract__Tool__EnableDetailedErrorLogging=false
       - McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com
-      - McpIntract__Cors__AllowCredentials=true
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
