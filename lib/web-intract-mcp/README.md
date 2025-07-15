@@ -167,37 +167,6 @@ Feel free to use it in your projects, but be prepared for potential breaking cha
 
 We welcome contributions! Please see our [contributing guidelines](.github/copilot-instructions.md) for development standards and workflow.
 
-### Publishing to NPM
-
-This repository uses GitHub Actions to publish the `@web-intract-mcp/client` package to npm registry.
-
-#### Setup NPM Token
-1. Create an npm account and generate an access token
-2. Add the token as `NPM_TOKEN` in repository secrets (Settings → Secrets and variables → Actions)
-
-#### Publishing Process
-1. **Preview Release**: Go to Actions → "Publish NPM Package" → Run workflow → Select "preview"
-   - Creates version: `{version}-preview.{build-number}` 
-   - Published with `preview` tag
-   - Example: `0.1.0-preview.123`
-
-2. **Production Release**: Go to Actions → "Publish NPM Package" → Run workflow → Select "production"
-   - Uses exact version from `package.json`
-   - Published with `latest` tag
-   - Creates GitHub release
-
-#### Installation Commands
-```bash
-# Install stable version
-npm install @web-intract-mcp/client
-
-# Install preview version
-npm install @web-intract-mcp/client@preview
-
-# Install specific version
-npm install @web-intract-mcp/client@0.1.0-preview.123
-```
-
 ### Development Workflow
 
 ```bash

@@ -117,7 +117,21 @@ export default async function DocPage({ params }: Props) {
                                prose-code:text-primary-600 dark:prose-code:text-primary-400 
                                prose-pre:bg-gray-900 dark:prose-pre:bg-gray-800
                                prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700
-                               prose-blockquote:border-l-primary-600 dark:prose-blockquote:border-l-primary-400"
+                               prose-blockquote:border-l-primary-600 dark:prose-blockquote:border-l-primary-400
+                               [&_h1]:!text-gray-900 [&_h1]:dark:!text-white
+                               [&_h2]:!text-gray-900 [&_h2]:dark:!text-white
+                               [&_h3]:!text-gray-900 [&_h3]:dark:!text-white
+                               [&_h4]:!text-gray-900 [&_h4]:dark:!text-white
+                               [&_h5]:!text-gray-900 [&_h5]:dark:!text-white
+                               [&_h6]:!text-gray-900 [&_h6]:dark:!text-white
+                               [&_.heading-link]:!text-gray-900 [&_.heading-link]:dark:!text-white
+                               [&_.heading-link]:!no-underline [&_.heading-link]:hover:!no-underline
+                               [&_h1_a]:!text-gray-900 [&_h1_a]:dark:!text-white [&_h1_a]:!no-underline
+                               [&_h2_a]:!text-gray-900 [&_h2_a]:dark:!text-white [&_h2_a]:!no-underline
+                               [&_h3_a]:!text-gray-900 [&_h3_a]:dark:!text-white [&_h3_a]:!no-underline
+                               [&_h4_a]:!text-gray-900 [&_h4_a]:dark:!text-white [&_h4_a]:!no-underline
+                               [&_h5_a]:!text-gray-900 [&_h5_a]:dark:!text-white [&_h5_a]:!no-underline
+                               [&_h6_a]:!text-gray-900 [&_h6_a]:dark:!text-white [&_h6_a]:!no-underline"
                     dangerouslySetInnerHTML={{ __html: doc.content }}
                   />
                 </article>
