@@ -1,11 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import { remark } from 'remark'
-import html from 'remark-html'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeHighlight from 'rehype-highlight'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
 
 const contentDirectory = path.join(process.cwd(), 'content')
 
@@ -42,32 +45,74 @@ export interface Version {
   isLatest: boolean
 }
 
-// Enhanced markdown processing with Mermaid support
+// Enhanced markdown processing with Mermaid support and syntax highlighting
 async function processMarkdown(content: string): Promise<string> {
   try {
-    // Process markdown without pre-transforming Mermaid to preserve proper code blocks
-    const markdownResult = await remark()
-    .use(remarkGfm) // GitHub Flavored Markdown first
-    .use(html, { 
-    sanitize: false,
-    allowDangerousHtml: true // Allow custom HTML for Mermaid diagrams
-    })
-    .use(rehypeSlug)
-    .use(rehypeAutolinkHeadings, {
+    // Use unified processor for proper remark -> rehype chain
+    const markdownResult = await unified()
+      .use(remarkParse) // Parse markdown
+      .use(remarkGfm) // GitHub Flavored Markdown
+      .use(remarkRehype, { allowDangerousHtml: true }) // Convert to HTML AST
+      .use(rehypeSlug) // Add IDs to headings
+      .use(rehypeAutolinkHeadings, {
         behavior: 'wrap',
         properties: {
-            className: ['heading-link'],
-            ariaLabel: 'Link to heading'
+          className: ['heading-link'],
+          ariaLabel: 'Link to heading'
         }
-    })
-    .process(content)
+      }) // Add links to headings
+      .use(rehypeHighlight, {
+        detect: true,
+        ignoreMissing: true,
+        aliases: {
+          'js': 'javascript',
+          'ts': 'typescript',
+          'jsx': 'javascript',
+          'tsx': 'typescript',
+          'sh': 'bash',
+          'shell': 'bash',
+          'json': 'json',
+          'yml': 'yaml',
+          'xml': 'xml',
+          'html': 'xml',
+          'cs': 'csharp',
+          'py': 'python',
+          'rb': 'ruby',
+          'go': 'go',
+          'rs': 'rust',
+          'php': 'php',
+          'java': 'java',
+          'cpp': 'cpp',
+          'c': 'c',
+          'sql': 'sql',
+          'dockerfile': 'dockerfile',
+          'powershell': 'powershell',
+          'ps1': 'powershell',
+          'bash': 'bash'
+        }
+      }) // Add syntax highlighting
+      .use(rehypeStringify, { allowDangerousHtml: true }) // Convert to HTML string
+      .process(content)
     
     let result = markdownResult.toString()
     
     // Post-process to transform Mermaid code blocks to proper div format with better styling
     result = result.replace(
-      /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
-      '<div class="mermaid" style="text-align: center; margin: 2rem 0; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem;">$1</div>'
+      /<pre><code class="hljs language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
+      (match, mermaidCode) => {
+        const cleanCode = mermaidCode.trim()
+        return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`
+      }
+    )
+    
+    // Post-process to wrap tables in scrollable containers for horizontal overflow
+    result = result.replace(
+      /<table>/g,
+      '<div class="table-container"><table>'
+    )
+    result = result.replace(
+      /<\/table>/g,
+      '</table></div>'
     )
     
     return result
@@ -83,13 +128,26 @@ async function processMarkdown(content: string): Promise<string> {
           .replace(/\s+/g, '-')
           .replace(/-+/g, '-')
           .replace(/^-+|-+$/g, '')
-        return `<h${level} id="${id}">${title}</h${level}>`
+        return `<h${level} id="${id}"><a href="#${id}" class="heading-link">${title}</a></h${level}>`
       })
     
     // Transform Mermaid code blocks in fallback too
     result = result.replace(
       /```mermaid<br>([\s\S]*?)<br>```/g,
-      '<div class="mermaid" style="text-align: center; margin: 2rem 0; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem;">$1</div>'
+      (match, mermaidCode) => {
+        const cleanCode = mermaidCode.replace(/<br>/g, '\n').trim()
+        return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`
+      }
+    )
+    
+    // Add table wrapping in fallback processing too
+    result = result.replace(
+      /<table>/g,
+      '<div class="table-container"><table>'
+    )
+    result = result.replace(
+      /<\/table>/g,
+      '</table></div>'
     )
     
     return result
@@ -248,7 +306,7 @@ export async function getDocPages(version: string = 'latest'): Promise<DocPage[]
       })
   )
   
-  return allDocsData.sort((a, b) => a.order - b.order)
+  return allDocsData.sort((a, b) => (a.order || 999) - (b.order || 999))
 }
 
 export async function getDocPage(version: string, slug: string): Promise<DocPage | null> {

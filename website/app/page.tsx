@@ -1,6 +1,10 @@
-import React from 'react'
-import Head from 'next/head'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'WebIntract MCP - Transform Web Applications into MCP Servers',
+  description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
+}
 
 const features = [
   {
@@ -66,22 +70,6 @@ const useCases = [
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>WebIntractMCP - Transform Web Applications into MCP Servers</title>
-        <meta
-          name="description"
-          content="Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly."
-        />
-        <meta name="keywords" content="MCP, Model Context Protocol, web automation, chatbot integration, AI, web applications" />
-        <meta property="og:title" content="WebIntractMCP - Transform Web Applications into MCP Servers" />
-        <meta property="og:description" content="Transform any web application into an MCP server with real-time two-way communication." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://webintractmcp.com" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="WebIntractMCP - Transform Web Applications into MCP Servers" />
-        <meta name="twitter:description" content="Transform any web application into an MCP server with real-time two-way communication." />
-      </Head>
-
       {/* Hero Section */}
       <div className="relative isolate px-6 pt-14 lg:px-8">
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
@@ -104,7 +92,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
-                href="/docs/quickstart"
+                href="/docs/latest/getting-started"
                 className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
               >
                 Get started
@@ -170,32 +158,42 @@ export default function Home() {
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-              <div className="relative flex flex-col gap-6 sm:flex-row lg:flex-col">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-xl">
+              <Link 
+                href="https://www.npmjs.com/package/@web-intract-mcp/client"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative flex flex-col gap-6 sm:flex-row lg:flex-col group hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-4 transition-colors"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-xl group-hover:bg-primary-700">
                   📚
                 </div>
                 <div className="sm:min-w-0 sm:flex-1">
-                  <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white">
+                  <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">
                     @web-intract-mcp/client
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-300">
                     TypeScript library for client-side integration. Framework-agnostic and easy to integrate into any web application.
                   </p>
                 </div>
-              </div>
-              <div className="relative flex flex-col gap-6 sm:flex-row lg:flex-col">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-xl">
+              </Link>
+              <Link 
+                href="https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative flex flex-col gap-6 sm:flex-row lg:flex-col group hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-4 transition-colors"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-600 text-white font-bold text-xl group-hover:bg-primary-700">
                   🖥️
                 </div>
                 <div className="sm:min-w-0 sm:flex-1">
-                  <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white">
+                  <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">
                     WebIntractMCPServer
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-300">
                     Ready-to-deploy Docker MCP server for protocol handling. Built with .NET 9 and ASP.NET Core.
                   </p>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -247,7 +245,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
-                href="/docs/quickstart"
+                href="/docs/latest/getting-started"
                 className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
               >
                 Get started

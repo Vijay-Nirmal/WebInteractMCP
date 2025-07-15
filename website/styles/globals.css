@@ -5,8 +5,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-/* Prism.js theme for code highlighting */
-@import 'prismjs/themes/prism-tomorrow.css';
+/* Import highlight.js theme */
+@import 'highlight.js/styles/github.css';
 
 @layer base {
   html {
@@ -155,6 +155,40 @@
     border-bottom-color: #374151;
   }
 
+  /* Table container for horizontal scrolling */
+  .table-container {
+    @apply overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg my-6;
+    /* Add subtle shadow for better visual separation */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .table-container {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Table inside container should have no additional margins/borders */
+  .table-container table {
+    @apply !my-0 !border-0 !rounded-none;
+    min-width: 100%;
+  }
+
+  /* Custom scrollbar for table containers */
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+
   /* Mobile responsive tables */
   @media (max-width: 640px) {
     .enhanced-content table {
@@ -163,7 +197,7 @@
   }
 }
 
-/* Custom scrollbar */
+  /* Custom scrollbar */
 .toc::-webkit-scrollbar {
   width: 4px;
 }
@@ -178,4 +212,141 @@
 
 .toc::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Custom syntax highlighting styles that work with dark mode */
+.hljs {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-lg;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+}
+
+/* Light mode syntax highlighting */
+.hljs-comment,
+.hljs-quote {
+  @apply text-gray-500 italic;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag,
+.hljs-name,
+.hljs-regexp,
+.hljs-link,
+.hljs-selector-id,
+.hljs-selector-class {
+  @apply text-red-600;
+}
+
+.hljs-number,
+.hljs-meta,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params {
+  @apply text-purple-600;
+}
+
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet {
+  @apply text-green-600;
+}
+
+.hljs-title,
+.hljs-section {
+  @apply text-blue-600 font-semibold;
+}
+
+.hljs-keyword,
+.hljs-selector-tag {
+  @apply text-purple-700 font-medium;
+}
+
+/* Dark mode syntax highlighting */
+.dark .hljs-comment,
+.dark .hljs-quote {
+  @apply text-gray-400 italic;
+}
+
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-attribute,
+.dark .hljs-tag,
+.dark .hljs-name,
+.dark .hljs-regexp,
+.dark .hljs-link,
+.dark .hljs-selector-id,
+.dark .hljs-selector-class {
+  @apply text-red-400;
+}
+
+.dark .hljs-number,
+.dark .hljs-meta,
+.dark .hljs-built_in,
+.dark .hljs-builtin-name,
+.dark .hljs-literal,
+.dark .hljs-type,
+.dark .hljs-params {
+  @apply text-purple-400;
+}
+
+.dark .hljs-string,
+.dark .hljs-symbol,
+.dark .hljs-bullet {
+  @apply text-green-400;
+}
+
+.dark .hljs-title,
+.dark .hljs-section {
+  @apply text-blue-400 font-semibold;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag {
+  @apply text-purple-300 font-medium;
+}
+
+/* Language-specific styling */
+.hljs-function {
+  @apply text-blue-600;
+}
+
+.dark .hljs-function {
+  @apply text-blue-400;
+}
+
+.hljs-emphasis {
+  @apply italic;
+}
+
+.hljs-strong {
+  @apply font-bold;
+}
+
+.hljs-deletion {
+  @apply bg-red-100 dark:bg-red-900/20;
+}
+
+.hljs-addition {
+  @apply bg-green-100 dark:bg-green-900/20;
+}
+
+/* Inline code styling */
+.prose code:not(pre code) {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Code block container */
+.prose pre {
+  @apply bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-x-auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  @apply bg-transparent text-sm leading-6;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }

@@ -14,14 +14,11 @@ WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enabl
 
 ## Key Components
 
-### 📚 @web-intract-mcp/client
+### 📚 [@web-intract-mcp/client](https://www.npmjs.com/package/@web-intract-mcp/client)
 TypeScript library for client-side integration. This framework-agnostic library can be integrated into any JavaScript framework (React, Angular, Vue, etc.).
 
-### 🖥️ WebIntractMCPServer
+### 🖥️ [WebIntractMCPServer](https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server)
 Ready-to-deploy Docker MCP server for protocol handling. Built with .NET 9 and ASP.NET Core for robust performance.
-
-### 🎯 Sample Implementation
-Complete Angular + .NET example demonstrating the full integration workflow.
 
 ## Architecture Overview
 

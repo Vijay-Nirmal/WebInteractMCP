@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
-import Head from 'next/head'
+'use client'
+
+import type { Metadata } from 'next'
+import { useState } from 'react'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -28,14 +30,6 @@ export default function Contact() {
 
   return (
     <>
-      <Head>
-        <title>Contact - WebIntractMCP</title>
-        <meta
-          name="description"
-          content="Get in touch with the WebIntractMCP team. Contact Vijay Nirmal for questions, support, or collaboration opportunities."
-        />
-      </Head>
-
       <div className="py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
