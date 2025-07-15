@@ -105,6 +105,16 @@ async function processMarkdown(content: string): Promise<string> {
       }
     )
     
+    // Post-process to wrap tables in scrollable containers for horizontal overflow
+    result = result.replace(
+      /<table>/g,
+      '<div class="table-container"><table>'
+    )
+    result = result.replace(
+      /<\/table>/g,
+      '</table></div>'
+    )
+    
     return result
   } catch (error) {
     console.error('Error processing markdown:', error)
@@ -128,6 +138,16 @@ async function processMarkdown(content: string): Promise<string> {
         const cleanCode = mermaidCode.replace(/<br>/g, '\n').trim()
         return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`
       }
+    )
+    
+    // Add table wrapping in fallback processing too
+    result = result.replace(
+      /<table>/g,
+      '<div class="table-container"><table>'
+    )
+    result = result.replace(
+      /<\/table>/g,
+      '</table></div>'
     )
     
     return result

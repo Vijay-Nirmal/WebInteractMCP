@@ -155,6 +155,40 @@
     border-bottom-color: #374151;
   }
 
+  /* Table container for horizontal scrolling */
+  .table-container {
+    @apply overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg my-6;
+    /* Add subtle shadow for better visual separation */
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  }
+
+  .dark .table-container {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  /* Table inside container should have no additional margins/borders */
+  .table-container table {
+    @apply !my-0 !border-0 !rounded-none;
+    min-width: 100%;
+  }
+
+  /* Custom scrollbar for table containers */
+  .table-container::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .table-container::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  .table-container::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded;
+  }
+
+  .table-container::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
+  }
+
   /* Mobile responsive tables */
   @media (max-width: 640px) {
     .enhanced-content table {

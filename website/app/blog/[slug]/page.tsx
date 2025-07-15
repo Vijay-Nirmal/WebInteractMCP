@@ -98,7 +98,15 @@ export default async function BlogPost({ params }: Props) {
         {/* Article content */}
         <div className="mx-auto mt-16 max-w-none">
           <div 
-            className="prose prose-lg prose-gray dark:prose-invert max-w-none prose-headings:text-gray-900 dark:prose-headings:text-white prose-a:text-primary-600 dark:prose-a:text-primary-400 prose-code:text-primary-600 dark:prose-code:text-primary-400"
+            className="prose prose-lg prose-gray dark:prose-invert max-w-none 
+                       prose-headings:text-gray-900 dark:prose-headings:text-white 
+                       prose-a:text-primary-600 dark:prose-a:text-primary-400 
+                       prose-code:text-primary-600 dark:prose-code:text-primary-400
+                       [&_.table-container]:overflow-x-auto [&_.table-container]:border 
+                       [&_.table-container]:border-gray-200 [&_.table-container]:dark:border-gray-700 
+                       [&_.table-container]:rounded-lg [&_.table-container]:my-6
+                       [&_.table-container_table]:!my-0 [&_.table-container_table]:!border-0
+                       [&_.table-container_table]:!rounded-none"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </div>

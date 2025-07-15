@@ -131,7 +131,12 @@ export default async function DocPage({ params }: Props) {
                                [&_h3_a]:!text-gray-900 [&_h3_a]:dark:!text-white [&_h3_a]:!no-underline
                                [&_h4_a]:!text-gray-900 [&_h4_a]:dark:!text-white [&_h4_a]:!no-underline
                                [&_h5_a]:!text-gray-900 [&_h5_a]:dark:!text-white [&_h5_a]:!no-underline
-                               [&_h6_a]:!text-gray-900 [&_h6_a]:dark:!text-white [&_h6_a]:!no-underline"
+                               [&_h6_a]:!text-gray-900 [&_h6_a]:dark:!text-white [&_h6_a]:!no-underline
+                               [&_.table-container]:overflow-x-auto [&_.table-container]:border 
+                               [&_.table-container]:border-gray-200 [&_.table-container]:dark:border-gray-700 
+                               [&_.table-container]:rounded-lg [&_.table-container]:my-6
+                               [&_.table-container_table]:!my-0 [&_.table-container_table]:!border-0
+                               [&_.table-container_table]:!rounded-none"
                     dangerouslySetInnerHTML={{ __html: doc.content }}
                   />
                 </article>
