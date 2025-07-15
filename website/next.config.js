@@ -7,9 +7,6 @@ const nextConfig = {
   },
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',
   basePath: process.env.NODE_ENV === 'production' ? '' : '',
-  experimental: {
-    mdxRs: true,
-  },
 }
 
 module.exports = nextConfig

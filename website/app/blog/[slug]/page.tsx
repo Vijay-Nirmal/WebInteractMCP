@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { getBlogPost, getAllBlogSlugs } from '../../../lib/content'
 
 type Props = {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const post = await getBlogPost(params.slug)
+  const { slug } = await params
+  const post = await getBlogPost(slug)
   
   if (!post) {
     return {
@@ -37,7 +38,8 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPost({ params }: Props) {
-  const post = await getBlogPost(params.slug)
+  const { slug } = await params
+  const post = await getBlogPost(slug)
 
   if (!post) {
     notFound()

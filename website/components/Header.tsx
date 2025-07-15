@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTheme } from 'next-themes'
 import { Bars3Icon, XMarkIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline'
@@ -15,7 +15,13 @@ const navigation = [
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
+
+  // Ensure component is mounted before showing theme-dependent UI
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <>
@@ -59,8 +65,12 @@ export default function Header() {
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
             >
-              {theme === 'dark' ? (
-                <SunIcon className="h-5 w-5" />
+              {mounted ? (
+                theme === 'dark' ? (
+                  <SunIcon className="h-5 w-5" />
+                ) : (
+                  <MoonIcon className="h-5 w-5" />
+                )
               ) : (
                 <MoonIcon className="h-5 w-5" />
               )}
@@ -126,11 +136,18 @@ export default function Header() {
                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                     className="flex items-center gap-x-3 -mx-3 rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"
                   >
-                    {theme === 'dark' ? (
-                      <>
-                        <SunIcon className="h-5 w-5" />
-                        Light Mode
-                      </>
+                    {mounted ? (
+                      theme === 'dark' ? (
+                        <>
+                          <SunIcon className="h-5 w-5" />
+                          Light Mode
+                        </>
+                      ) : (
+                        <>
+                          <MoonIcon className="h-5 w-5" />
+                          Dark Mode
+                        </>
+                      )
                     ) : (
                       <>
                         <MoonIcon className="h-5 w-5" />
