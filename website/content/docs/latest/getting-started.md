@@ -20,9 +20,6 @@ TypeScript library for client-side integration. This framework-agnostic library 
 ### 🖥️ WebIntractMCPServer
 Ready-to-deploy Docker MCP server for protocol handling. Built with .NET 9 and ASP.NET Core for robust performance.
 
-### 🎯 Sample Implementation
-Complete Angular + .NET example demonstrating the full integration workflow.
-
 ## Architecture Overview
 
 ```mermaid

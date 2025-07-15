@@ -16,7 +16,6 @@ WebIntractMCP consists of two tightly integrated components that work together t
 
 - **📚 [@web-intract-mcp/client](lib/web-intract-mcp)** - TypeScript library for client-side integration
 - **🖥️ [WebIntractMCPServer](server/WebIntractMCPServer)** - Ready to deploy Docker MCP server image for protocol handling
-- **🎯 [Sample Implementation](sample/angular-dotnetnet-semantic-kernel)** - Complete Angular + .NET example
 
 ## ✨ Key Features
 
@@ -162,7 +161,6 @@ Feel free to use it in your projects, but be prepared for potential breaking cha
 
 - [Client Library Guide](lib/web-intract-mcp/README.md) - Complete TypeScript library documentation
 - [Server Setup Guide](server/README.md) - MCP server configuration and deployment
-- [Sample Implementation](sample/angular-dotnetnet-semantic-kernel/README.md) - Working example with Angular and .NET
 
 ## 🤝 Contributing
 

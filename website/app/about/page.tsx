@@ -118,10 +118,6 @@ export default function About() {
                   <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   <span><strong>SignalR:</strong> Real-time communication with fallback support</span>
                 </li>
-                <li className="flex items-center space-x-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span><strong>Angular 20:</strong> Modern web framework for sample implementation</span>
-                </li>
               </ul>
 
               <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
