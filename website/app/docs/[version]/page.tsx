@@ -5,22 +5,23 @@ import { getVersions, getDocPages } from '../../../lib/content'
 import DocsSidebar from '../../../components/DocsSidebar'
 
 type Props = {
-  params: { version: string }
+  params: Promise<{ version: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { version } = await params
   const versions = await getVersions()
-  const version = versions.find(v => v.version === params.version)
+  const versionData = versions.find(v => v.version === version)
   
-  if (!version) {
+  if (!versionData) {
     return {
       title: 'Documentation Not Found',
     }
   }
 
   return {
-    title: `Documentation ${version.label} - WebIntract MCP`,
-    description: `WebIntract MCP documentation for version ${version.label}. Learn how to transform web applications into MCP servers.`,
+    title: `Documentation ${versionData.label} - WebIntract MCP`,
+    description: `WebIntract MCP documentation for version ${versionData.label}. Learn how to transform web applications into MCP servers.`,
   }
 }
 
@@ -32,14 +33,15 @@ export async function generateStaticParams() {
 }
 
 export default async function DocsVersionIndex({ params }: Props) {
+  const { version } = await params
   const versions = await getVersions()
-  const currentVersion = versions.find(v => v.version === params.version)
+  const currentVersion = versions.find(v => v.version === version)
   
   if (!currentVersion) {
     notFound()
   }
 
-  const docs = await getDocPages(params.version)
+  const docs = await getDocPages(version)
   
   // Group docs by category
   const groupedDocs = docs.reduce((acc, doc) => {
@@ -91,7 +93,7 @@ export default async function DocsVersionIndex({ params }: Props) {
         <div className="lg:flex lg:gap-8">
           {/* Sidebar - Hidden on mobile, shown on desktop */}
           <div className="hidden lg:block">
-            <DocsSidebar currentVersion={params.version} />
+            <DocsSidebar currentVersion={version} />
           </div>
 
           {/* Main content */}
@@ -123,18 +125,18 @@ export default async function DocsVersionIndex({ params }: Props) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 space-y-2 sm:space-y-0">
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Version:</span>
                   <div className="flex flex-wrap gap-2">
-                    {versions.map((version) => (
+                    {versions.map((versionItem) => (
                       <Link
-                        key={version.version}
-                        href={`/docs/${version.version}`}
+                        key={versionItem.version}
+                        href={`/docs/${versionItem.version}`}
                         className={`inline-flex items-center rounded-md px-3 py-1 text-xs font-medium transition-colors ${
-                          version.version === params.version
+                          versionItem.version === version
                             ? 'bg-primary-100 text-primary-800 dark:bg-primary-900/20 dark:text-primary-200'
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
-                        {version.label}
-                        {version.isLatest && (
+                        {versionItem.label}
+                        {versionItem.isLatest && (
                           <span className="ml-1 text-xs text-primary-600 dark:text-primary-400">
                             (Latest)
                           </span>
@@ -158,7 +160,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                     
                     <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
                       <Link
-                        href={`/docs/${params.version}/quickstart/angular`}
+                        href={`/docs/${version}/quickstart/angular`}
                         className="relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 sm:px-6 py-4 sm:py-5 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                       >
                         <div className="flex-shrink-0">
@@ -171,7 +173,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                       </Link>
 
                       <Link
-                        href={`/docs/${params.version}/quickstart/react`}
+                        href={`/docs/${version}/quickstart/react`}
                         className="relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 sm:px-6 py-4 sm:py-5 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                       >
                         <div className="flex-shrink-0">
@@ -184,7 +186,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                       </Link>
 
                       <Link
-                        href={`/docs/${params.version}/quickstart/vue`}
+                        href={`/docs/${version}/quickstart/vue`}
                         className="relative flex items-center space-x-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-4 sm:px-6 py-4 sm:py-5 shadow-sm hover:border-gray-400 dark:hover:border-gray-500 transition-colors"
                       >
                         <div className="flex-shrink-0">
@@ -207,7 +209,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                     </p>
                     <div className="mt-3 sm:mt-4 space-y-2">
                       <Link
-                        href={`/docs/${params.version}/examples`}
+                        href={`/docs/${version}/examples`}
                         className="block text-xs sm:text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
                       >
                         → View Examples
@@ -240,7 +242,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                           {groupedDocs[category].map((doc) => (
                             <Link
                               key={doc.slug}
-                              href={`/docs/${params.version}/${doc.slug}`}
+                              href={`/docs/${version}/${doc.slug}`}
                               className="group relative rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 sm:p-6 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md transition-all"
                             >
                               <h4 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">

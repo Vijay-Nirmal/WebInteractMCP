@@ -6,12 +6,13 @@ import DocsSidebar from '../../../../components/DocsSidebar'
 import TableOfContents from '../../../../components/TableOfContents'
 
 type Props = {
-  params: { version: string; slug: string[] }
+  params: Promise<{ version: string; slug: string[] }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const slug = params.slug.join('/')
-  const doc = await getDocPage(params.version, slug)
+  const { version, slug } = await params
+  const slugPath = slug.join('/')
+  const doc = await getDocPage(version, slugPath)
   
   if (!doc) {
     return {
@@ -43,10 +44,11 @@ export async function generateStaticParams() {
 }
 
 export default async function DocPage({ params }: Props) {
-  const slug = params.slug.join('/')
-  const doc = await getDocPage(params.version, slug)
+  const { version, slug } = await params
+  const slugPath = slug.join('/')
+  const doc = await getDocPage(version, slugPath)
   const versions = await getVersions()
-  const currentVersion = versions.find(v => v.version === params.version)
+  const currentVersion = versions.find(v => v.version === version)
 
   if (!doc || !currentVersion) {
     notFound()
@@ -58,7 +60,7 @@ export default async function DocPage({ params }: Props) {
         <div className="lg:flex lg:gap-8">
           {/* Sidebar - Hidden on mobile, shown on desktop */}
           <div className="hidden lg:block">
-            <DocsSidebar currentVersion={params.version} currentSlug={slug} />
+            <DocsSidebar currentVersion={version} currentSlug={slugPath} />
           </div>
 
           {/* Main content */}
@@ -92,7 +94,7 @@ export default async function DocPage({ params }: Props) {
                 </li>
                 <li className="whitespace-nowrap">
                   <Link 
-                    href={`/docs/${params.version}`}
+                    href={`/docs/${version}`}
                     className="hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                   >
                     {currentVersion.label}
@@ -233,7 +235,7 @@ export default async function DocPage({ params }: Props) {
                 <div className="mt-12 sm:mt-16 border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8">
                   <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
                     <Link
-                      href={`/docs/${params.version}`}
+                      href={`/docs/${version}`}
                       className="inline-flex items-center justify-center sm:justify-start rounded-md bg-white dark:bg-gray-800 px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">

@@ -14,7 +14,8 @@ This directory contains the Next.js website for WebIntractMCP.
 
 ## 🛠️ Tech Stack
 
-- **Next.js 14**: React framework with static site generation
+- **Next.js 15**: React framework with static site generation
+- **React 19**: Latest React version with new features
 - **TypeScript**: Type-safe development
 - **Tailwind CSS**: Utility-first CSS framework
 - **Markdown**: Content management with gray-matter
