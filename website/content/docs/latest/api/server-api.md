@@ -6,7 +6,7 @@ category: "API Reference"
 
 # Server API Reference
 
-Complete REST API and SignalR hub reference for the WebIntract MCP Server, including endpoints, request/response formats, and integration patterns.
+Complete REST API and SignalR hub reference for the WebInteract MCP Server, including endpoints, request/response formats, and integration patterns.
 
 ## Base URL
 
@@ -112,7 +112,7 @@ GET /api/mcp-tools?category=web&limit=10&offset=0
     "metadata": {
       "category": "web",
       "version": "1.0.0",
-      "author": "WebIntract",
+      "author": "WebInteract",
       "tags": ["search", "web", "information"]
     }
   }
@@ -736,7 +736,7 @@ Get current server configuration.
 **Response:**
 ```json
 {
-  "mcpIntract": {
+  "mcpInteract": {
     "client": {
       "baseUrl": "http://localhost:4200",
       "timeoutSeconds": 30
@@ -766,7 +766,7 @@ Update server configuration.
 **Request Body:**
 ```json
 {
-  "mcpIntract": {
+  "mcpInteract": {
     "tool": {
       "timeoutMinutes": 15
     }
@@ -955,7 +955,7 @@ public class McpServerClient : IDisposable
 }
 ```
 
-This comprehensive Server API reference provides developers with all the information needed to integrate with the WebIntract MCP Server using REST APIs, SignalR, or WebSocket connections.
+This comprehensive Server API reference provides developers with all the information needed to integrate with the WebInteract MCP Server using REST APIs, SignalR, or WebSocket connections.
 
 ## Next Steps
 

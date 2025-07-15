@@ -1,5 +1,5 @@
 /**
- * @fileoverview SignalR service for Web Intract MCP communication
+ * @fileoverview SignalR service for Web Interact MCP communication
  * @description Framework-agnostic SignalR service for real-time communication with MCP servers
  * @version 1.0.0
  * @author Vijay Nirmal
@@ -12,15 +12,15 @@ import { ToolRegistry } from './tool-registry';
 /**
  * Forward declaration to avoid circular dependency
  */
-export interface WebIntractMCPController {
+export interface WebInteractMCPController {
   start(tools: ToolStartConfig[]): Promise<CallToolResult[]>;
 }
 
 /**
- * SignalR service for Web Intract MCP communication
+ * SignalR service for Web Interact MCP communication
  * This is a framework-agnostic implementation that can be used with any JavaScript framework
  */
-export class WebIntractSignalRService {
+export class WebInteractSignalRService {
   private connection: signalR.HubConnection | null = null;
   private readonly config: TransportOptions;
   private readonly logger: Pick<Console, 'log' | 'error' | 'warn' | 'info'>;
@@ -73,7 +73,7 @@ export class WebIntractSignalRService {
   }
 
   /**
-   * Creates a new WebIntractSignalRService instance
+   * Creates a new WebInteractSignalRService instance
    * @param serverUrl - The base URL of the MCP server
    * @param mcpController - The MCP controller instance
    * @param toolRegistry - The tool registry instance for tool discovery
@@ -81,7 +81,7 @@ export class WebIntractSignalRService {
    */
   constructor(
     private serverUrl: string, 
-    private mcpController: WebIntractMCPController,
+    private mcpController: WebInteractMCPController,
     private toolRegistry: ToolRegistry,
     config: Partial<TransportOptions> = {}
   ) {
@@ -372,4 +372,4 @@ export class WebIntractSignalRService {
 }
 
 // Legacy alias for backward compatibility
-export { WebIntractSignalRService as MCPSignalRService };
+export { WebInteractSignalRService as MCPSignalRService };

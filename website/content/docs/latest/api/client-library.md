@@ -6,14 +6,14 @@ category: "API Reference"
 
 # Client Library API Reference
 
-Complete API reference for the WebIntract MCP client library, including TypeScript interfaces, classes, and integration patterns.
+Complete API reference for the WebInteract MCP client library, including TypeScript interfaces, classes, and integration patterns.
 
 ## Installation
 
 ```bash
-npm install @webintract/mcp-client
+npm install @webinteract/mcp-client
 # or
-yarn add @webintract/mcp-client
+yarn add @webinteract/mcp-client
 ```
 
 ## Core Interfaces
@@ -217,12 +217,12 @@ interface ConnectionState {
 
 ## Main Client Class
 
-### WebIntractMcpClient
+### WebInteractMcpClient
 
-Main client class for interacting with WebIntract MCP Server.
+Main client class for interacting with WebInteract MCP Server.
 
 ```typescript
-class WebIntractMcpClient {
+class WebInteractMcpClient {
   constructor(options: McpClientOptions);
   
   // Connection management
@@ -306,7 +306,7 @@ interface McpClientOptions {
 
 **Example:**
 ```typescript
-const client = new WebIntractMcpClient({
+const client = new WebInteractMcpClient({
   baseUrl: "https://mcp.example.com",
   http: {
     timeout: 30000,
@@ -626,7 +626,7 @@ interface CacheOptions {
 }
 
 // Enable caching
-const client = new WebIntractMcpClient({
+const client = new WebInteractMcpClient({
   baseUrl: "https://mcp.example.com",
   cache: {
     enabled: true,
@@ -756,10 +756,10 @@ console.log(`Completed ${batchResponse.metadata.completedCount} of ${batchRespon
 
 ```typescript
 import { useEffect, useState, useCallback } from 'react';
-import { WebIntractMcpClient } from '@webintract/mcp-client';
+import { WebInteractMcpClient } from '@webinteract/mcp-client';
 
-export function useWebIntractMcp(options: McpClientOptions) {
-  const [client] = useState(() => new WebIntractMcpClient(options));
+export function useWebInteractMcp(options: McpClientOptions) {
+  const [client] = useState(() => new WebInteractMcpClient(options));
   const [tools, setTools] = useState<McpTool[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -818,10 +818,10 @@ export function useWebIntractMcp(options: McpClientOptions) {
 
 ```typescript
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { WebIntractMcpClient } from '@webintract/mcp-client';
+import { WebInteractMcpClient } from '@webinteract/mcp-client';
 
-export function useWebIntractMcp(options: McpClientOptions) {
-  const client = new WebIntractMcpClient(options);
+export function useWebInteractMcp(options: McpClientOptions) {
+  const client = new WebInteractMcpClient(options);
   const tools = ref<McpTool[]>([]);
   const connectionState = ref<ConnectionState>({
     isConnected: false,
@@ -881,7 +881,7 @@ export function useWebIntractMcp(options: McpClientOptions) {
 
 ```typescript
 // v1.x (deprecated)
-import { McpClient } from '@webintract/mcp-client';
+import { McpClient } from '@webinteract/mcp-client';
 
 const client = new McpClient('http://localhost:8080');
 await client.init();
@@ -889,9 +889,9 @@ const tools = await client.listTools();
 const result = await client.execute('tool_name', { arg: 'value' });
 
 // v2.x (current)
-import { WebIntractMcpClient } from '@webintract/mcp-client';
+import { WebInteractMcpClient } from '@webinteract/mcp-client';
 
-const client = new WebIntractMcpClient({
+const client = new WebInteractMcpClient({
   baseUrl: 'http://localhost:8080'
 });
 await client.connect();
@@ -910,7 +910,7 @@ const result = await client.callTool({
 4. **Response Format**: Standardized response structure with `content` array
 5. **Error Handling**: Specific error types instead of generic errors
 
-This comprehensive API reference covers all aspects of the WebIntract MCP client library, providing developers with everything needed to integrate MCP tools into their applications effectively.
+This comprehensive API reference covers all aspects of the WebInteract MCP client library, providing developers with everything needed to integrate MCP tools into their applications effectively.
 
 ## Next Steps
 

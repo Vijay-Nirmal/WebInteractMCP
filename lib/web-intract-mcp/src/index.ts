@@ -1,5 +1,5 @@
 /**
- * @fileoverview Main entry point for the Web Intract MCP library
+ * @fileoverview Main entry point for the Web Interact MCP library
  * @description Production-ready TypeScript library for transforming web applications into MCP servers
  * @version 1.0.0
  * @author Vijay Nirmal
@@ -7,8 +7,8 @@
 
 // Export main classes
 export { ToolRegistry } from './tool-registry';
-export { WebIntractMCPController } from './controller';
-export { WebIntractSignalRService } from './signalr.service';
+export { WebInteractMCPController } from './controller';
+export { WebInteractSignalRService } from './signalr.service';
 
 // Export types
 export {
@@ -44,9 +44,9 @@ export type {
   ReturnValue,
   ToolStep,
   ToolConfiguration,
-  WebIntractMCPOptions,
+  WebInteractMCPOptions,
   TransportOptions,
-  WebIntractMCPEvent,
+  WebInteractMCPEvent,
   ToolStartConfig,
   
   // Function types
@@ -77,27 +77,27 @@ export type { ToolSummary } from './tool-registry';
 
 // Export SignalR service interfaces
 export type { 
-  WebIntractMCPController as IWebIntractMCPController
+  WebInteractMCPController as IWebInteractMCPController
 } from './signalr.service';
 
 // Import types for function signatures
 import type { 
-    WebIntractMCPOptions
+    WebInteractMCPOptions
 } from './types';
 import type { ToolRegistry } from './tool-registry';
-import { WebIntractMCPController } from './controller';
+import { WebInteractMCPController } from './controller';
 
 /**
- * Create a new WebIntractMCPController instance with custom options
+ * Create a new WebInteractMCPController instance with custom options
  * @param options - Global configuration options
  * @param shepherdOptions - Default options to pass to the Shepherd.Tour constructor
- * @returns A new WebIntractMCPController instance
+ * @returns A new WebInteractMCPController instance
  */
-export function createWebIntractMCPController(
-  options?: Partial<WebIntractMCPOptions>, 
+export function createWebInteractMCPController(
+  options?: Partial<WebInteractMCPOptions>, 
   shepherdOptions?: unknown
-): WebIntractMCPController {
-  return new WebIntractMCPController(options, shepherdOptions);
+): WebInteractMCPController {
+  return new WebInteractMCPController(options, shepherdOptions);
 }
 
 /**
@@ -119,7 +119,7 @@ export const VERSION = '1.0.0';
  * Library information
  */
 export const LIBRARY_INFO = {
-  name: '@web-intract-mcp/client',
+  name: '@web-interact-mcp/client',
   version: VERSION,
   description: 'A production-ready TypeScript library that transforms web applications into MCP servers with robust two-way communication',
   author: 'GitHub Copilot',

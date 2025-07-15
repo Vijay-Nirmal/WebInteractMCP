@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'About WebIntractMCP - Open Source MCP Ecosystem',
-  description: 'Learn about WebIntractMCP, the open-source ecosystem that transforms web applications into MCP servers. Created by Vijay Nirmal.',
+  title: 'About WebInteractMCP - Open Source MCP Ecosystem',
+  description: 'Learn about WebInteractMCP, the open-source ecosystem that transforms web applications into MCP servers. Created by Vijay Nirmal.',
 }
 
 export default function About() {
@@ -13,10 +13,10 @@ export default function About() {
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-              About WebIntractMCP
+              About WebInteractMCP
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              WebIntractMCP is an innovative open-source ecosystem that bridges the gap between web applications 
+              WebInteractMCP is an innovative open-source ecosystem that bridges the gap between web applications 
               and the Model Context Protocol, enabling seamless AI-driven web automation.
             </p>
           </div>
@@ -51,16 +51,16 @@ export default function About() {
 
             <div className="max-w-xl text-base leading-7 text-gray-700 dark:text-gray-300 lg:col-span-7">
               <h2 className="mt-8 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-                The Story Behind WebIntractMCP
+                The Story Behind WebInteractMCP
               </h2>
               <p className="mt-6">
-                WebIntractMCP was born from the recognition that while AI and chatbots have become incredibly 
+                WebInteractMCP was born from the recognition that while AI and chatbots have become incredibly 
                 sophisticated, they've been limited in their ability to directly interact with web applications. 
                 Most solutions required complex browser automation setups, brittle selectors, and framework-specific 
                 implementations.
               </p>
               <p className="mt-8">
-                By leveraging the Model Context Protocol (MCP), WebIntractMCP creates a standardized way for 
+                By leveraging the Model Context Protocol (MCP), WebInteractMCP creates a standardized way for 
                 web applications to expose their functionality to AI assistants. This opens up endless possibilities 
                 for intelligent user assistance, automated testing, process automation, and enhanced accessibility.
               </p>
@@ -72,14 +72,14 @@ export default function About() {
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Simplicity First</h3>
                   <p className="mt-2">
-                    We believe that powerful tools should be easy to use. WebIntractMCP can be integrated 
+                    We believe that powerful tools should be easy to use. WebInteractMCP can be integrated 
                     into any web application with just a few lines of code.
                   </p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Framework Agnostic</h3>
                   <p className="mt-2">
-                    Whether you're using React, Angular, Vue, or vanilla JavaScript, WebIntractMCP works 
+                    Whether you're using React, Angular, Vue, or vanilla JavaScript, WebInteractMCP works 
                     seamlessly with your existing tech stack.
                   </p>
                 </div>
@@ -93,7 +93,7 @@ export default function About() {
                 <div>
                   <h3 className="font-semibold text-gray-900 dark:text-white">Open Source</h3>
                   <p className="mt-2">
-                    We believe in the power of community. WebIntractMCP is open source and welcomes 
+                    We believe in the power of community. WebInteractMCP is open source and welcomes 
                     contributions from developers worldwide.
                   </p>
                 </div>
@@ -103,7 +103,7 @@ export default function About() {
                 Technology Choices
               </h2>
               <p className="mt-6">
-                WebIntractMCP is built with modern, battle-tested technologies:
+                WebInteractMCP is built with modern, battle-tested technologies:
               </p>
               <ul className="mt-6 space-y-3">
                 <li className="flex items-center space-x-3">
@@ -124,13 +124,13 @@ export default function About() {
                 Community & Contributions
               </h2>
               <p className="mt-6">
-                WebIntractMCP thrives on community contributions. Whether you're reporting bugs, 
+                WebInteractMCP thrives on community contributions. Whether you're reporting bugs, 
                 suggesting features, contributing code, or helping with documentation, every contribution 
                 is valued and appreciated.
               </p>
               <div className="mt-8 flex gap-x-6">
                 <Link
-                  href="https://github.com/Vijay-Nirmal/WebIntractMCP"
+                  href="https://github.com/Vijay-Nirmal/WebInteractMCP"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
@@ -157,7 +157,7 @@ export default function About() {
               Meet the Creator
             </h2>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              WebIntractMCP is created and maintained by Vijay Nirmal, a passionate developer 
+              WebInteractMCP is created and maintained by Vijay Nirmal, a passionate developer 
               committed to making web applications more intelligent and accessible.
             </p>
           </div>

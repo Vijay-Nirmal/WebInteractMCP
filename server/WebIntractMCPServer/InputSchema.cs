@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace WebIntractMCPServer;
+namespace WebInteractMCPServer;
 
 /// <summary>
 /// Schema definition for tool input parameters

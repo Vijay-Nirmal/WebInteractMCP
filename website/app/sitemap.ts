@@ -4,7 +4,7 @@ import { getBlogPosts, getDocPages, getVersions } from '../lib/content'
 export const dynamic = 'force-static'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://webintractmcp.com'
+  const baseUrl = 'https://webinteractmcp.com'
   const currentDate = new Date().toISOString()
   
   // Static pages

@@ -1,21 +1,21 @@
-# WebIntractMCP
+# WebInteractMCP
 
 > Transform any web application into an MCP server with real-time two-way communication
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Development Status](https://img.shields.io/badge/Status-Active%20Development-orange)](https://github.com/Vijay-Nirmal/WebIntractMCP)
-[![Version](https://img.shields.io/badge/Version-Pre--1.0-red)](https://github.com/Vijay-Nirmal/WebIntractMCP)
+[![Development Status](https://img.shields.io/badge/Status-Active%20Development-orange)](https://github.com/Vijay-Nirmal/WebInteractMCP)
+[![Version](https://img.shields.io/badge/Version-Pre--1.0-red)](https://github.com/Vijay-Nirmal/WebInteractMCP)
 
-WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
+WebInteractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
 > **📢 Check out the preview version available now!** This project is in active development. Expect breaking changes in future releases as we evolve toward version 1.0.
 
 ## 🚀 Overview
 
-WebIntractMCP consists of two tightly integrated components that work together to create a seamless MCP experience:
+WebInteractMCP consists of two tightly integrated components that work together to create a seamless MCP experience:
 
-- **📚 [@web-intract-mcp/client](lib/web-intract-mcp)** - TypeScript library for client-side integration
-- **🖥️ [WebIntractMCPServer](server/WebIntractMCPServer)** - Ready to deploy Docker MCP server image for protocol handling
+- **📚 [@web-interact-mcp/client](lib/web-interact-mcp)** - TypeScript library for client-side integration
+- **🖥️ [WebInteractMCPServer](server/WebInteractMCPServer)** - Ready to deploy Docker MCP server image for protocol handling
 
 ## ✨ Key Features
 
@@ -34,7 +34,7 @@ WebIntractMCP consists of two tightly integrated components that work together t
 
 https://github.com/user-attachments/assets/bf9d15a6-fa4a-40a0-8543-cb0fd92bffac
 
-*Click to view the demonstration of WebIntractMCP transforming a web application into an MCP server*
+*Click to view the demonstration of WebInteractMCP transforming a web application into an MCP server*
 
 ## 🏗️ Architecture
 
@@ -45,9 +45,9 @@ graph TB
         E[Tools Configuration<br/>JSON File]
     end
     
-    subgraph "WebIntractMCP Ecosystem"
-        B[WebIntractMCPServer]
-        C[@web-intract-mcp/client<br/>TypeScript Library]
+    subgraph "WebInteractMCP Ecosystem"
+        B[WebInteractMCPServer]
+        C[@web-interact-mcp/client<br/>TypeScript Library]
     end
     
     subgraph "MCP Client (Chatbot/AI)"
@@ -67,10 +67,10 @@ graph TB
 
 ```bash
 # Install the stable version (Not available yet)
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 
 # Or install the latest preview version
-npm install @web-intract-mcp/client@preview
+npm install @web-interact-mcp/client@preview
 ```
 
 ### 2. Configure Your Tools
@@ -97,9 +97,9 @@ Create a `mcp-tools.json` file:
 ### 3. Initialize in Your Web App
 
 ```typescript
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
-const controller = createWebIntractMCPController();
+const controller = createWebInteractMCPController();
 await controller.loadTools('/mcp-tools.json');
 await controller.createSession('http://localhost:8080');
 ```
@@ -108,21 +108,21 @@ await controller.createSession('http://localhost:8080');
 
 ```bash
 # Using Docker
-docker run -p 8080:8080 webintract-mcp-server
+docker run -p 8080:8080 webinteract-mcp-server
 
 # Or build from source
-cd server/WebIntractMCPServer
+cd server/WebInteractMCPServer
 dotnet run
 ```
 
 ## 📁 Project Structure
 
 ```
-WebIntractMCP/
-├── lib/web-intract-mcp/           # TypeScript MCP Library
+WebInteractMCP/
+├── lib/web-interact-mcp/           # TypeScript MCP Library
 │   ├── src/                       # Source code
 │   └── README.md                  # Library documentation
-├── server/WebIntractMCPServer/    # .NET MCP Server
+├── server/WebInteractMCPServer/    # .NET MCP Server
 │   ├── Program.cs                 # Server entry point
 │   └── README.md                  # Server documentation
 ├── sample/                        # Reference implementations
@@ -159,7 +159,7 @@ Feel free to use it in your projects, but be prepared for potential breaking cha
 
 ## 📖 Documentation
 
-- [Client Library Guide](lib/web-intract-mcp/README.md) - Complete TypeScript library documentation
+- [Client Library Guide](lib/web-interact-mcp/README.md) - Complete TypeScript library documentation
 - [Server Setup Guide](server/README.md) - MCP server configuration and deployment
 - [Sample Implementation](sample/angular-dotnetnet-semantic-kernel/README.md) - Working example with Angular and .NET
 
@@ -172,12 +172,12 @@ We welcome contributions! Please see our [contributing guidelines](.github/copil
 ```bash
 # Setup
 npm install
-cd lib/web-intract-mcp && npm install
+cd lib/web-interact-mcp && npm install
 cd sample/angular-dotnetnet-semantic-kernel && npm install
 
 # Start development environment with sample app
 cd sample/angular-dotnetnet-semantic-kernel
-npm run start:server    # Web Intract MCP server
+npm run start:server    # Web Interact MCP server
 npm run start:client    # .NET client backend sample app
 npm run start           # Angular frontend sample app
 ```
@@ -188,8 +188,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- [GitHub Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues) - Report bugs or request features
-- [Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions) - Community discussions
+- [GitHub Issues](https://github.com/Vijay-Nirmal/WebInteractMCP/issues) - Report bugs or request features
+- [Discussions](https://github.com/Vijay-Nirmal/WebInteractMCP/discussions) - Community discussions
 
 ---
 

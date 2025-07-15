@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.SignalR;
 
-namespace WebIntractMCPServer.Hubs;
+namespace WebInteractMCPServer.Hubs;
 
 /// <summary>
 /// SignalR hub for MCP tools communication with clients

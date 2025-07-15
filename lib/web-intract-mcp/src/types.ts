@@ -1,5 +1,5 @@
 /**
- * @fileoverview Core TypeScript type definitions for Web Intract MCP library
+ * @fileoverview Core TypeScript type definitions for Web Interact MCP library
  * @description This file contains all the type definitions used throughout the library
  * @version 1.0.0
  * @author Vijay Nirmal
@@ -474,7 +474,7 @@ export interface ToolConfiguration {
   /** An array of steps that make up the Tool */
   steps: ToolStep[];
   /** Override global options for this specific tool */
-  options?: Partial<WebIntractMCPOptions>;
+  options?: Partial<WebInteractMCPOptions>;
   /** Parameter schema for MCP server integration */
   parameterSchema?: ToolParameterSchema;
   /** Configuration for the tool-level return value */
@@ -490,9 +490,9 @@ export interface ToolConfiguration {
 }
 
 /**
- * Global configuration options for Web Intract MCP Controller
+ * Global configuration options for Web Interact MCP Controller
  */
-export interface WebIntractMCPOptions {
+export interface WebInteractMCPOptions {
   /** The base server URL (default: 'http://localhost:8080') */
   serverUrl: string;
   /** Whether to show visual feedback for automated actions (default: true) */
@@ -539,9 +539,9 @@ export interface TransportOptions {
 }
 
 /**
- * Event types that can be emitted by the Web Intract MCP Controller
+ * Event types that can be emitted by the Web Interact MCP Controller
  */
-export type WebIntractMCPEvent = 'start' | 'complete' | 'cancel' | 'step:show';
+export type WebInteractMCPEvent = 'start' | 'complete' | 'cancel' | 'step:show';
 
 /**
  * Configuration for tools to start

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Tool Registry for managing Web Intract MCP tool configurations
+ * @fileoverview Tool Registry for managing Web Interact MCP tool configurations
  * @description Manages the collection of available tools with validation and discovery capabilities
  * @version 1.0.0
  * @author Vijay Nirmal

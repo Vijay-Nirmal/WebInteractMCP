@@ -3,8 +3,8 @@ import Link from 'next/link'
 import { getBlogPosts } from '../../lib/content'
 
 export const metadata: Metadata = {
-  title: 'Blog - WebIntract MCP',
-  description: 'Latest news, tutorials, and insights about WebIntract MCP and the Model Context Protocol ecosystem.',
+  title: 'Blog - WebInteract MCP',
+  description: 'Latest news, tutorials, and insights about WebInteract MCP and the Model Context Protocol ecosystem.',
 }
 
 export default async function BlogIndex() {
@@ -18,7 +18,7 @@ export default async function BlogIndex() {
             Blog
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            Latest news, tutorials, and insights about WebIntract MCP and the Model Context Protocol ecosystem.
+            Latest news, tutorials, and insights about WebInteract MCP and the Model Context Protocol ecosystem.
           </p>
         </div>
 

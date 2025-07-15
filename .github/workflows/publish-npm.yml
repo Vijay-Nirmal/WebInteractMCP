@@ -13,7 +13,7 @@ on:
           - production
 
 env:
-  PACKAGE_PATH: lib/web-intract-mcp
+  PACKAGE_PATH: lib/web-interact-mcp
 
 jobs:
   build:
@@ -132,7 +132,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     environment: 
       name: ${{ needs.build.outputs.is-production == 'true' && 'production' || 'preview' }}
-      url: https://www.npmjs.com/package/@web-intract-mcp/client
+      url: https://www.npmjs.com/package/@web-interact-mcp/client
     
     defaults:
       run:
@@ -166,7 +166,7 @@ jobs:
             exit 1
           fi
           
-          echo "🚀 Publishing @web-intract-mcp/client@$BUILD_VERSION with tag: $NPM_TAG"
+          echo "🚀 Publishing @web-interact-mcp/client@$BUILD_VERSION with tag: $NPM_TAG"
           echo "📦 Publishing tarball: $TARBALL"
           npm publish "$TARBALL" --tag $NPM_TAG --access public
         env:
@@ -179,21 +179,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: "v${{ needs.build.outputs.version }}"
-          release_name: "@web-intract-mcp/client v${{ needs.build.outputs.version }}"
+          release_name: "@web-interact-mcp/client v${{ needs.build.outputs.version }}"
           body: |
-            ## @web-intract-mcp/client v${{ needs.build.outputs.version }}
+            ## @web-interact-mcp/client v${{ needs.build.outputs.version }}
             
             ### Installation
             ```bash
-            npm install @web-intract-mcp/client@${{ needs.build.outputs.version }}
+            npm install @web-interact-mcp/client@${{ needs.build.outputs.version }}
             ```
             
             ### What's Changed
-            - Production release of @web-intract-mcp/client
-            - See [CHANGELOG.md](lib/web-intract-mcp/CHANGELOG.md) for detailed changes
+            - Production release of @web-interact-mcp/client
+            - See [CHANGELOG.md](lib/web-interact-mcp/CHANGELOG.md) for detailed changes
             
             ### Links
-            - [NPM Package](https://www.npmjs.com/package/@web-intract-mcp/client)
+            - [NPM Package](https://www.npmjs.com/package/@web-interact-mcp/client)
             - [Documentation](README.md)
           draft: false
           prerelease: false
@@ -209,7 +209,7 @@ jobs:
         run: |
           echo "## 📦 NPM Build & Publish Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Package:** @web-intract-mcp/client" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** @web-interact-mcp/client" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Release Type:** ${{ needs.build.outputs.release-type }}" >> $GITHUB_STEP_SUMMARY
           echo "**NPM Tag:** ${{ needs.build.outputs.npm-tag }}" >> $GITHUB_STEP_SUMMARY
@@ -226,7 +226,7 @@ jobs:
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "### 📥 Installation" >> $GITHUB_STEP_SUMMARY
               echo '```bash' >> $GITHUB_STEP_SUMMARY
-              echo "npm install @web-intract-mcp/client@${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
+              echo "npm install @web-interact-mcp/client@${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
               echo '```' >> $GITHUB_STEP_SUMMARY
               echo "" >> $GITHUB_STEP_SUMMARY
               echo "### 🏷️ NPM Tag" >> $GITHUB_STEP_SUMMARY
@@ -248,11 +248,11 @@ jobs:
             echo "Package was built successfully but not published to NPM because this is not the master branch." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Would have been published as:**" >> $GITHUB_STEP_SUMMARY
-            echo "- Package: \`@web-intract-mcp/client@${{ needs.build.outputs.build-version }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Package: \`@web-interact-mcp/client@${{ needs.build.outputs.build-version }}\`" >> $GITHUB_STEP_SUMMARY
             echo "- Tag: \`${{ needs.build.outputs.npm-tag }}\`" >> $GITHUB_STEP_SUMMARY
           fi
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
-          echo "- [NPM Package](https://www.npmjs.com/package/@web-intract-mcp/client)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Documentation](https://github.com/Vijay-Nirmal/WebIntractMCP)" >> $GITHUB_STEP_SUMMARY
+          echo "- [NPM Package](https://www.npmjs.com/package/@web-interact-mcp/client)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Documentation](https://github.com/Vijay-Nirmal/WebInteractMCP)" >> $GITHUB_STEP_SUMMARY

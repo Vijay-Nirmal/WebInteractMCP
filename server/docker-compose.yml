@@ -1,9 +1,9 @@
 services:
-  webintract-mcp-server:
+  webinteract-mcp-server:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: webintract-mcp-server
+    container_name: webinteract-mcp-server
     ports:
       - "8080:8080"
     environment:
@@ -11,16 +11,16 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       
-      # McpIntract Tool Configuration
-      - McpIntract__Tool__TimeoutMinutes=5
-      - McpIntract__Tool__EnableDetailedErrorLogging=false
+      # McpInteract Tool Configuration
+      - McpInteract__Tool__TimeoutMinutes=5
+      - McpInteract__Tool__EnableDetailedErrorLogging=false
       
-      # McpIntract CORS Configuration
-      - McpIntract__Cors__AllowAnyOrigin=true
+      # McpInteract CORS Configuration
+      - McpInteract__Cors__AllowAnyOrigin=true
       
       # Logging Configuration
       - Logging__LogLevel__Default=Information
-      - Logging__LogLevel__WebIntractMCPServer=Information
+      - Logging__LogLevel__WebInteractMCPServer=Information
       - Logging__LogLevel__Microsoft.AspNetCore=Warning
     
     restart: unless-stopped
@@ -38,14 +38,14 @@ services:
   # Optional Redis service for caching and SignalR backplane. TODO: Doesn't support Redis Backplane yet to scale out
   # redis:
   #   image: redis:7-alpine
-  #   container_name: webintract-redis
+  #   container_name: webinteract-redis
   #   ports:
   #     - "6379:6379"
   #   command: redis-server --appendonly yes
   #   volumes:
   #     - redis-data:/data
   #   networks:
-  #     - webintract-network
+  #     - webinteract-network
   #   restart: unless-stopped
   #   healthcheck:
   #     test: ["CMD", "redis-cli", "ping"]

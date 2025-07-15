@@ -3,7 +3,7 @@
     "Name": "McpServerAndClient",
     "Projects": [
       {
-        "Path": "..\\..\\server\\WebIntractMCPServer\\WebIntractMCPServer.csproj",
+        "Path": "..\\..\\server\\WebInteractMCPServer\\WebInteractMCPServer.csproj",
         "Action": "Start"
       },
       {

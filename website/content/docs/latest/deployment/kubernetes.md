@@ -6,7 +6,7 @@ category: "Deployment"
 
 # Kubernetes Deployment
 
-Deploy WebIntract MCP Server on Kubernetes with high availability, auto-scaling, and production-ready configuration.
+Deploy WebInteract MCP Server on Kubernetes with high availability, auto-scaling, and production-ready configuration.
 
 ## Quick Start
 
@@ -19,44 +19,44 @@ Deploy WebIntract MCP Server on Kubernetes with high availability, auto-scaling,
 
 ### Simple Deployment
 
-Deploy WebIntract MCP Server with basic configuration:
+Deploy WebInteract MCP Server with basic configuration:
 
 ```bash
 kubectl apply -f - <<EOF
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webintract-mcp-server
+  name: webinteract-mcp-server
   namespace: default
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: webintract-mcp-server
+      app: webinteract-mcp-server
   template:
     metadata:
       labels:
-        app: webintract-mcp-server
+        app: webinteract-mcp-server
     spec:
       containers:
-      - name: webintract-mcp-server
-        image: webintract-mcp-server:latest
+      - name: webinteract-mcp-server
+        image: webinteract-mcp-server:latest
         ports:
         - containerPort: 8080
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Production"
-        - name: McpIntract__Client__BaseUrl
+        - name: McpInteract__Client__BaseUrl
           value: "https://myapp.example.com"
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: webintract-mcp-service
+  name: webinteract-mcp-service
   namespace: default
 spec:
   selector:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
   ports:
   - port: 80
     targetPort: 8080
@@ -71,13 +71,13 @@ EOF
 kubectl get deployments
 
 # Check pods
-kubectl get pods -l app=webintract-mcp-server
+kubectl get pods -l app=webinteract-mcp-server
 
 # Check service
 kubectl get services
 
 # View logs
-kubectl logs -l app=webintract-mcp-server
+kubectl logs -l app=webinteract-mcp-server
 ```
 
 ## Helm Deployment
@@ -86,14 +86,14 @@ kubectl logs -l app=webintract-mcp-server
 
 ```bash
 # Add Helm repository (replace with actual repo)
-helm repo add webintract https://charts.webintract.com
+helm repo add webinteract https://charts.webinteract.com
 helm repo update
 
 # Install with default values
-helm install webintract-mcp webintract/webintract-mcp-server
+helm install webinteract-mcp webinteract/webinteract-mcp-server
 
 # Install with custom values
-helm install webintract-mcp webintract/webintract-mcp-server \
+helm install webinteract-mcp webinteract/webinteract-mcp-server \
   --set image.tag=v1.0.0 \
   --set replicaCount=3 \
   --set ingress.enabled=true \
@@ -109,7 +109,7 @@ Create `values.yaml` for customization:
 replicaCount: 3
 
 image:
-  repository: webintract-mcp-server
+  repository: webinteract-mcp-server
   tag: "latest"
   pullPolicy: IfNotPresent
 
@@ -134,7 +134,7 @@ ingress:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: webintract-mcp-tls
+    - secretName: webinteract-mcp-tls
       hosts:
         - mcp.example.com
 
@@ -154,7 +154,7 @@ autoscaling:
   targetMemoryUtilizationPercentage: 80
 
 config:
-  mcpIntract:
+  mcpInteract:
     client:
       baseUrl: "https://myapp.example.com"
       timeoutSeconds: 60
@@ -205,7 +205,7 @@ readinessProbe:
 Deploy with custom values:
 
 ```bash
-helm install webintract-mcp webintract/webintract-mcp-server -f values.yaml
+helm install webinteract-mcp webinteract/webinteract-mcp-server -f values.yaml
 ```
 
 ## Production Deployment
@@ -217,20 +217,20 @@ helm install webintract-mcp webintract/webintract-mcp-server -f values.yaml
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: webintract-mcp
+  name: webinteract-mcp
   labels:
-    name: webintract-mcp
+    name: webinteract-mcp
 ---
 # configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: webintract-mcp-config
-  namespace: webintract-mcp
+  name: webinteract-mcp-config
+  namespace: webinteract-mcp
 data:
   appsettings.json: |
     {
-      "McpIntract": {
+      "McpInteract": {
         "Client": {
           "BaseUrl": "https://myapp.example.com",
           "TimeoutSeconds": 60,
@@ -256,8 +256,8 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: webintract-mcp-secrets
-  namespace: webintract-mcp
+  name: webinteract-mcp-secrets
+  namespace: webinteract-mcp
 type: Opaque
 data:
   # Base64 encoded secrets
@@ -268,10 +268,10 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webintract-mcp-server
-  namespace: webintract-mcp
+  name: webinteract-mcp-server
+  namespace: webinteract-mcp
   labels:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
     version: v1.0.0
 spec:
   replicas: 3
@@ -282,25 +282,25 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      app: webintract-mcp-server
+      app: webinteract-mcp-server
   template:
     metadata:
       labels:
-        app: webintract-mcp-server
+        app: webinteract-mcp-server
         version: v1.0.0
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
         prometheus.io/path: "/metrics"
     spec:
-      serviceAccountName: webintract-mcp-sa
+      serviceAccountName: webinteract-mcp-sa
       securityContext:
         fsGroup: 1001
         runAsNonRoot: true
         runAsUser: 1001
       containers:
-      - name: webintract-mcp-server
-        image: webintract-mcp-server:1.0.0
+      - name: webinteract-mcp-server
+        image: webinteract-mcp-server:1.0.0
         imagePullPolicy: IfNotPresent
         ports:
         - name: http
@@ -315,7 +315,7 @@ spec:
           value: "1"
         envFrom:
         - secretRef:
-            name: webintract-mcp-secrets
+            name: webinteract-mcp-secrets
         volumeMounts:
         - name: config-volume
           mountPath: /app/appsettings.json
@@ -355,7 +355,7 @@ spec:
       volumes:
       - name: config-volume
         configMap:
-          name: webintract-mcp-config
+          name: webinteract-mcp-config
       - name: tmp-volume
         emptyDir: {}
       affinity:
@@ -368,17 +368,17 @@ spec:
                 - key: app
                   operator: In
                   values:
-                  - webintract-mcp-server
+                  - webinteract-mcp-server
               topologyKey: kubernetes.io/hostname
 ---
 # service.yaml
 apiVersion: v1
 kind: Service
 metadata:
-  name: webintract-mcp-service
-  namespace: webintract-mcp
+  name: webinteract-mcp-service
+  namespace: webinteract-mcp
   labels:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
 spec:
   type: ClusterIP
   ports:
@@ -387,28 +387,28 @@ spec:
     protocol: TCP
     name: http
   selector:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
 ---
 # serviceaccount.yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: webintract-mcp-sa
-  namespace: webintract-mcp
+  name: webinteract-mcp-sa
+  namespace: webinteract-mcp
   labels:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
 ---
 # hpa.yaml
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: webintract-mcp-hpa
-  namespace: webintract-mcp
+  name: webinteract-mcp-hpa
+  namespace: webinteract-mcp
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: webintract-mcp-server
+    name: webinteract-mcp-server
   minReplicas: 2
   maxReplicas: 10
   metrics:
@@ -442,8 +442,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: webintract-mcp-ingress
-  namespace: webintract-mcp
+  name: webinteract-mcp-ingress
+  namespace: webinteract-mcp
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
@@ -454,7 +454,7 @@ spec:
   tls:
   - hosts:
     - mcp.example.com
-    secretName: webintract-mcp-tls
+    secretName: webinteract-mcp-tls
   rules:
   - host: mcp.example.com
     http:
@@ -463,7 +463,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: webintract-mcp-service
+            name: webinteract-mcp-service
             port:
               number: 80
 ```
@@ -492,14 +492,14 @@ Add monitoring with Prometheus and Grafana:
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: webintract-mcp-monitor
-  namespace: webintract-mcp
+  name: webinteract-mcp-monitor
+  namespace: webinteract-mcp
   labels:
-    app: webintract-mcp-server
+    app: webinteract-mcp-server
 spec:
   selector:
     matchLabels:
-      app: webintract-mcp-server
+      app: webinteract-mcp-server
   endpoints:
   - port: http
     path: /metrics
@@ -513,14 +513,14 @@ Create Grafana dashboard configuration:
 ```json
 {
   "dashboard": {
-    "title": "WebIntract MCP Server",
+    "title": "WebInteract MCP Server",
     "panels": [
       {
         "title": "Request Rate",
         "type": "graph",
         "targets": [
           {
-            "expr": "rate(http_requests_total{service=\"webintract-mcp-service\"}[5m])"
+            "expr": "rate(http_requests_total{service=\"webinteract-mcp-service\"}[5m])"
           }
         ]
       },
@@ -529,7 +529,7 @@ Create Grafana dashboard configuration:
         "type": "graph",
         "targets": [
           {
-            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=\"webintract-mcp-service\"}[5m]))"
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{service=\"webinteract-mcp-service\"}[5m]))"
           }
         ]
       },
@@ -538,7 +538,7 @@ Create Grafana dashboard configuration:
         "type": "graph",
         "targets": [
           {
-            "expr": "rate(http_requests_total{service=\"webintract-mcp-service\",status=~\"5..\"}[5m])"
+            "expr": "rate(http_requests_total{service=\"webinteract-mcp-service\",status=~\"5..\"}[5m])"
           }
         ]
       }
@@ -556,8 +556,8 @@ Create Grafana dashboard configuration:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: webintract-mcp
-  name: webintract-mcp-role
+  namespace: webinteract-mcp
+  name: webinteract-mcp-role
 rules:
 - apiGroups: [""]
   resources: ["pods"]
@@ -569,15 +569,15 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: webintract-mcp-rolebinding
-  namespace: webintract-mcp
+  name: webinteract-mcp-rolebinding
+  namespace: webinteract-mcp
 subjects:
 - kind: ServiceAccount
-  name: webintract-mcp-sa
-  namespace: webintract-mcp
+  name: webinteract-mcp-sa
+  namespace: webinteract-mcp
 roleRef:
   kind: Role
-  name: webintract-mcp-role
+  name: webinteract-mcp-role
   apiGroup: rbac.authorization.k8s.io
 ```
 
@@ -588,12 +588,12 @@ roleRef:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: webintract-mcp-netpol
-  namespace: webintract-mcp
+  name: webinteract-mcp-netpol
+  namespace: webinteract-mcp
 spec:
   podSelector:
     matchLabels:
-      app: webintract-mcp-server
+      app: webinteract-mcp-server
   policyTypes:
   - Ingress
   - Egress
@@ -626,8 +626,8 @@ spec:
 apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: webintract-mcp-psp
-  namespace: webintract-mcp
+  name: webinteract-mcp-psp
+  namespace: webinteract-mcp
 spec:
   privileged: false
   allowPrivilegeEscalation: false
@@ -668,22 +668,22 @@ spec:
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: webintract-mcp-server
-  namespace: webintract-mcp
+  name: webinteract-mcp-server
+  namespace: webinteract-mcp
 spec:
-  serviceName: webintract-mcp-service
+  serviceName: webinteract-mcp-service
   replicas: 3
   selector:
     matchLabels:
-      app: webintract-mcp-server
+      app: webinteract-mcp-server
   template:
     metadata:
       labels:
-        app: webintract-mcp-server
+        app: webinteract-mcp-server
     spec:
       containers:
-      - name: webintract-mcp-server
-        image: webintract-mcp-server:latest
+      - name: webinteract-mcp-server
+        image: webinteract-mcp-server:latest
         volumeMounts:
         - name: data-volume
           mountPath: /app/data
@@ -721,7 +721,7 @@ image:
 
 config:
   aspnetcoreEnvironment: "Development"
-  mcpIntract:
+  mcpInteract:
     tool:
       enableDetailedErrorLogging: true
 
@@ -799,37 +799,37 @@ autoscaling:
 **Pods not starting:**
 ```bash
 # Check pod status
-kubectl get pods -n webintract-mcp
+kubectl get pods -n webinteract-mcp
 
 # Describe pod for events
-kubectl describe pod <pod-name> -n webintract-mcp
+kubectl describe pod <pod-name> -n webinteract-mcp
 
 # Check logs
-kubectl logs <pod-name> -n webintract-mcp
+kubectl logs <pod-name> -n webinteract-mcp
 
 # Check previous container logs
-kubectl logs <pod-name> -n webintract-mcp --previous
+kubectl logs <pod-name> -n webinteract-mcp --previous
 ```
 
 **Service connectivity issues:**
 ```bash
 # Test service connectivity
-kubectl exec -it <pod-name> -n webintract-mcp -- curl http://webintract-mcp-service
+kubectl exec -it <pod-name> -n webinteract-mcp -- curl http://webinteract-mcp-service
 
 # Check service endpoints
-kubectl get endpoints webintract-mcp-service -n webintract-mcp
+kubectl get endpoints webinteract-mcp-service -n webinteract-mcp
 
 # Port forward for testing
-kubectl port-forward service/webintract-mcp-service 8080:80 -n webintract-mcp
+kubectl port-forward service/webinteract-mcp-service 8080:80 -n webinteract-mcp
 ```
 
 **Ingress issues:**
 ```bash
 # Check ingress status
-kubectl get ingress -n webintract-mcp
+kubectl get ingress -n webinteract-mcp
 
 # Describe ingress for events
-kubectl describe ingress webintract-mcp-ingress -n webintract-mcp
+kubectl describe ingress webinteract-mcp-ingress -n webinteract-mcp
 
 # Check ingress controller logs
 kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
@@ -840,13 +840,13 @@ kubectl logs -n ingress-nginx deployment/ingress-nginx-controller
 **Interactive debugging:**
 ```bash
 # Run debug pod
-kubectl run debug-pod --image=nicolaka/netshoot -it --rm -n webintract-mcp
+kubectl run debug-pod --image=nicolaka/netshoot -it --rm -n webinteract-mcp
 
 # Execute commands in existing pod
-kubectl exec -it <pod-name> -n webintract-mcp -- /bin/bash
+kubectl exec -it <pod-name> -n webinteract-mcp -- /bin/bash
 
 # Copy files from pod
-kubectl cp <pod-name>:/app/logs/app.log ./app.log -n webintract-mcp
+kubectl cp <pod-name>:/app/logs/app.log ./app.log -n webinteract-mcp
 ```
 
 ### Performance Troubleshooting
@@ -854,16 +854,16 @@ kubectl cp <pod-name>:/app/logs/app.log ./app.log -n webintract-mcp
 **Resource monitoring:**
 ```bash
 # Check resource usage
-kubectl top pods -n webintract-mcp
+kubectl top pods -n webinteract-mcp
 
 # Check node resource usage
 kubectl top nodes
 
 # Check HPA status
-kubectl get hpa -n webintract-mcp
+kubectl get hpa -n webinteract-mcp
 
 # Describe HPA for scaling events
-kubectl describe hpa webintract-mcp-hpa -n webintract-mcp
+kubectl describe hpa webinteract-mcp-hpa -n webinteract-mcp
 ```
 
 ## Best Practices

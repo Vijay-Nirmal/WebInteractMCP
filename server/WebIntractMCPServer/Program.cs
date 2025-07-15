@@ -1,20 +1,20 @@
 using Microsoft.Extensions.Options;
-using WebIntractMCPServer;
-using WebIntractMCPServer.Configuration;
-using WebIntractMCPServer.Hubs;
+using WebInteractMCPServer;
+using WebInteractMCPServer.Configuration;
+using WebInteractMCPServer.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services
 builder.Services.AddOpenApi();
-builder.Services.AddMcpIntract(builder.Configuration);
+builder.Services.AddMcpInteract(builder.Configuration);
 builder.Services.AddCors();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
 // Configure CORS policy with resolved options
-var mcpOptions = app.Services.GetRequiredService<IOptions<McpIntractOptions>>().Value;
+var mcpOptions = app.Services.GetRequiredService<IOptions<McpInteractOptions>>().Value;
 
 app.UseCors(corsBuilder =>
 {

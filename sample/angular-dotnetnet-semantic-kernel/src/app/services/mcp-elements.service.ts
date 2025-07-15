@@ -1,23 +1,23 @@
 import { Injectable } from '@angular/core';
-import { WebIntractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider, LogLevel } from '@web-intract-mcp/client';
+import { WebInteractMCPController, ToolConfiguration, ToolStartConfig, CustomFunction, ReturnValueProviderFunction, CallToolResult, CustomFunctionImplementation, ReturnValueProvider, LogLevel } from '@web-interact-mcp/client';
 
 /**
- * Angular service for integrating MCP Elements with the WebIntractMCP application
+ * Angular service for integrating MCP Elements with the WebInteractMCP application
  */
 @Injectable({
   providedIn: 'root'
 })
 export class MCPElementsService {
-  private mcpController: WebIntractMCPController;
+  private mcpController: WebInteractMCPController;
   private isInitialized = false;
   
   constructor() {
-    this.mcpController = new WebIntractMCPController({
+    this.mcpController = new WebInteractMCPController({
       enableVisualFeedback: true,
       logLevel: LogLevel.DEBUG, // Set to DEBUG for development
     }, {
       useModalOverlay: true,
-      classPrefix: 'WebIntractMCP-shepherd',
+      classPrefix: 'WebInteractMCP-shepherd',
       defaultStepOptions: {
         scrollTo: true,
         popperOptions: {
@@ -309,7 +309,7 @@ export class MCPElementsService {
         steps: [
           {
             targetElement: 'body',
-            content: 'Welcome to WebIntractMCP! This is a basic tour to get you started.'
+            content: 'Welcome to WebInteractMCP! This is a basic tour to get you started.'
           }
         ]
       }

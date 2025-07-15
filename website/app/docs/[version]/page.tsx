@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `Documentation ${versionData.label} - WebIntract MCP`,
-    description: `WebIntract MCP documentation for version ${versionData.label}. Learn how to transform web applications into MCP servers.`,
+    title: `Documentation ${versionData.label} - WebInteract MCP`,
+    description: `WebInteract MCP documentation for version ${versionData.label}. Learn how to transform web applications into MCP servers.`,
   }
 }
 
@@ -117,7 +117,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                 Documentation
               </h1>
               <p className="mt-4 sm:mt-6 text-base sm:text-lg leading-7 sm:leading-8 text-gray-600 dark:text-gray-300">
-                Complete guide to WebIntract MCP - transform your web applications into MCP servers.
+                Complete guide to WebInteract MCP - transform your web applications into MCP servers.
               </p>
               
               {/* Version selector */}
@@ -155,7 +155,7 @@ export default async function DocsVersionIndex({ params }: Props) {
                       Quick Start
                     </h2>
                     <p className="mt-3 sm:mt-4 text-sm sm:text-base text-gray-600 dark:text-gray-300">
-                      Get up and running with WebIntract MCP in minutes. Choose your framework and follow our step-by-step guides.
+                      Get up and running with WebInteract MCP in minutes. Choose your framework and follow our step-by-step guides.
                     </p>
                     
                     <div className="mt-6 sm:mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">

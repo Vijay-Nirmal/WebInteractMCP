@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MCPElementsService } from '../../services/mcp-elements.service';
-import { ToolConfiguration, CustomFunctionContext, createSuccessResult, ReturnValueContext } from '@web-intract-mcp/client';
+import { ToolConfiguration, CustomFunctionContext, createSuccessResult, ReturnValueContext } from '@web-interact-mcp/client';
 
 function refReplacer() {
   let m = new Map(), v= new Map(), init: any = null;
@@ -1245,7 +1245,7 @@ export class MCPControlsComponent implements OnInit, OnDestroy {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'McpIntract-Session-Id': sessionId
+          'McpInteract-Session-Id': sessionId
         },
         body: JSON.stringify({ message: this.chatMessage })
       });

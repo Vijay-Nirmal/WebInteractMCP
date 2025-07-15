@@ -9,32 +9,32 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ## Basic Setup
 
-### 1. Create WebIntractMCP Hook
+### 1. Create WebInteractMCP Hook
 
 ```typescript
-// hooks/useWebIntractMCP.ts
+// hooks/useWebInteractMCP.ts
 import { useState, useCallback } from 'react';
-import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController, WebInteractMCPController } from '@web-interact-mcp/client';
 
-export function useWebIntractMCP() {
-  const [controller, setController] = useState<WebIntractMCPController | null>(null);
+export function useWebInteractMCP() {
+  const [controller, setController] = useState<WebInteractMCPController | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   const initialize = useCallback(async (serverUrl: string = 'http://localhost:8080') => {
     try {
-      const mcpController = createWebIntractMCPController();
+      const mcpController = createWebInteractMCPController();
       await mcpController.loadTools('/mcp-tools.json');
       await mcpController.createSession(serverUrl);
       
       setController(mcpController);
       setIsConnected(true);
     } catch (error) {
-      console.error('Failed to initialize WebIntractMCP:', error);
+      console.error('Failed to initialize WebInteractMCP:', error);
     }
   }, []);
 
@@ -47,18 +47,18 @@ export function useWebIntractMCP() {
 ```typescript
 // App.tsx
 import React, { useEffect } from 'react';
-import { useWebIntractMCP } from './hooks/useWebIntractMCP';
+import { useWebInteractMCP } from './hooks/useWebInteractMCP';
 
 function App() {
-  const { initialize, isConnected } = useWebIntractMCP();
+  const { initialize, isConnected } = useWebInteractMCP();
 
   useEffect(() => {
-    initialize(); // Connect to WebIntractMCPServer
+    initialize(); // Connect to WebInteractMCPServer
   }, [initialize]);
 
   return (
     <div className="App">
-      <h1>My React App with WebIntractMCP</h1>
+      <h1>My React App with WebInteractMCP</h1>
       {isConnected && <span>✅ MCP Connected</span>}
       <button data-testid="submit-btn">Click Me</button>
     </div>

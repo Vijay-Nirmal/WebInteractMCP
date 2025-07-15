@@ -1,4 +1,4 @@
-# Contributing to Web Intract MCP
+# Contributing to Web Interact MCP
 
 Thanks for contributing! Here's how to get started quickly.
 
@@ -11,8 +11,8 @@ Thanks for contributing! Here's how to get started quickly.
 
 ```bash
 # Fork repo and clone
-git clone https://github.com/Vijay-Nirmal/WebIntractMCP.git
-cd WebIntractMCP/lib/web-intract-mcp
+git clone https://github.com/Vijay-Nirmal/WebInteractMCP.git
+cd WebInteractMCP/lib/web-interact-mcp
 
 # Install and test
 npm install

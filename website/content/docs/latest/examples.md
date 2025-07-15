@@ -6,7 +6,7 @@ category: "Examples"
 
 # Examples
 
-Real-world implementation examples and use cases for WebIntractMCP.
+Real-world implementation examples and use cases for WebInteractMCP.
 
 ## Basic Examples
 
@@ -558,14 +558,14 @@ Real-world implementation examples and use cases for WebIntractMCP.
 
 ```typescript
 import { useEffect, useRef } from 'react';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 function useMCP() {
   const controllerRef = useRef(null);
 
   useEffect(() => {
     const initMCP = async () => {
-      controllerRef.current = createWebIntractMCPController();
+      controllerRef.current = createWebInteractMCPController();
       await controllerRef.current.loadTools('/mcp-tools.json');
       await controllerRef.current.createSession();
     };
@@ -608,7 +608,7 @@ function MyComponent() {
 
 ```typescript
 import { Injectable, OnDestroy } from '@angular/core';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 @Injectable({
   providedIn: 'root'
@@ -617,7 +617,7 @@ export class McpService implements OnDestroy {
   private controller: any;
 
   async initialize() {
-    this.controller = createWebIntractMCPController({
+    this.controller = createWebInteractMCPController({
       enableLogging: true
     });
     
@@ -667,12 +667,12 @@ export class DemoComponent {
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 const controller = ref(null);
 
 onMounted(async () => {
-  controller.value = createWebIntractMCPController();
+  controller.value = createWebInteractMCPController();
   await controller.value.loadTools('/mcp-tools.json');
   await controller.value.createSession();
 });
@@ -760,4 +760,4 @@ const runTool = async () => {
 }
 ```
 
-These examples demonstrate the flexibility and power of WebIntractMCP across various use cases and frameworks. Each example can be adapted to your specific needs and requirements.
+These examples demonstrate the flexibility and power of WebInteractMCP across various use cases and frameworks. Each example can be adapted to your specific needs and requirements.

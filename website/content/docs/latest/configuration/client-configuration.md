@@ -6,7 +6,7 @@ category: "Configuration"
 
 # Client Configuration
 
-Configure the WebIntractMCP client library with essential options.
+Configure the WebInteractMCP client library with essential options.
 
 ## Complete Configuration Reference
 
@@ -22,7 +22,7 @@ Configure the WebIntractMCP client library with essential options.
 | `transport.logLevel` | `LogLevel` | `LogLevel.INFO` | TRACE(0), DEBUG(1), INFO(2), WARN(3), ERROR(4), FATAL(5), OFF(6) | SignalR specific log level |
 | `transport.transportTypes` | `TransportType` | `WebSockets \| ServerSentEvents \| LongPolling` | WebSockets(1), ServerSentEvents(2), LongPolling(4) | Allowed transport types (can be combined with \|) |
 
-## WebIntractMCPOptions (Simplified View)
+## WebInteractMCPOptions (Simplified View)
 
 For quick reference, the main configuration properties:
 
@@ -36,9 +36,9 @@ For quick reference, the main configuration properties:
 ## Basic Setup
 
 ```typescript
-import { WebIntractMCPController, LogLevel } from '@web-intract-mcp/client';
+import { WebInteractMCPController, LogLevel } from '@web-interact-mcp/client';
 
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.DEBUG,
   serverUrl: 'http://localhost:8080',
   enableVisualFeedback: true
@@ -49,7 +49,7 @@ const controller = new WebIntractMCPController({
 
 **Development:**
 ```typescript
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.DEBUG,
   serverUrl: 'http://localhost:8080',
   enableVisualFeedback: true
@@ -58,7 +58,7 @@ const controller = new WebIntractMCPController({
 
 **Production:**
 ```typescript
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.WARN,
   serverUrl: 'https://api.myapp.com',
   enableVisualFeedback: false
@@ -79,7 +79,7 @@ const shepherdOptions = {
   }
 };
 
-const controller = new WebIntractMCPController(
+const controller = new WebInteractMCPController(
   { logLevel: LogLevel.INFO },
   shepherdOptions
 );

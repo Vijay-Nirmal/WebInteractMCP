@@ -1,16 +1,16 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace WebIntractMCPServer.Configuration;
+namespace WebInteractMCPServer.Configuration;
 
 /// <summary>
-/// Configuration options for the MCP Intract server
+/// Configuration options for the MCP Interact server
 /// </summary>
-public sealed class McpIntractOptions
+public sealed class McpInteractOptions
 {
     /// <summary>
     /// Configuration section name
     /// </summary>
-    public const string SectionName = "McpIntract";
+    public const string SectionName = "McpInteract";
 
     /// <summary>
     /// Client connection configuration

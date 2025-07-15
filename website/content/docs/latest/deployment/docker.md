@@ -6,21 +6,21 @@ category: "Deployment"
 
 # Docker Deployment
 
-Deploy WebIntract MCP Server using Docker for development, testing, and production environments.
+Deploy WebInteract MCP Server using Docker for development, testing, and production environments.
 
 ## Quick Start
 
 ### Using Pre-built Image
 
-Pull and run the latest WebIntract MCP Server image:
+Pull and run the latest WebInteract MCP Server image:
 
 ```bash
 docker run -d \
-  --name webintract-mcp-server \
+  --name webinteract-mcp-server \
   -p 8080:8080 \
-  -e McpIntract__Client__BaseUrl=http://your-client-app:4200 \
-  -e McpIntract__Cors__AllowedOrigins__0=http://your-client-app:4200 \
-  webintract-mcp-server:latest
+  -e McpInteract__Client__BaseUrl=http://your-client-app:4200 \
+  -e McpInteract__Cors__AllowedOrigins__0=http://your-client-app:4200 \
+  webinteract-mcp-server:latest
 ```
 
 Access the server at: http://localhost:8080
@@ -50,11 +50,11 @@ Healthy
 
 ```bash
 # Clone the repository
-git clone https://github.com/Vijay-Nirmal/WebIntractMCP.git
-cd WebIntractMCP/server
+git clone https://github.com/Vijay-Nirmal/WebInteractMCP.git
+cd WebInteractMCP/server
 
 # Build the Docker image
-docker build -t webintract-mcp-server:local .
+docker build -t webinteract-mcp-server:local .
 ```
 
 ### Custom Build with Build Args
@@ -63,7 +63,7 @@ docker build -t webintract-mcp-server:local .
 docker build \
   --build-arg ASPNETCORE_ENVIRONMENT=Production \
   --build-arg BUILD_CONFIGURATION=Release \
-  -t webintract-mcp-server:1.0.0 .
+  -t webinteract-mcp-server:1.0.0 .
 ```
 
 ## Environment Configuration
@@ -74,13 +74,13 @@ Set essential environment variables:
 
 ```bash
 docker run -d \
-  --name webintract-mcp-server \
+  --name webinteract-mcp-server \
   -p 8080:8080 \
   -e ASPNETCORE_ENVIRONMENT=Production \
-  -e McpIntract__Client__BaseUrl=https://myapp.example.com \
-  -e McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com \
-  -e McpIntract__Tool__EnableDetailedErrorLogging=false \
-  webintract-mcp-server:latest
+  -e McpInteract__Client__BaseUrl=https://myapp.example.com \
+  -e McpInteract__Cors__AllowedOrigins__0=https://myapp.example.com \
+  -e McpInteract__Tool__EnableDetailedErrorLogging=false \
+  webinteract-mcp-server:latest
 ```
 
 ### Complete Configuration
@@ -89,18 +89,18 @@ For production deployments with full configuration:
 
 ```bash
 docker run -d \
-  --name webintract-mcp-server \
+  --name webinteract-mcp-server \
   -p 8080:8080 \
   -e ASPNETCORE_ENVIRONMENT=Production \
-  -e McpIntract__Client__BaseUrl=https://myapp.example.com \
-  -e McpIntract__Client__ToolsEndpoint=/api/mcp-tools \
-  -e McpIntract__Client__TimeoutSeconds=60 \
-  -e McpIntract__Client__CacheTools=true \
-  -e McpIntract__Client__CacheDurationMinutes=60 \
-  -e McpIntract__Tool__TimeoutMinutes=10 \
-  -e McpIntract__Tool__EnableDetailedErrorLogging=false \
-  -e McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com \
-  webintract-mcp-server:latest
+  -e McpInteract__Client__BaseUrl=https://myapp.example.com \
+  -e McpInteract__Client__ToolsEndpoint=/api/mcp-tools \
+  -e McpInteract__Client__TimeoutSeconds=60 \
+  -e McpInteract__Client__CacheTools=true \
+  -e McpInteract__Client__CacheDurationMinutes=60 \
+  -e McpInteract__Tool__TimeoutMinutes=10 \
+  -e McpInteract__Tool__EnableDetailedErrorLogging=false \
+  -e McpInteract__Cors__AllowedOrigins__0=https://myapp.example.com \
+  webinteract-mcp-server:latest
 ```
 
 ## Docker Compose
@@ -113,18 +113,18 @@ Create `docker-compose.yml` for development:
 version: '3.8'
 
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
-    container_name: webintract-mcp-dev
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
+    container_name: webinteract-mcp-dev
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - McpIntract__Client__BaseUrl=http://host.docker.internal:4200
-      - McpIntract__Cors__AllowedOrigins__0=http://localhost:4200
-      - McpIntract__Cors__AllowedOrigins__1=http://host.docker.internal:4200
-      - McpIntract__Tool__EnableDetailedErrorLogging=true
-      - McpIntract__Tool__TimeoutMinutes=2
+      - McpInteract__Client__BaseUrl=http://host.docker.internal:4200
+      - McpInteract__Cors__AllowedOrigins__0=http://localhost:4200
+      - McpInteract__Cors__AllowedOrigins__1=http://host.docker.internal:4200
+      - McpInteract__Tool__EnableDetailedErrorLogging=true
+      - McpInteract__Tool__TimeoutMinutes=2
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
@@ -146,7 +146,7 @@ services:
       - ../client:/app
     command: npm run dev
     depends_on:
-      - webintract-mcp-server
+      - webinteract-mcp-server
 ```
 
 ### Production Setup
@@ -157,19 +157,19 @@ Create `docker-compose.prod.yml` for production:
 version: '3.8'
 
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
-    container_name: webintract-mcp-prod
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
+    container_name: webinteract-mcp-prod
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - McpIntract__Client__BaseUrl=https://myapp.example.com
-      - McpIntract__Client__TimeoutSeconds=60
-      - McpIntract__Client__CacheDurationMinutes=60
-      - McpIntract__Tool__TimeoutMinutes=10
-      - McpIntract__Tool__EnableDetailedErrorLogging=false
-      - McpIntract__Cors__AllowedOrigins__0=https://myapp.example.com
+      - McpInteract__Client__BaseUrl=https://myapp.example.com
+      - McpInteract__Client__TimeoutSeconds=60
+      - McpInteract__Client__CacheDurationMinutes=60
+      - McpInteract__Tool__TimeoutMinutes=10
+      - McpInteract__Tool__EnableDetailedErrorLogging=false
+      - McpInteract__Cors__AllowedOrigins__0=https://myapp.example.com
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
@@ -189,7 +189,7 @@ services:
   # Reverse proxy (optional)
   nginx:
     image: nginx:alpine
-    container_name: webintract-nginx
+    container_name: webinteract-nginx
     ports:
       - "80:80"
       - "443:443"
@@ -197,7 +197,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
-      - webintract-mcp-server
+      - webinteract-mcp-server
     restart: unless-stopped
 ```
 
@@ -211,7 +211,7 @@ docker-compose up -d
 docker-compose -f docker-compose.prod.yml up -d
 
 # View logs
-docker-compose logs -f webintract-mcp-server
+docker-compose logs -f webinteract-mcp-server
 
 # Stop services
 docker-compose down
@@ -229,19 +229,19 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /src
 
 # Copy project files
-COPY ["WebIntractMCPServer/WebIntractMCPServer.csproj", "WebIntractMCPServer/"]
-RUN dotnet restore "WebIntractMCPServer/WebIntractMCPServer.csproj"
+COPY ["WebInteractMCPServer/WebInteractMCPServer.csproj", "WebInteractMCPServer/"]
+RUN dotnet restore "WebInteractMCPServer/WebInteractMCPServer.csproj"
 
 # Copy source code
 COPY . .
-WORKDIR "/src/WebIntractMCPServer"
+WORKDIR "/src/WebInteractMCPServer"
 
 # Build application
-RUN dotnet build "WebIntractMCPServer.csproj" -c Release -o /app/build
+RUN dotnet build "WebInteractMCPServer.csproj" -c Release -o /app/build
 
 # Publish stage
 FROM build AS publish
-RUN dotnet publish "WebIntractMCPServer.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "WebInteractMCPServer.csproj" -c Release -o /app/publish --no-restore
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS final
@@ -268,7 +268,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
 EXPOSE 8080
 
 # Set entry point
-ENTRYPOINT ["dotnet", "WebIntractMCPServer.dll"]
+ENTRYPOINT ["dotnet", "WebInteractMCPServer.dll"]
 ```
 
 ### Docker Secrets
@@ -279,10 +279,10 @@ For sensitive configuration, use Docker secrets:
 version: '3.8'
 
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     environment:
-      - McpIntract__Client__BaseUrl_FILE=/run/secrets/client_base_url
+      - McpInteract__Client__BaseUrl_FILE=/run/secrets/client_base_url
     secrets:
       - client_base_url
     deploy:
@@ -309,8 +309,8 @@ Set resource limits for production:
 
 ```yaml
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     deploy:
       resources:
         limits:
@@ -329,14 +329,14 @@ Create isolated networks:
 
 ```bash
 # Create custom network
-docker network create webintract-network
+docker network create webinteract-network
 
 # Run container with custom network
 docker run -d \
-  --name webintract-mcp-server \
-  --network webintract-network \
+  --name webinteract-mcp-server \
+  --network webinteract-network \
   -p 8080:8080 \
-  webintract-mcp-server:latest
+  webinteract-mcp-server:latest
 ```
 
 ### Service Discovery
@@ -347,20 +347,20 @@ Using Docker Compose with service names:
 version: '3.8'
 
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     networks:
-      - webintract-net
+      - webinteract-net
 
   client-app:
     image: client-app:latest
     environment:
-      - MCP_SERVER_URL=http://webintract-mcp-server:8080
+      - MCP_SERVER_URL=http://webinteract-mcp-server:8080
     networks:
-      - webintract-net
+      - webinteract-net
 
 networks:
-  webintract-net:
+  webinteract-net:
     driver: bridge
 ```
 
@@ -372,13 +372,13 @@ Monitor container health and performance:
 
 ```bash
 # Container stats
-docker stats webintract-mcp-server
+docker stats webinteract-mcp-server
 
 # Container logs
-docker logs -f webintract-mcp-server
+docker logs -f webinteract-mcp-server
 
 # Container inspect
-docker inspect webintract-mcp-server
+docker inspect webinteract-mcp-server
 ```
 
 ### Log Management
@@ -387,8 +387,8 @@ Configure structured logging:
 
 ```yaml
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     logging:
       driver: "json-file"
       options:
@@ -396,7 +396,7 @@ services:
         max-file: "5"
         labels: "service,environment"
     labels:
-      - "service=webintract-mcp-server"
+      - "service=webinteract-mcp-server"
       - "environment=production"
 ```
 
@@ -406,13 +406,13 @@ Forward logs to external systems:
 
 ```yaml
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     logging:
       driver: "syslog"
       options:
         syslog-address: "tcp://log-server:514"
-        tag: "webintract-mcp-server"
+        tag: "webinteract-mcp-server"
 ```
 
 ## Troubleshooting
@@ -425,16 +425,16 @@ services:
 docker ps -a
 
 # View container logs
-docker logs webintract-mcp-server
+docker logs webinteract-mcp-server
 
 # Inspect container configuration
-docker inspect webintract-mcp-server
+docker inspect webinteract-mcp-server
 ```
 
 **Port binding issues:**
 ```bash
 # Check port usage
-docker port webintract-mcp-server
+docker port webinteract-mcp-server
 
 # List listening ports
 netstat -tulpn | grep :8080
@@ -443,10 +443,10 @@ netstat -tulpn | grep :8080
 **Memory issues:**
 ```bash
 # Check memory usage
-docker stats --no-stream webintract-mcp-server
+docker stats --no-stream webinteract-mcp-server
 
 # Set memory limits
-docker run -m 512m webintract-mcp-server:latest
+docker run -m 512m webinteract-mcp-server:latest
 ```
 
 ### Debug Mode
@@ -455,11 +455,11 @@ Run container in debug mode:
 
 ```bash
 docker run -it \
-  --name webintract-mcp-debug \
+  --name webinteract-mcp-debug \
   -p 8080:8080 \
   -e ASPNETCORE_ENVIRONMENT=Development \
-  -e McpIntract__Tool__EnableDetailedErrorLogging=true \
-  webintract-mcp-server:latest
+  -e McpInteract__Tool__EnableDetailedErrorLogging=true \
+  webinteract-mcp-server:latest
 ```
 
 ### Shell Access
@@ -468,10 +468,10 @@ Access container shell for debugging:
 
 ```bash
 # Execute bash in running container
-docker exec -it webintract-mcp-server /bin/bash
+docker exec -it webinteract-mcp-server /bin/bash
 
 # Run temporary container with shell
-docker run -it --entrypoint /bin/bash webintract-mcp-server:latest
+docker run -it --entrypoint /bin/bash webinteract-mcp-server:latest
 ```
 
 ## Security Best Practices
@@ -485,7 +485,7 @@ docker run -it --entrypoint /bin/bash webintract-mcp-server:latest
 
 ```bash
 # Scan for vulnerabilities
-docker scout cves webintract-mcp-server:latest
+docker scout cves webinteract-mcp-server:latest
 
 # Update base image
 docker pull mcr.microsoft.com/dotnet/aspnet:9.0
@@ -511,8 +511,8 @@ docker pull mcr.microsoft.com/dotnet/aspnet:9.0
 
 ```yaml
 services:
-  webintract-mcp-server:
-    image: webintract-mcp-server:latest
+  webinteract-mcp-server:
+    image: webinteract-mcp-server:latest
     environment:
       - ASPNETCORE_URLS=http://+:8080
       - DOTNET_gcServer=1

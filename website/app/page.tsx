@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'WebIntract MCP - Transform Web Applications into MCP Servers',
+  title: 'WebInteract MCP - Transform Web Applications into MCP Servers',
   description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
 }
 
@@ -84,7 +84,7 @@ export default function Home() {
           </div>
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
-              WebIntractMCP
+              WebInteractMCP
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
               Transform any web application into an MCP server with real-time two-way communication. 
@@ -98,7 +98,7 @@ export default function Home() {
                 Get started
               </Link>
               <Link
-                href="https://github.com/Vijay-Nirmal/WebIntractMCP"
+                href="https://github.com/Vijay-Nirmal/WebInteractMCP"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
@@ -121,7 +121,7 @@ export default function Home() {
               Everything you need for MCP integration
             </p>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              WebIntractMCP provides a comprehensive toolkit for transforming web applications into powerful MCP servers.
+              WebInteractMCP provides a comprehensive toolkit for transforming web applications into powerful MCP servers.
             </p>
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -153,13 +153,13 @@ export default function Home() {
               Simple yet powerful architecture
             </p>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              WebIntractMCP consists of two tightly integrated components that work together seamlessly.
+              WebInteractMCP consists of two tightly integrated components that work together seamlessly.
             </p>
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
               <Link 
-                href="https://www.npmjs.com/package/@web-intract-mcp/client"
+                href="https://www.npmjs.com/package/@web-interact-mcp/client"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative flex flex-col gap-6 sm:flex-row lg:flex-col group hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-4 transition-colors"
@@ -169,7 +169,7 @@ export default function Home() {
                 </div>
                 <div className="sm:min-w-0 sm:flex-1">
                   <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">
-                    @web-intract-mcp/client
+                    @web-interact-mcp/client
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-300">
                     TypeScript library for client-side integration. Framework-agnostic and easy to integrate into any web application.
@@ -177,7 +177,7 @@ export default function Home() {
                 </div>
               </Link>
               <Link 
-                href="https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server"
+                href="https://hub.docker.com/r/vijaynirmalpon/web-interact-mcp-server"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative flex flex-col gap-6 sm:flex-row lg:flex-col group hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg p-4 transition-colors"
@@ -187,7 +187,7 @@ export default function Home() {
                 </div>
                 <div className="sm:min-w-0 sm:flex-1">
                   <p className="text-lg font-semibold leading-8 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400">
-                    WebIntractMCPServer
+                    WebInteractMCPServer
                   </p>
                   <p className="mt-2 text-base leading-7 text-gray-600 dark:text-gray-300">
                     Ready-to-deploy Docker MCP server for protocol handling. Built with .NET 9 and ASP.NET Core.
@@ -210,7 +210,7 @@ export default function Home() {
               Endless possibilities
             </p>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              From automated testing to user onboarding, WebIntractMCP opens up new possibilities for web automation.
+              From automated testing to user onboarding, WebInteractMCP opens up new possibilities for web automation.
             </p>
           </div>
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">

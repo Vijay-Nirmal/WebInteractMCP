@@ -6,25 +6,25 @@ category: "Configuration"
 
 # Server Configuration
 
-Configure WebIntract MCP Server via `appsettings.json` or environment variables.
+Configure WebInteract MCP Server via `appsettings.json` or environment variables.
 
 ## Complete Configuration Reference
 
 | Environment Variable | JSON Path | Default | Type | Possible Values | Description |
 |---------------------|-----------|---------|------|-----------------|-------------|
-| `McpIntract__Tool__TimeoutMinutes` | `McpIntract.Tool.TimeoutMinutes` | `5` | integer | 1-60 | Tool execution timeout in minutes |
-| `McpIntract__Tool__EnableDetailedErrorLogging` | `McpIntract.Tool.EnableDetailedErrorLogging` | `false` | boolean | true/false | Enable detailed error logging |
-| `McpIntract__Cors__AllowedOrigins__0` | `McpIntract.Cors.AllowedOrigins[0]` | `http://localhost:4200` | string | Valid URLs | First allowed origin |
-| `McpIntract__Cors__AllowedOrigins__N` | `McpIntract.Cors.AllowedOrigins[N]` | - | string | Valid URLs | Additional allowed origins (replace N with index) |
-| `McpIntract__Cors__AllowAnyOrigin` | `McpIntract.Cors.AllowAnyOrigin` | `false` | boolean | true/false | Allow any origin (insecure for production) |
-| `McpIntract__Cors__AllowedHeaders__0` | `McpIntract.Cors.AllowedHeaders[0]` | - | string | Valid headers | First additional allowed header |
-| `McpIntract__Cors__AllowedHeaders__N` | `McpIntract.Cors.AllowedHeaders[N]` | - | string | Valid headers | Additional allowed headers (replace N with index) |
+| `McpInteract__Tool__TimeoutMinutes` | `McpInteract.Tool.TimeoutMinutes` | `5` | integer | 1-60 | Tool execution timeout in minutes |
+| `McpInteract__Tool__EnableDetailedErrorLogging` | `McpInteract.Tool.EnableDetailedErrorLogging` | `false` | boolean | true/false | Enable detailed error logging |
+| `McpInteract__Cors__AllowedOrigins__0` | `McpInteract.Cors.AllowedOrigins[0]` | `http://localhost:4200` | string | Valid URLs | First allowed origin |
+| `McpInteract__Cors__AllowedOrigins__N` | `McpInteract.Cors.AllowedOrigins[N]` | - | string | Valid URLs | Additional allowed origins (replace N with index) |
+| `McpInteract__Cors__AllowAnyOrigin` | `McpInteract.Cors.AllowAnyOrigin` | `false` | boolean | true/false | Allow any origin (insecure for production) |
+| `McpInteract__Cors__AllowedHeaders__0` | `McpInteract.Cors.AllowedHeaders[0]` | - | string | Valid headers | First additional allowed header |
+| `McpInteract__Cors__AllowedHeaders__N` | `McpInteract.Cors.AllowedHeaders[N]` | - | string | Valid headers | Additional allowed headers (replace N with index) |
 
 ## Configuration Structure
 
 ```json
 {
-  "McpIntract": {
+  "McpInteract": {
     "Tool": { /* Tool execution settings */ },
     "Cors": { /* CORS settings */ }
   }
@@ -41,7 +41,7 @@ Configure WebIntract MCP Server via `appsettings.json` or environment variables.
 **Example:**
 ```json
 {
-  "McpIntract": {
+  "McpInteract": {
     "Tool": {
       "TimeoutMinutes": 10,
       "EnableDetailedErrorLogging": false
@@ -61,7 +61,7 @@ Configure WebIntract MCP Server via `appsettings.json` or environment variables.
 **Example:**
 ```json
 {
-  "McpIntract": {
+  "McpInteract": {
     "Cors": {
       "AllowedOrigins": ["https://myapp.com"],
       "AllowAnyOrigin": false
@@ -76,12 +76,12 @@ Use double underscores (`__`) for nested configuration:
 
 ```bash
 # Tool configuration
-McpIntract__Tool__TimeoutMinutes=10
-McpIntract__Tool__EnableDetailedErrorLogging=false
+McpInteract__Tool__TimeoutMinutes=10
+McpInteract__Tool__EnableDetailedErrorLogging=false
 
 # CORS configuration
-McpIntract__Cors__AllowedOrigins__0=https://myapp.com
-McpIntract__Cors__AllowAnyOrigin=false
+McpInteract__Cors__AllowedOrigins__0=https://myapp.com
+McpInteract__Cors__AllowAnyOrigin=false
 ```
 
 ## Docker
@@ -89,9 +89,9 @@ McpIntract__Cors__AllowAnyOrigin=false
 ```bash
 docker run -d \
   -p 8080:8080 \
-  -e McpIntract__Cors__AllowedOrigins__0=https://myapp.com \
-  -e McpIntract__Tool__TimeoutMinutes=10 \
-  webintract-mcp-server:latest
+  -e McpInteract__Cors__AllowedOrigins__0=https://myapp.com \
+  -e McpInteract__Tool__TimeoutMinutes=10 \
+  webinteract-mcp-server:latest
 ```
 
 ## Health Check

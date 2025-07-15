@@ -7,7 +7,7 @@
     "steps": [
       {
         "targetElement": "app-header",
-        "content": "Welcome to WebIntractMCP - our Stack Overflow clone! This is the main navigation header where you can access different sections of the platform.",
+        "content": "Welcome to WebInteractMCP - our Stack Overflow clone! This is the main navigation header where you can access different sections of the platform.",
         "shepherdOptions": {
           "attachTo": {
             "on": "bottom"
@@ -141,7 +141,7 @@
       "required": ["questionTitle", "questionBody", "tags"],
       "metadata": {
         "version": "1.0",
-        "author": "WebIntractMCP Development Team"
+        "author": "WebInteractMCP Development Team"
       }
     },
     "steps": [
@@ -411,7 +411,7 @@
       },
       "metadata": {
         "version": "1.0",
-        "author": "WebIntractMCP Development Team"
+        "author": "WebInteractMCP Development Team"
       }
     },
     "steps": [
@@ -499,7 +499,7 @@
       },
       "metadata": {
         "version": "1.0",
-        "author": "WebIntractMCP Development Team"
+        "author": "WebInteractMCP Development Team"
       }
     },
     "returnValue": {

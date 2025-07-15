@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${doc.title} - WebIntract MCP Documentation`,
-    description: `WebIntract MCP documentation: ${doc.title}`,
+    title: `${doc.title} - WebInteract MCP Documentation`,
+    description: `WebInteract MCP documentation: ${doc.title}`,
   }
 }
 
@@ -246,7 +246,7 @@ export default async function DocPage({ params }: Props) {
 
                     <div className="flex flex-col sm:flex-row sm:space-x-4 gap-2 sm:gap-0">
                       <Link
-                        href="https://github.com/Vijay-Nirmal/WebIntractMCP/issues"
+                        href="https://github.com/Vijay-Nirmal/WebInteractMCP/issues"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center sm:justify-start text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"

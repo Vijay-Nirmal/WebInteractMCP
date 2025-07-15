@@ -1,5 +1,5 @@
 /**
- * @fileoverview Web Intract MCP Controller - Production-ready controller for MCP tool execution and management
+ * @fileoverview Web Interact MCP Controller - Production-ready controller for MCP tool execution and management
  * @description Enterprise-grade controller that transforms web applications into MCP servers with robust tool execution
  * @version 1.0.0
  * @author Vijay Nirmal
@@ -11,8 +11,8 @@ import {
   ToolStep,
   ToolStartConfig,
   CallToolResult,
-  WebIntractMCPOptions,
-  WebIntractMCPEvent,
+  WebInteractMCPOptions,
+  WebInteractMCPEvent,
   CustomFunction,
   CustomFunctionImplementation,
   ReturnValueProviderFunction,
@@ -29,7 +29,7 @@ import {
   ILogger
 } from './types';
 import { ToolRegistry } from './tool-registry';
-import { WebIntractSignalRService } from './signalr.service';
+import { WebInteractSignalRService } from './signalr.service';
 import { ConsoleLogger } from './consoleLogger';
 
 /**
@@ -51,7 +51,7 @@ const DEFAULT_SHEPHERD_OPTIONS = {
 /**
  * Default configuration options for production use
  */
-const DEFAULT_OPTIONS: WebIntractMCPOptions = {
+const DEFAULT_OPTIONS: WebInteractMCPOptions = {
   serverUrl: 'http://localhost:8080',
   enableVisualFeedback: true,
   logLevel: LogLevel.WARN,
@@ -65,11 +65,11 @@ const DEFAULT_OPTIONS: WebIntractMCPOptions = {
 };
 
 /**
- * Production-ready controller class for Web Intract MCP
+ * Production-ready controller class for Web Interact MCP
  * Provides comprehensive tool execution, registration, and management capabilities
  * with enterprise-grade logging, error handling, and monitoring
  */
-export class WebIntractMCPController {
+export class WebInteractMCPController {
   
   // Core components
   private readonly registry: ToolRegistry;
@@ -82,10 +82,10 @@ export class WebIntractMCPController {
   private currentStepIndex: number = 0;
   
   // Event handling
-  private readonly eventListeners: Map<WebIntractMCPEvent, Function[]> = new Map();
+  private readonly eventListeners: Map<WebInteractMCPEvent, Function[]> = new Map();
   
   // Configuration and options
-  private globalOptions: WebIntractMCPOptions;
+  private globalOptions: WebInteractMCPOptions;
   private readonly shepherdOptions: any;
   
   // Custom functionality
@@ -100,16 +100,16 @@ export class WebIntractMCPController {
   private readonly styleElementId: string = 'mcp-visual-feedback-styles';
   
   // Communication
-  private signalRService: WebIntractSignalRService | null = null;
+  private signalRService: WebInteractSignalRService | null = null;
 
   /**
-   * Creates a new production-ready WebIntractMCPController instance
+   * Creates a new production-ready WebInteractMCPController instance
    * @param options - Global configuration options
    * @param shepherdOptions - Optional Shepherd.js tour configuration (uses production defaults if not provided)
    * @param logger - Optional custom logger implementation (uses ConsoleLogger if not provided)
    */
   constructor(
-    options: Partial<WebIntractMCPOptions> = {},
+    options: Partial<WebInteractMCPOptions> = {},
     shepherdOptions: any = {},
     logger?: ILogger
   ) {
@@ -139,7 +139,7 @@ export class WebIntractMCPController {
       this.customStyles = { ...options.visualEffectStyles };
     }
 
-    this.logger.info('WebIntractMCPController initialized', {
+    this.logger.info('WebInteractMCPController initialized', {
       logLevel: LogLevel[this.globalOptions.logLevel],
       enableVisualFeedback: this.globalOptions.enableVisualFeedback,
       serverUrl: this.globalOptions.serverUrl
@@ -165,7 +165,7 @@ export class WebIntractMCPController {
    * Gets the current global configuration options
    * @returns A copy of the current global options
    */
-  getGlobalOptions(): WebIntractMCPOptions {
+  getGlobalOptions(): WebInteractMCPOptions {
     return { ...this.globalOptions };
   }
 
@@ -181,7 +181,7 @@ export class WebIntractMCPController {
    * Updates global configuration options
    * @param options - Partial options to update
    */
-  updateGlobalOptions(options: Partial<WebIntractMCPOptions>): void {
+  updateGlobalOptions(options: Partial<WebInteractMCPOptions>): void {
     this.logger.debug('Updating global options', options);
     
     const previousOptions = { ...this.globalOptions };
@@ -355,7 +355,7 @@ export class WebIntractMCPController {
    * @param tool - The tool configuration
    * @returns The effective options for the tool
    */
-  private getEffectiveOptions(tool: ToolConfiguration): WebIntractMCPOptions {
+  private getEffectiveOptions(tool: ToolConfiguration): WebInteractMCPOptions {
     return { ...this.globalOptions, ...tool.options };
   }
 
@@ -448,7 +448,7 @@ export class WebIntractMCPController {
    * @param eventName - The name of the event.
    * @param handler - The callback function.
    */
-  on(eventName: WebIntractMCPEvent, handler: Function): void {
+  on(eventName: WebInteractMCPEvent, handler: Function): void {
     if (!this.eventListeners.has(eventName)) {
       this.eventListeners.set(eventName, []);
     }
@@ -460,7 +460,7 @@ export class WebIntractMCPController {
    * @param eventName - The name of the event.
    * @param handler - The callback function to remove.
    */
-  off(eventName: WebIntractMCPEvent, handler: Function): void {
+  off(eventName: WebInteractMCPEvent, handler: Function): void {
     const handlers = this.eventListeners.get(eventName);
     if (handlers) {
       const index = handlers.indexOf(handler);
@@ -476,7 +476,7 @@ export class WebIntractMCPController {
    * @param eventName - The name of the event to emit.
    * @param data - Optional data to pass to the event handlers.
    */
-  private emit(eventName: WebIntractMCPEvent, data?: any): void {
+  private emit(eventName: WebInteractMCPEvent, data?: any): void {
     const handlers = this.eventListeners.get(eventName) || [];
     handlers.forEach(handler => {
       try {
@@ -1340,7 +1340,7 @@ export class WebIntractMCPController {
    * Shows a click visual effect on an element.
    * @private
    */
-  private showClickEffect(element: HTMLElement, options?: WebIntractMCPOptions): void {
+  private showClickEffect(element: HTMLElement, options?: WebInteractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1378,7 +1378,7 @@ export class WebIntractMCPController {
    * Shows typing animation on an input element.
    * @private
    */
-  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: WebIntractMCPOptions, delay: number = 10): Promise<void> {
+  private async showTypingEffect(element: HTMLInputElement | HTMLTextAreaElement, text: string, options?: WebInteractMCPOptions, delay: number = 10): Promise<void> {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) {
       element.value = text;
@@ -1408,7 +1408,7 @@ export class WebIntractMCPController {
    * Highlights an element temporarily.
    * @private
    */
-  private highlightElement(element: HTMLElement, duration: number = 2000, options?: WebIntractMCPOptions): void {
+  private highlightElement(element: HTMLElement, duration: number = 2000, options?: WebInteractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1427,7 +1427,7 @@ export class WebIntractMCPController {
    * Shows a focus effect on an element.
    * @private
    */
-  private showFocusEffect(element: HTMLElement, duration: number = 1000, options?: WebIntractMCPOptions): void {
+  private showFocusEffect(element: HTMLElement, duration: number = 1000, options?: WebInteractMCPOptions): void {
     const effectiveOptions = options || this.globalOptions;
     if (!effectiveOptions.enableVisualFeedback) return;
 
@@ -1810,7 +1810,7 @@ export class WebIntractMCPController {
   async createSession(): Promise<string> {
     try {
       // Create a new SignalR service instance
-      this.signalRService = new WebIntractSignalRService(this.globalOptions.serverUrl, this, this.registry);
+      this.signalRService = new WebInteractSignalRService(this.globalOptions.serverUrl, this, this.registry);
       
       // Start the connection
       await this.signalRService.start();
