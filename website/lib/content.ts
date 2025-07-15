@@ -1,11 +1,13 @@
 import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
-import { remark } from 'remark'
-import html from 'remark-html'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkRehype from 'remark-rehype'
+import rehypeStringify from 'rehype-stringify'
 
 const contentDirectory = path.join(process.cwd(), 'content')
 
@@ -45,22 +47,21 @@ export interface Version {
 // Enhanced markdown processing with Mermaid support
 async function processMarkdown(content: string): Promise<string> {
   try {
-    // Process markdown without pre-transforming Mermaid to preserve proper code blocks
-    const markdownResult = await remark()
-    .use(remarkGfm) // GitHub Flavored Markdown first
-    .use(html, { 
-    sanitize: false,
-    allowDangerousHtml: true // Allow custom HTML for Mermaid diagrams
-    })
-    .use(rehypeSlug)
-    .use(rehypeAutolinkHeadings, {
+    // Use unified processor for proper remark -> rehype chain
+    const markdownResult = await unified()
+      .use(remarkParse) // Parse markdown
+      .use(remarkGfm) // GitHub Flavored Markdown
+      .use(remarkRehype, { allowDangerousHtml: true }) // Convert to HTML AST
+      .use(rehypeSlug) // Add IDs to headings
+      .use(rehypeAutolinkHeadings, {
         behavior: 'wrap',
         properties: {
-            className: ['heading-link'],
-            ariaLabel: 'Link to heading'
+          className: ['heading-link'],
+          ariaLabel: 'Link to heading'
         }
-    })
-    .process(content)
+      }) // Add links to headings
+      .use(rehypeStringify, { allowDangerousHtml: true }) // Convert to HTML string
+      .process(content)
     
     let result = markdownResult.toString()
     
@@ -86,7 +87,7 @@ async function processMarkdown(content: string): Promise<string> {
           .replace(/\s+/g, '-')
           .replace(/-+/g, '-')
           .replace(/^-+|-+$/g, '')
-        return `<h${level} id="${id}">${title}</h${level}>`
+        return `<h${level} id="${id}"><a href="#${id}" class="heading-link">${title}</a></h${level}>`
       })
     
     // Transform Mermaid code blocks in fallback too
