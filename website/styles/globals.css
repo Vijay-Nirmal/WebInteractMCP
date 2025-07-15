@@ -5,6 +5,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
+/* Import highlight.js theme */
+@import 'highlight.js/styles/github.css';
+
 @layer base {
   html {
     scroll-behavior: smooth;
@@ -160,7 +163,7 @@
   }
 }
 
-/* Custom scrollbar */
+  /* Custom scrollbar */
 .toc::-webkit-scrollbar {
   width: 4px;
 }
@@ -175,4 +178,141 @@
 
 .toc::-webkit-scrollbar-thumb:hover {
   @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Custom syntax highlighting styles that work with dark mode */
+.hljs {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-4 rounded-lg;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+  overflow-x: auto;
+}
+
+/* Light mode syntax highlighting */
+.hljs-comment,
+.hljs-quote {
+  @apply text-gray-500 italic;
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-attribute,
+.hljs-tag,
+.hljs-name,
+.hljs-regexp,
+.hljs-link,
+.hljs-selector-id,
+.hljs-selector-class {
+  @apply text-red-600;
+}
+
+.hljs-number,
+.hljs-meta,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params {
+  @apply text-purple-600;
+}
+
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet {
+  @apply text-green-600;
+}
+
+.hljs-title,
+.hljs-section {
+  @apply text-blue-600 font-semibold;
+}
+
+.hljs-keyword,
+.hljs-selector-tag {
+  @apply text-purple-700 font-medium;
+}
+
+/* Dark mode syntax highlighting */
+.dark .hljs-comment,
+.dark .hljs-quote {
+  @apply text-gray-400 italic;
+}
+
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-attribute,
+.dark .hljs-tag,
+.dark .hljs-name,
+.dark .hljs-regexp,
+.dark .hljs-link,
+.dark .hljs-selector-id,
+.dark .hljs-selector-class {
+  @apply text-red-400;
+}
+
+.dark .hljs-number,
+.dark .hljs-meta,
+.dark .hljs-built_in,
+.dark .hljs-builtin-name,
+.dark .hljs-literal,
+.dark .hljs-type,
+.dark .hljs-params {
+  @apply text-purple-400;
+}
+
+.dark .hljs-string,
+.dark .hljs-symbol,
+.dark .hljs-bullet {
+  @apply text-green-400;
+}
+
+.dark .hljs-title,
+.dark .hljs-section {
+  @apply text-blue-400 font-semibold;
+}
+
+.dark .hljs-keyword,
+.dark .hljs-selector-tag {
+  @apply text-purple-300 font-medium;
+}
+
+/* Language-specific styling */
+.hljs-function {
+  @apply text-blue-600;
+}
+
+.dark .hljs-function {
+  @apply text-blue-400;
+}
+
+.hljs-emphasis {
+  @apply italic;
+}
+
+.hljs-strong {
+  @apply font-bold;
+}
+
+.hljs-deletion {
+  @apply bg-red-100 dark:bg-red-900/20;
+}
+
+.hljs-addition {
+  @apply bg-green-100 dark:bg-green-900/20;
+}
+
+/* Inline code styling */
+.prose code:not(pre code) {
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-1.5 py-0.5 rounded text-sm;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+}
+
+/* Code block container */
+.prose pre {
+  @apply bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-x-auto;
+  margin: 1.5rem 0;
+}
+
+.prose pre code {
+  @apply bg-transparent text-sm leading-6;
+  font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
 }

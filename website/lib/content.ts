@@ -4,6 +4,7 @@ import matter from 'gray-matter'
 import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
+import rehypeHighlight from 'rehype-highlight'
 import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
@@ -44,7 +45,7 @@ export interface Version {
   isLatest: boolean
 }
 
-// Enhanced markdown processing with Mermaid support
+// Enhanced markdown processing with Mermaid support and syntax highlighting
 async function processMarkdown(content: string): Promise<string> {
   try {
     // Use unified processor for proper remark -> rehype chain
@@ -60,6 +61,36 @@ async function processMarkdown(content: string): Promise<string> {
           ariaLabel: 'Link to heading'
         }
       }) // Add links to headings
+      .use(rehypeHighlight, {
+        detect: true,
+        ignoreMissing: true,
+        aliases: {
+          'js': 'javascript',
+          'ts': 'typescript',
+          'jsx': 'javascript',
+          'tsx': 'typescript',
+          'sh': 'bash',
+          'shell': 'bash',
+          'json': 'json',
+          'yml': 'yaml',
+          'xml': 'xml',
+          'html': 'xml',
+          'cs': 'csharp',
+          'py': 'python',
+          'rb': 'ruby',
+          'go': 'go',
+          'rs': 'rust',
+          'php': 'php',
+          'java': 'java',
+          'cpp': 'cpp',
+          'c': 'c',
+          'sql': 'sql',
+          'dockerfile': 'dockerfile',
+          'powershell': 'powershell',
+          'ps1': 'powershell',
+          'bash': 'bash'
+        }
+      }) // Add syntax highlighting
       .use(rehypeStringify, { allowDangerousHtml: true }) // Convert to HTML string
       .process(content)
     
