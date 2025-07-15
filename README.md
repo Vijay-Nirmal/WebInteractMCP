@@ -39,26 +39,48 @@ https://github.com/user-attachments/assets/bf9d15a6-fa4a-40a0-8543-cb0fd92bffac
 ## 🏗️ Architecture
 
 ```mermaid
-graph TB
-    subgraph "Your Web Application"
-        D[Client Web App<br/>Any Framework]
-        E[Tools Configuration<br/>JSON File]
+sequenceDiagram
+    participant U as 👤 User
+    participant W as 🌐 Website
+    participant C as 📦 @web-intract-mcp/client
+    participant CB as 🤖 MCP Client<br/>(ChatBot Server)
+    participant MS as 🖥️ WebIntractMCPServer
+
+    %% Styling
+    Note over U,MS: WebIntractMCP Communication Flow
+    
+    rect rgba(135, 206, 235, 0.1)
+        Note over U,MS: 🚀 Session Initialization Phase
+        U->>+W: 💬 Opens chat session
+        W->>+C: 🔧 Initialize MCP session
+        C->>+MS: 🔗 Establish 2-way connection<br/>(SignalR WebSocket)
+        MS-->>-C: ✅ Connection established
+        C->>+MS: 🛠️ Send tools configuration
+        MS-->>-C: 🆔 Return session ID
+        C-->>-W: 📋 Provide session ID
+        W-->>-U: 🟢 Session ready
+    end
+
+    rect rgba(144, 238, 144, 0.1)
+        Note over U,MS: 📝 Task Processing Phase
+        U->>+W: ⌨️ Enters task/query
+        W->>+CB: 📤 Send request with session ID
+        CB->>+MS: 🔌 Connect & register tools
+        MS-->>-CB: 🛠️ Return available tools
+        CB->>CB: 🧠 LLM processes task<br/>& selects tools
     end
     
-    subgraph "WebIntractMCP Ecosystem"
-        B[WebIntractMCPServer]
-        C["@web-intract-mcp/client"<br/>TypeScript Library]
+    rect rgba(255, 182, 193, 0.1)
+        Note over U,MS: ⚡ Tool Execution Phase
+        CB->>+MS: 🎯 Invoke tool with parameters
+        MS->>+C: 📨 Forward tool invocation
+        C->>+W: 🖱️ Execute actions<br/>(DOM manipulation, clicks)
+        W-->>-C: 📊 Return execution result
+        C-->>-MS: 📤 Send tool response
+        MS-->>-CB: 📥 Forward response to LLM
+        CB->>+W: 🎨 Return processed result
+        W-->>-U: 📺 Display response
     end
-    
-    subgraph "MCP Client (Chatbot/AI)"
-        A[MCP Client Application]
-    end
-    
-    D -->|Initiates Request| A
-    A -->|MCP Protocol| B
-    B -->|Real-time Communication| C
-    C -->|Integrate| D
-    E -->|Configure| C
 ```
 
 ## 🚀 Quick Start

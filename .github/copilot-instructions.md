@@ -129,23 +129,6 @@ sample/angular-dotnetnet-semantic-kernel/src/
 - TypeScript 5.8+ (Angular compatible)
 - SignalR (client/server version alignment)
 
-## Common Issues
-
-### SignalR Connection
-- Verify CORS in WebIntractMCPServer
-- Check hub URL configuration
-- Implement proper error handling
-
-### Type Compatibility  
-- Run `npm run build` in @web-intract-mcp/client after changes
-- Verify type exports in index.ts
-- Check Angular imports match library exports
-
-### MCP Protocol
-- Validate tool schemas
-- Ensure parameter validation
-- Test tool execution isolation
-
 ## Best Practices
 
 1. **Type Safety**: Use TypeScript strict mode
