@@ -9,35 +9,48 @@ WebInteract MCP Server enables client web applications to expose their functiona
 ## Architecture
 
 ```mermaid
-graph TB
-    subgraph "MCP Client"
-        A[MCP Client Application]
+sequenceDiagram
+    participant U as 👤 User
+    participant W as 🌐 Website
+    participant C as 📦 @web-interact-mcp/client
+    participant CB as 🤖 MCP Client<br/>(ChatBot Server)
+    participant MS as 🖥️ WebInteractMCPServer
+
+    %% Styling
+    Note over U,MS: WebInteractMCP Communication Flow
+    
+    rect rgba(135, 206, 235, 0.1)
+        Note over U,MS: 🚀 Session Initialization Phase
+        U->>+W: 💬 Opens chat session
+        W->>+C: 🔧 Initialize MCP session
+        C->>+MS: 🔗 Establish 2-way connection<br/>(SignalR WebSocket)
+        MS-->>-C: ✅ Connection established
+        C->>+MS: 🛠️ Send tools configuration
+        MS-->>-C: 🆔 Return session ID
+        C-->>-W: 📋 Provide session ID
+        W-->>-U: 🟢 Session ready
+    end
+
+    rect rgba(144, 238, 144, 0.1)
+        Note over U,MS: 📝 Task Processing Phase
+        U->>+W: ⌨️ Enters task/query
+        W->>+CB: 📤 Send request with session ID
+        CB->>+MS: 🔌 Connect & register tools
+        MS-->>-CB: 🛠️ Return available tools
+        CB->>CB: 🧠 LLM processes task<br/>& selects tools
     end
     
-    subgraph "WebInteract MCP Server"
-        B[MCP Protocol Handler]
-        C[Tool Registry Service]
-        D[Communication Hub]
-        E[Configuration Manager]
+    rect rgba(255, 182, 193, 0.1)
+        Note over U,MS: ⚡ Tool Execution Phase
+        CB->>+MS: 🎯 Invoke tool with parameters
+        MS->>+C: 📨 Forward tool invocation
+        C->>+W: 🖱️ Execute actions<br/>(DOM manipulation, clicks)
+        W-->>-C: 📊 Return execution result
+        C-->>-MS: 📤 Send tool response
+        MS-->>-CB: 📥 Forward response to LLM
+        CB->>+W: 🎨 Return processed result
+        W-->>-U: 📺 Display response
     end
-    
-    subgraph "Client Web Application"
-        F[Tool Registration]
-        G[Tool Execution]
-        H[Communication Interface]
-    end
-    
-    A -->|MCP Protocol| B
-    B --> C
-    C --> D
-    D -->|Robust 2-way Connection| H
-    H --> F
-    H --> G
-    F --> C
-    G --> D
-    E --> B
-    E --> C
-    E --> D
 ```
 
 ## Features
