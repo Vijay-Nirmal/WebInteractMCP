@@ -185,13 +185,6 @@ npm run export
 
 Upload the contents of the `out` directory to your hosting provider.
 
-## 📊 Analytics
-
-The website includes Google Analytics configuration. To enable:
-
-1. Replace `GA_MEASUREMENT_ID` in `pages/_document.tsx` with your actual GA ID
-2. Redeploy the site
-
 ## 🛠️ Development
 
 ### Adding New Pages

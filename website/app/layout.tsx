@@ -4,6 +4,7 @@ import '../styles/globals.css'
 import Layout from '../components/Layout'
 import { ThemeProvider } from '../components/ThemeProvider'
 import MermaidInitializer from '../components/MermaidInitializer'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -78,6 +79,7 @@ export default function RootLayout({
           </Layout>
           <MermaidInitializer />
         </ThemeProvider>
+        <GoogleAnalytics gaId="G-SSX9SGVTFQ" />
       </body>
     </html>
   )
