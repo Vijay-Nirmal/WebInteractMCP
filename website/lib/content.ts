@@ -98,7 +98,7 @@ async function processMarkdown(content: string): Promise<string> {
     
     // Post-process to transform Mermaid code blocks to proper div format with better styling
     result = result.replace(
-      /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
+      /<pre><code class="hljs language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
       (match, mermaidCode) => {
         const cleanCode = mermaidCode.trim()
         return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`

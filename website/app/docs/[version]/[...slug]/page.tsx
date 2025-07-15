@@ -111,7 +111,7 @@ export default async function DocPage({ params }: Props) {
                   </header>
 
                   <div 
-                    className="mt-8 prose prose-lg prose-gray dark:prose-invert max-w-none 
+                    className="mt-8 prose prose-base prose-gray dark:prose-invert max-w-none 
                                prose-headings:text-gray-900 dark:prose-headings:text-white 
                                prose-a:text-primary-600 dark:prose-a:text-primary-400 
                                prose-code:text-primary-600 dark:prose-code:text-primary-400 

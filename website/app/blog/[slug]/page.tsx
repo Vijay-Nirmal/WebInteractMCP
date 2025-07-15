@@ -98,7 +98,7 @@ export default async function BlogPost({ params }: Props) {
         {/* Article content */}
         <div className="mx-auto mt-16 max-w-none">
           <div 
-            className="prose prose-lg prose-gray dark:prose-invert max-w-none 
+            className="prose prose-base prose-gray dark:prose-invert max-w-none 
                        prose-headings:text-gray-900 dark:prose-headings:text-white 
                        prose-a:text-primary-600 dark:prose-a:text-primary-400 
                        prose-code:text-primary-600 dark:prose-code:text-primary-400
