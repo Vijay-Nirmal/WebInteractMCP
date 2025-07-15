@@ -1,18 +1,14 @@
-import React from 'react'
-import Head from 'next/head'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'About WebIntractMCP - Open Source MCP Ecosystem',
+  description: 'Learn about WebIntractMCP, the open-source ecosystem that transforms web applications into MCP servers. Created by Vijay Nirmal.',
+}
 
 export default function About() {
   return (
     <>
-      <Head>
-        <title>About WebIntractMCP - Open Source MCP Ecosystem</title>
-        <meta
-          name="description"
-          content="Learn about WebIntractMCP, the open-source ecosystem that transforms web applications into MCP servers. Created by Vijay Nirmal."
-        />
-      </Head>
-
       <div className="py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0">

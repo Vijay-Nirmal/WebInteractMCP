@@ -1,6 +1,10 @@
-import React from 'react'
-import Head from 'next/head'
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'WebIntract MCP - Transform Web Applications into MCP Servers',
+  description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
+}
 
 const features = [
   {
@@ -66,22 +70,6 @@ const useCases = [
 export default function Home() {
   return (
     <>
-      <Head>
-        <title>WebIntractMCP - Transform Web Applications into MCP Servers</title>
-        <meta
-          name="description"
-          content="Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly."
-        />
-        <meta name="keywords" content="MCP, Model Context Protocol, web automation, chatbot integration, AI, web applications" />
-        <meta property="og:title" content="WebIntractMCP - Transform Web Applications into MCP Servers" />
-        <meta property="og:description" content="Transform any web application into an MCP server with real-time two-way communication." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://webintractmcp.com" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="WebIntractMCP - Transform Web Applications into MCP Servers" />
-        <meta name="twitter:description" content="Transform any web application into an MCP server with real-time two-way communication." />
-      </Head>
-
       {/* Hero Section */}
       <div className="relative isolate px-6 pt-14 lg:px-8">
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
@@ -104,7 +92,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
-                href="/docs/quickstart"
+                href="/docs/latest/getting-started"
                 className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
               >
                 Get started
@@ -247,7 +235,7 @@ export default function Home() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <Link
-                href="/docs/quickstart"
+                href="/docs/latest/getting-started"
                 className="rounded-md bg-primary-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
               >
                 Get started

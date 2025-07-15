@@ -67,7 +67,10 @@ async function processMarkdown(content: string): Promise<string> {
     // Post-process to transform Mermaid code blocks to proper div format with better styling
     result = result.replace(
       /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
-      '<div class="mermaid" style="text-align: center; margin: 2rem 0; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem;">$1</div>'
+      (match, mermaidCode) => {
+        const cleanCode = mermaidCode.trim()
+        return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`
+      }
     )
     
     return result
@@ -89,7 +92,10 @@ async function processMarkdown(content: string): Promise<string> {
     // Transform Mermaid code blocks in fallback too
     result = result.replace(
       /```mermaid<br>([\s\S]*?)<br>```/g,
-      '<div class="mermaid" style="text-align: center; margin: 2rem 0; padding: 1rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.5rem;">$1</div>'
+      (match, mermaidCode) => {
+        const cleanCode = mermaidCode.replace(/<br>/g, '\n').trim()
+        return `<div class="mermaid-diagram" data-mermaid="${encodeURIComponent(cleanCode)}">${cleanCode}</div>`
+      }
     )
     
     return result
@@ -248,7 +254,7 @@ export async function getDocPages(version: string = 'latest'): Promise<DocPage[]
       })
   )
   
-  return allDocsData.sort((a, b) => a.order - b.order)
+  return allDocsData.sort((a, b) => (a.order || 999) - (b.order || 999))
 }
 
 export async function getDocPage(version: string, slug: string): Promise<DocPage | null> {
