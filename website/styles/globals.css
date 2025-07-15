@@ -194,6 +194,64 @@
     .enhanced-content table {
       @apply block overflow-x-auto whitespace-nowrap;
     }
+    
+    /* Ensure prose content is readable on mobile */
+    .prose {
+      @apply text-sm leading-6;
+    }
+    
+    .prose h1 {
+      @apply text-xl;
+    }
+    
+    .prose h2 {
+      @apply text-lg;
+    }
+    
+    .prose h3 {
+      @apply text-base;
+    }
+    
+    .prose h4 {
+      @apply text-sm;
+    }
+    
+    /* Adjust code blocks for mobile */
+    .prose pre {
+      @apply text-xs p-3 overflow-x-auto;
+    }
+    
+    .prose code {
+      @apply text-xs;
+    }
+    
+    /* Responsive padding for mobile */
+    .enhanced-content {
+      @apply px-0;
+    }
+  }
+  
+  /* Medium screens adjustments */
+  @media (min-width: 641px) and (max-width: 1024px) {
+    .prose {
+      @apply text-sm leading-7;
+    }
+    
+    .prose h1 {
+      @apply text-2xl;
+    }
+    
+    .prose h2 {
+      @apply text-xl;
+    }
+    
+    .prose h3 {
+      @apply text-lg;
+    }
+    
+    .prose pre {
+      @apply text-sm p-4;
+    }
   }
 }
 

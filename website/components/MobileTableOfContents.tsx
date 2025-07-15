@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 
 interface TocItem {
   id: string
@@ -9,11 +10,12 @@ interface TocItem {
   children?: TocItem[]
 }
 
-interface TableOfContentsProps {
+interface MobileTableOfContentsProps {
   items: TocItem[]
 }
 
-export default function TableOfContents({ items }: TableOfContentsProps) {
+export default function MobileTableOfContents({ items }: MobileTableOfContentsProps) {
+  const [isOpen, setIsOpen] = useState(false)
   const [activeId, setActiveId] = useState<string>('')
 
   useEffect(() => {
@@ -49,6 +51,7 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
       // Update URL hash without triggering scroll
       history.pushState(null, '', `#${id}`)
       setActiveId(id)
+      setIsOpen(false) // Close mobile TOC after clicking
     }
   }
 
@@ -60,16 +63,16 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
         <a
           href={`#${item.id}`}
           onClick={(e) => handleClick(e, item.id)}
-          className={`block py-1 text-sm transition-all duration-200 border-l-2 ${
+          className={`block py-2 px-3 text-sm transition-all duration-200 border-l-2 ${
             isActive
               ? 'border-primary-500 text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 font-medium'
               : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
           } ${
             item.level === 1
-              ? 'pl-4 text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400'
+              ? 'pl-3 text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400'
               : item.level === 2
               ? 'pl-6 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-              : 'pl-8 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              : 'pl-9 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
           }`}
         >
           {item.title}
@@ -84,20 +87,33 @@ export default function TableOfContents({ items }: TableOfContentsProps) {
   }
 
   return (
-    <div className="w-full xl:w-64 flex-shrink-0">
-      <div className="xl:sticky xl:top-24 xl:max-h-[calc(100vh-6rem)] xl:overflow-y-auto">
-        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50">
-          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-            <svg className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-            </svg>
-            On this page
-          </h3>
-          <nav className="space-y-1">
-            {items.map((item) => renderTocItem(item))}
-          </nav>
+    <div className="xl:hidden mb-6">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between w-full px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+      >
+        <div className="flex items-center">
+          <svg className="w-4 h-4 mr-2 text-gray-500" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+          </svg>
+          On this page
         </div>
-      </div>
+        {isOpen ? (
+          <ChevronUpIcon className="w-5 h-5" />
+        ) : (
+          <ChevronDownIcon className="w-5 h-5" />
+        )}
+      </button>
+      
+      {isOpen && (
+        <div className="mt-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-lg">
+          <div className="max-h-96 overflow-y-auto">
+            <nav className="p-2">
+              {items.map((item) => renderTocItem(item))}
+            </nav>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

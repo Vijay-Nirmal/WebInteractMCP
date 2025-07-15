@@ -174,23 +174,29 @@ function extractTableOfContents(content: string): TableOfContentsItem[] {
 
   while ((match = headingRegex.exec(cleanContent)) !== null) {
     const level = match[1].length
-    const title = match[2].trim()
+    let title = match[2].trim()
     
     // Skip if title is empty or contains only special characters
     if (!title || /^[^\w\s]*$/.test(title)) {
       continue
     }
     
-    // Generate ID that matches rehypeSlug behavior more closely
+    // Clean up markdown link syntax from titles: [text](url) -> text
+    title = title.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    
+    // Clean up remaining markdown syntax
+    title = title.replace(/[*_`]/g, '')
+    
+    // Generate ID that matches GitHub's slug generation algorithm (used by rehypeSlug)
     const id = title.toLowerCase()
       .trim()
       .replace(/\s+/g, '-')           // Replace spaces with hyphens
-      .replace(/[^\w\-]+/g, '')       // Remove non-word characters except hyphens
+      .replace(/[^\w\-\u00C0-\u017F]/g, '') // Keep only word characters, hyphens, and accented characters
       .replace(/\-\-+/g, '-')         // Replace multiple hyphens with single hyphen
       .replace(/^-+/, '')             // Remove leading hyphens
       .replace(/-+$/, '')             // Remove trailing hyphens
 
-    if (id) {
+    if (id && title) {
       headings.push({
         id,
         title,

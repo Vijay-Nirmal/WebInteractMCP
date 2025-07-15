@@ -56,10 +56,10 @@ export default async function DocsSidebar({ currentVersion, currentSlug }: DocsS
   })
 
   return (
-    <div className="w-64 flex-shrink-0">
-      <div className="sticky top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
+    <div className="w-full lg:w-64 flex-shrink-0">
+      <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-6rem)] lg:overflow-y-auto">
         {/* Version Selector */}
-        <div className="mb-6">
+        <div className="mb-4 lg:mb-6">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Version
           </label>
@@ -86,7 +86,7 @@ export default async function DocsSidebar({ currentVersion, currentSlug }: DocsS
         </div>
 
         {/* Navigation */}
-        <nav className="space-y-6">
+        <nav className="space-y-4 lg:space-y-6">
           {sortedCategories.map((category) => (
             <div key={category}>
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">
@@ -105,7 +105,7 @@ export default async function DocsSidebar({ currentVersion, currentSlug }: DocsS
                     >
                       <span className="truncate">{doc.title}</span>
                       {currentSlug === doc.slug && (
-                        <ChevronRightIcon className="ml-auto h-4 w-4" />
+                        <ChevronRightIcon className="ml-auto h-4 w-4 flex-shrink-0" />
                       )}
                     </Link>
                   </li>
