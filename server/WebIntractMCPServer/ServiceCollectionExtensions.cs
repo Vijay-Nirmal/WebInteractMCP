@@ -4,32 +4,32 @@ using Microsoft.Extensions.Options;
 using ModelContextProtocol.AspNetCore;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
-using WebIntractMCPServer.Abstractions;
-using WebIntractMCPServer.Configuration;
-using WebIntractMCPServer.Factories;
-using WebIntractMCPServer.Services;
+using WebInteractMCPServer.Abstractions;
+using WebInteractMCPServer.Configuration;
+using WebInteractMCPServer.Factories;
+using WebInteractMCPServer.Services;
 
-namespace WebIntractMCPServer;
+namespace WebInteractMCPServer;
 
 /// <summary>
-/// Extension methods for configuring MCP Intract services
+/// Extension methods for configuring MCP Interact services
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds MCP Intract services to the service collection
+    /// Adds MCP Interact services to the service collection
     /// </summary>
     /// <param name="services">The service collection</param>
     /// <param name="configuration">The configuration instance</param>
     /// <returns>The service collection for chaining</returns>
-    public static IServiceCollection AddMcpIntract(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddMcpInteract(this IServiceCollection services, IConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(configuration);
 
         // Register configuration
-        services.Configure<McpIntractOptions>(configuration.GetSection(McpIntractOptions.SectionName));
-        services.AddSingleton<IValidateOptions<McpIntractOptions>, McpIntractOptionsValidator>();
+        services.Configure<McpInteractOptions>(configuration.GetSection(McpInteractOptions.SectionName));
+        services.AddSingleton<IValidateOptions<McpInteractOptions>, McpInteractOptionsValidator>();
 
         // Register core services
         services.AddMcpServer().WithHttpTransport();
@@ -68,15 +68,15 @@ public static class ServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(options);
 
         var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-        var logger = loggerFactory?.CreateLogger("McpIntractSession");
+        var logger = loggerFactory?.CreateLogger("McpInteractSession");
 
         try
         {
             // Validate session header
-            if (!context.Request.Headers.TryGetValue("McpIntract-Session-Id", out var sessionHeader) || 
+            if (!context.Request.Headers.TryGetValue("McpInteract-Session-Id", out var sessionHeader) || 
                 string.IsNullOrWhiteSpace(sessionHeader))
             {
-                const string errorMessage = "McpIntract-Session-Id header is missing or empty. Ensure to initialize a new session from the client and pass the session ID as the McpIntract-Session-Id header.";
+                const string errorMessage = "McpInteract-Session-Id header is missing or empty. Ensure to initialize a new session from the client and pass the session ID as the McpInteract-Session-Id header.";
                 logger?.LogError(errorMessage);
                 throw new InvalidOperationException(errorMessage);
             }
@@ -168,22 +168,22 @@ public static class ServiceCollectionExtensions
 }
 
 /// <summary>
-/// Validator for MCP Intract options
+/// Validator for MCP Interact options
 /// </summary>
-internal sealed class McpIntractOptionsValidator : IValidateOptions<McpIntractOptions>
+internal sealed class McpInteractOptionsValidator : IValidateOptions<McpInteractOptions>
 {
-    public ValidateOptionsResult Validate(string? name, McpIntractOptions options)
+    public ValidateOptionsResult Validate(string? name, McpInteractOptions options)
     {
         List<string> failures = [];
 
         if (options.Tool.TimeoutMinutes <= 0)
         {
-            failures.Add($"{nameof(McpIntractOptions.Tool)}.{nameof(ToolConfiguration.TimeoutMinutes)} must be greater than 0");
+            failures.Add($"{nameof(McpInteractOptions.Tool)}.{nameof(ToolConfiguration.TimeoutMinutes)} must be greater than 0");
         }
 
         if (!options.Cors.AllowAnyOrigin && (options.Cors.AllowedOrigins is null || !options.Cors.AllowedOrigins.Any()))
         {
-            failures.Add($"Either {nameof(McpIntractOptions.Cors)}.{nameof(CorsConfiguration.AllowAnyOrigin)} must be true or {nameof(McpIntractOptions.Cors)}.{nameof(CorsConfiguration.AllowedOrigins)} must contain at least one origin");
+            failures.Add($"Either {nameof(McpInteractOptions.Cors)}.{nameof(CorsConfiguration.AllowAnyOrigin)} must be true or {nameof(McpInteractOptions.Cors)}.{nameof(CorsConfiguration.AllowedOrigins)} must contain at least one origin");
         }
 
         return failures.Any() 

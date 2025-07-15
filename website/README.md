@@ -1,6 +1,6 @@
 # Website
 
-This directory contains the Next.js website for WebIntractMCP.
+This directory contains the Next.js website for WebInteractMCP.
 
 ## 🚀 Features
 
@@ -171,7 +171,7 @@ The website is configured for automatic deployment to GitHub Pages:
 
 ### Custom Domain
 
-To use a custom domain (webintractmcp.com):
+To use a custom domain (webinteractmcp.com):
 
 1. Add a `CNAME` file in the `public` directory with your domain
 2. Configure DNS settings with your domain provider
@@ -224,7 +224,7 @@ Create reusable components in the `components` directory. Follow the existing pa
 
 ## 📄 License
 
-This website is part of the WebIntractMCP project and is licensed under the MIT License.
+This website is part of the WebInteractMCP project and is licensed under the MIT License.
 
 ## ✅ Setup Complete
 
@@ -245,9 +245,9 @@ The website is now fully configured and ready to use:
 1. **Test the site**: `npm run dev` and visit http://localhost:3000
 2. **Add your content**: Update blog posts and documentation
 3. **Deploy**: Push to GitHub to trigger automatic deployment
-4. **Configure domain**: Set up custom domain (webintractmcp.com) if desired
+4. **Configure domain**: Set up custom domain (webinteractmcp.com) if desired
 
 ### Contact
 
 - **Email**: me@vijaynirmal.com
-- **GitHub**: https://github.com/Vijay-Nirmal/WebIntractMCP
+- **GitHub**: https://github.com/Vijay-Nirmal/WebInteractMCP

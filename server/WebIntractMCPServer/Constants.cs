@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace WebIntractMCPServer;
+namespace WebInteractMCPServer;
 
 /// <summary>
 /// Application-wide constants and configuration values

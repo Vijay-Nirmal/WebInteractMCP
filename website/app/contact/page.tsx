@@ -37,7 +37,7 @@ export default function Contact() {
               Get in Touch
             </h1>
             <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-              Have questions about WebIntractMCP? Want to contribute or collaborate? 
+              Have questions about WebInteractMCP? Want to contribute or collaborate? 
               I'd love to hear from you!
             </p>
           </div>
@@ -132,7 +132,7 @@ export default function Contact() {
                   </h3>
                   <p className="mt-4 text-lg leading-8 text-gray-600 dark:text-gray-300">
                     I'm always excited to connect with fellow developers, potential contributors, 
-                    and anyone interested in WebIntractMCP.
+                    and anyone interested in WebInteractMCP.
                   </p>
                 </div>
 
@@ -170,12 +170,12 @@ export default function Contact() {
                       <h4 className="text-lg font-semibold text-gray-900 dark:text-white">GitHub</h4>
                       <p className="mt-1 text-base text-gray-600 dark:text-gray-300">
                         <a
-                          href="https://github.com/Vijay-Nirmal/WebIntractMCP"
+                          href="https://github.com/Vijay-Nirmal/WebInteractMCP"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary-600 hover:text-primary-500 transition-colors"
                         >
-                          Vijay-Nirmal/WebIntractMCP
+                          Vijay-Nirmal/WebInteractMCP
                         </a>
                       </p>
                     </div>
@@ -193,7 +193,7 @@ export default function Contact() {
                       <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Discussions</h4>
                       <p className="mt-1 text-base text-gray-600 dark:text-gray-300">
                         <a
-                          href="https://github.com/Vijay-Nirmal/WebIntractMCP/discussions"
+                          href="https://github.com/Vijay-Nirmal/WebInteractMCP/discussions"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-primary-600 hover:text-primary-500 transition-colors"
@@ -210,7 +210,7 @@ export default function Contact() {
                     What can I help you with?
                   </h4>
                   <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                    <li>• Questions about WebIntractMCP implementation</li>
+                    <li>• Questions about WebInteractMCP implementation</li>
                     <li>• Feature requests and suggestions</li>
                     <li>• Bug reports and technical issues</li>
                     <li>• Collaboration opportunities</li>

@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "webintract-mcp-server.fullname" . }}
+  name: {{ include "webinteract-mcp-server.fullname" . }}
   labels:
-    {{- include "webintract-mcp-server.labels" . | nindent 4 }}
+    {{- include "webinteract-mcp-server.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "webintract-mcp-server.selectorLabels" . | nindent 6 }}
+      {{- include "webinteract-mcp-server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,7 +18,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "webintract-mcp-server.labels" . | nindent 8 }}
+        {{- include "webinteract-mcp-server.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -27,7 +27,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "webintract-mcp-server.serviceAccountName" . }}
+      serviceAccountName: {{ include "webinteract-mcp-server.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:

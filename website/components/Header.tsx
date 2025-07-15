@@ -29,12 +29,12 @@ export default function Header() {
         <nav className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8" aria-label="Global">
           <div className="flex lg:flex-1">
             <Link href="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">WebIntractMCP</span>
+              <span className="sr-only">WebInteractMCP</span>
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-lg">W</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white">WebIntractMCP</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">WebInteractMCP</span>
               </div>
             </Link>
           </div>
@@ -76,7 +76,7 @@ export default function Header() {
               )}
             </button>
             <Link
-              href="https://github.com/Vijay-Nirmal/WebIntractMCP"
+              href="https://github.com/Vijay-Nirmal/WebInteractMCP"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100 hover:text-primary-600 dark:hover:text-primary-400"
@@ -100,12 +100,12 @@ export default function Header() {
           <div className="fixed inset-y-0 right-0 z-[110] w-full overflow-y-auto bg-white dark:bg-gray-900 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10 dark:ring-gray-100/10 transform transition-transform duration-300 ease-in-out">
             <div className="flex items-center justify-between">
               <Link href="/" className="-m-1.5 p-1.5" onClick={() => setMobileMenuOpen(false)}>
-                <span className="sr-only">WebIntractMCP</span>
+                <span className="sr-only">WebInteractMCP</span>
                 <div className="flex items-center space-x-2">
                   <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
                     <span className="text-white font-bold text-lg">W</span>
                   </div>
-                  <span className="text-xl font-bold text-gray-900 dark:text-white">WebIntractMCP</span>
+                  <span className="text-xl font-bold text-gray-900 dark:text-white">WebInteractMCP</span>
                 </div>
               </Link>
               <button
@@ -156,7 +156,7 @@ export default function Header() {
                     )}
                   </button>
                   <Link
-                    href="https://github.com/Vijay-Nirmal/WebIntractMCP"
+                    href="https://github.com/Vijay-Nirmal/WebInteractMCP"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800"

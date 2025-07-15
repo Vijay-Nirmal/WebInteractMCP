@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "WebIntractMCP": {
+    "WebInteractMCP": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -61,10 +61,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "WebIntractMCP:build:production"
+              "buildTarget": "WebInteractMCP:build:production"
             },
             "development": {
-              "buildTarget": "WebIntractMCP:build:development"
+              "buildTarget": "WebInteractMCP:build:development"
             }
           },
           "defaultConfiguration": "development"

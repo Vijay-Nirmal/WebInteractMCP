@@ -9,7 +9,7 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ## Basic Setup
@@ -17,28 +17,28 @@ npm install @web-intract-mcp/client
 ### 1. Create Angular Service
 
 ```typescript
-// services/@web-intract-mcp/client.service.ts
+// services/@web-interact-mcp/client.service.ts
 import { Injectable } from '@angular/core';
-import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController, WebInteractMCPController } from '@web-interact-mcp/client';
 
 @Injectable({
   providedIn: 'root'
 })
-export class WebIntractMCPService {
-  private controller: WebIntractMCPController | null = null;
+export class WebInteractMCPService {
+  private controller: WebInteractMCPController | null = null;
   
   async initialize(serverUrl: string = 'http://localhost:8080'): Promise<void> {
     try {
-      this.controller = createWebIntractMCPController();
+      this.controller = createWebInteractMCPController();
       await this.controller.loadTools('/assets/mcp-tools.json');
       await this.controller.createSession(serverUrl);
     } catch (error) {
-      console.error('Failed to initialize WebIntractMCP:', error);
+      console.error('Failed to initialize WebInteractMCP:', error);
       throw error;
     }
   }
 
-  getController(): WebIntractMCPController | null {
+  getController(): WebInteractMCPController | null {
     return this.controller;
   }
 }
@@ -49,25 +49,25 @@ export class WebIntractMCPService {
 ```typescript
 // app.component.ts
 import { Component, OnInit } from '@angular/core';
-import { WebIntractMCPService } from './services/@web-intract-mcp/client.service';
+import { WebInteractMCPService } from './services/@web-interact-mcp/client.service';
 
 @Component({
   selector: 'app-root',
   template: `
     <div class="app-container">
-      <h1>My Angular App with WebIntractMCP</h1>
+      <h1>My Angular App with WebInteractMCP</h1>
       <button data-cy="submit-btn">Click Me</button>
     </div>
   `
 })
 export class AppComponent implements OnInit {
-  constructor(private webIntractMCPService: WebIntractMCPService) {}
+  constructor(private webInteractMCPService: WebInteractMCPService) {}
 
   async ngOnInit(): Promise<void> {
     try {
-      await this.webIntractMCPService.initialize(); // Connect to WebIntractMCPServer
+      await this.webInteractMCPService.initialize(); // Connect to WebInteractMCPServer
     } catch (error) {
-      console.error('Failed to initialize WebIntractMCP:', error);
+      console.error('Failed to initialize WebInteractMCP:', error);
     }
   }
 }
@@ -97,7 +97,7 @@ Create `src/assets/mcp-tools.json`:
 ]
 ```
 
-## Docker Configuration (WebIntractMCPServer)
+## Docker Configuration (WebInteractMCPServer)
 
 If using Docker deployment, update server URL:
 

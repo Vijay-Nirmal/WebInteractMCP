@@ -100,7 +100,7 @@ public class SessionKernelFactory : ISessionKernelFactory
                 Endpoint = new Uri("http://localhost:8080/sse"),
                 AdditionalHeaders = new Dictionary<string, string>
                 {
-                    { "McpIntract-Session-Id", sessionId }
+                    { "McpInteract-Session-Id", sessionId }
                 },
             });
             

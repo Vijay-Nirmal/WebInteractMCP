@@ -6,18 +6,18 @@ category: "Introduction"
 
 # Getting Started
 
-Welcome to WebIntractMCP! This guide will help you get started with transforming your web application into an MCP server.
+Welcome to WebInteractMCP! This guide will help you get started with transforming your web application into an MCP server.
 
-## What is WebIntractMCP?
+## What is WebInteractMCP?
 
-WebIntractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
+WebInteractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
 ## Key Components
 
-### 📚 [@web-intract-mcp/client](https://www.npmjs.com/package/@web-intract-mcp/client)
+### 📚 [@web-interact-mcp/client](https://www.npmjs.com/package/@web-interact-mcp/client)
 TypeScript library for client-side integration. This framework-agnostic library can be integrated into any JavaScript framework (React, Angular, Vue, etc.).
 
-### 🖥️ [WebIntractMCPServer](https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server)
+### 🖥️ [WebInteractMCPServer](https://hub.docker.com/r/vijaynirmalpon/web-interact-mcp-server)
 Ready-to-deploy Docker MCP server for protocol handling. Built with .NET 9 and ASP.NET Core for robust performance.
 
 ## Architecture Overview
@@ -29,9 +29,9 @@ graph TB
         E[Tools Configuration<br/>JSON File]
     end
     
-    subgraph "WebIntractMCP Ecosystem"
-        B[WebIntractMCPServer]
-        C["@web-intract-mcp/client"<br/>TypeScript Library]
+    subgraph "WebInteractMCP Ecosystem"
+        B[WebInteractMCPServer]
+        C["@web-interact-mcp/client"<br/>TypeScript Library]
     end
     
     subgraph "MCP Client (Chatbot/AI)"
@@ -50,17 +50,17 @@ graph TB
 ### 1. Install the Client Library
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ### 2. Run the MCP Server
 
 ```bash
 # Using Docker
-docker run -p 8080:8080 webintract-mcp-server
+docker run -p 8080:8080 webinteract-mcp-server
 
 # Or build from source
-cd server/WebIntractMCPServer
+cd server/WebInteractMCPServer
 dotnet run
 ```
 
@@ -88,9 +88,9 @@ Create a `mcp-tools.json` file in your web application's public directory:
 ### 4. Initialize in Your Web App
 
 ```typescript
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
-const controller = createWebIntractMCPController();
+const controller = createWebInteractMCPController();
 await controller.loadTools('/mcp-tools.json');
 await controller.createSession('http://localhost:8080');
 ```
@@ -116,6 +116,6 @@ Feel free to use it in your projects, but be prepared for potential breaking cha
 ## Need Help?
 
 - 📖 [Documentation](./api-reference)
-- 🐛 [Report Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues)
-- 💬 [Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions)
+- 🐛 [Report Issues](https://github.com/Vijay-Nirmal/WebInteractMCP/issues)
+- 💬 [Discussions](https://github.com/Vijay-Nirmal/WebInteractMCP/discussions)
 - 📧 [Contact](mailto:me@vijaynirmal.com)

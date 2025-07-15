@@ -1,6 +1,6 @@
 using ModelContextProtocol.Protocol;
 
-namespace WebIntractMCPServer.Abstractions;
+namespace WebInteractMCPServer.Abstractions;
 
 /// <summary>
 /// Service for managing tool operations with the client

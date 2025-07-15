@@ -6,17 +6,17 @@ category: "Reference"
 
 # API Reference
 
-Complete API documentation for WebIntractMCP.
+Complete API documentation for WebInteractMCP.
 
-## WebIntractMCPController
+## WebInteractMCPController
 
 The main controller class for managing MCP sessions and tool execution.
 
 ### Constructor
 
 ```typescript
-new WebIntractMCPController(
-  options: WebIntractMCPOptions,
+new WebInteractMCPController(
+  options: WebInteractMCPOptions,
   shepherdOptions?: ShepherdOptions,
   logger?: ILogger
 )
@@ -28,7 +28,7 @@ new WebIntractMCPController(
 - `shepherdOptions` (optional) - Shepherd.js configuration for UI tours (defaults to production-ready configuration)
 - `logger` (optional) - Custom logger implementation (defaults to ConsoleLogger)
 
-#### WebIntractMCPOptions
+#### WebInteractMCPOptions
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
@@ -64,9 +64,9 @@ When `shepherdOptions` is not provided, the controller uses these production-rea
 #### Example
 
 ```typescript
-import { WebIntractMCPController, LogLevel, TransportType } from '@web-intract-mcp/client';
+import { WebInteractMCPController, LogLevel, TransportType } from '@web-interact-mcp/client';
 
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.INFO,
   serverUrl: 'https://my-mcp-server.com',
   enableVisualFeedback: true,
@@ -266,7 +266,7 @@ console.log('Registered tools:', controller.tools.length);
 
 #### `version: string`
 
-Returns the current version of the WebIntractMCP library.
+Returns the current version of the WebInteractMCP library.
 
 ```typescript
 console.log('Library version:', controller.version);
@@ -313,22 +313,22 @@ interface ILogger {
 #### Configuration Examples
 
 ```typescript
-import { WebIntractMCPController, LogLevel } from '@web-intract-mcp/client';
+import { WebInteractMCPController, LogLevel } from '@web-interact-mcp/client';
 
 // Development configuration
-const devController = new WebIntractMCPController({
+const devController = new WebInteractMCPController({
   logLevel: LogLevel.DEBUG,
   serverUrl: 'http://localhost:5000'
 });
 
 // Production configuration
-const prodController = new WebIntractMCPController({
+const prodController = new WebInteractMCPController({
   logLevel: LogLevel.WARN,
   serverUrl: 'https://api.myapp.com'
 });
 
 // Disable all logging
-const silentController = new WebIntractMCPController({
+const silentController = new WebInteractMCPController({
   logLevel: LogLevel.OFF
 });
 ```
@@ -394,12 +394,12 @@ enum LogLevel {
 }
 ```
 
-### WebIntractMCPOptions
+### WebInteractMCPOptions
 
 Configuration options for the controller.
 
 ```typescript
-interface WebIntractMCPOptions {
+interface WebInteractMCPOptions {
   logLevel?: LogLevel;
   debugMode?: boolean; // Deprecated: Use logLevel instead
   serverUrl?: string;
@@ -551,10 +551,10 @@ const executeToolSafely = async (toolCall: ToolCall) => {
 ### Complete Integration Example
 
 ```typescript
-import { WebIntractMCPController, LogLevel, MCPTool } from '@web-intract-mcp/client';
+import { WebInteractMCPController, LogLevel, MCPTool } from '@web-interact-mcp/client';
 
 // Create controller with production settings
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.INFO,
   serverUrl: 'https://api.myapp.com',
   reconnectAttempts: 5,
@@ -657,7 +657,7 @@ process.on('SIGTERM', cleanup);
 ### Custom Logger Implementation
 
 ```typescript
-import { ILogger, LogLevel } from '@web-intract-mcp/client';
+import { ILogger, LogLevel } from '@web-interact-mcp/client';
 
 class CustomLogger implements ILogger {
   private logLevel: LogLevel;
@@ -708,7 +708,7 @@ class CustomLogger implements ILogger {
 }
 
 // Use custom logger
-const controller = new WebIntractMCPController({
+const controller = new WebInteractMCPController({
   logLevel: LogLevel.DEBUG
 });
 
@@ -721,10 +721,10 @@ controller.logger.info('Custom log message');
 ```typescript
 // Health monitoring service
 class MCPHealthMonitor {
-  private controller: WebIntractMCPController;
+  private controller: WebInteractMCPController;
   private healthCheckInterval: NodeJS.Timeout;
   
-  constructor(controller: WebIntractMCPController) {
+  constructor(controller: WebInteractMCPController) {
     this.controller = controller;
   }
   

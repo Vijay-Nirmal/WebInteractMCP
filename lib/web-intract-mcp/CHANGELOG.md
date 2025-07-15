@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-01-12
 
 ### Added
-- Initial production release of Web Intract MCP library
+- Initial production release of Web Interact MCP library
 - Complete TypeScript support with comprehensive type definitions
 - SignalR integration for real-time communication with MCP servers
 - Comprehensive tool management system with validation

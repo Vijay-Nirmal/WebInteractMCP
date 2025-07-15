@@ -6,27 +6,27 @@ category: "Help"
 
 # Troubleshooting
 
-Common issues and their solutions when working with WebIntractMCP.
+Common issues and their solutions when working with WebInteractMCP.
 
 ## Installation Issues
 
-### Cannot find module '@web-intract-mcp/client'
+### Cannot find module '@web-interact-mcp/client'
 
-**Problem**: Getting module not found error when importing WebIntractMCP.
+**Problem**: Getting module not found error when importing WebInteractMCP.
 
 **Solution**:
 1. Ensure the package is installed:
    ```bash
-   npm install @web-intract-mcp/client
+   npm install @web-interact-mcp/client
    ```
 
 2. Check your import statement:
    ```typescript
    // Correct
-   import { createWebIntractMCPController } from 'web-intract-mcp';
+   import { createWebInteractMCPController } from 'web-interact-mcp';
    
    // Incorrect
-   import WebIntractMCP from 'web-intract-mcp';
+   import WebInteractMCP from 'web-interact-mcp';
    ```
 
 3. Clear node_modules and reinstall:
@@ -61,7 +61,7 @@ Common issues and their solutions when working with WebIntractMCP.
 
 1. **Check server URL**:
    ```typescript
-   const controller = createWebIntractMCPController({
+   const controller = createWebInteractMCPController({
      serverUrl: 'http://localhost:8080' // Verify this is correct
    });
    ```
@@ -72,7 +72,7 @@ Common issues and their solutions when working with WebIntractMCP.
    curl http://localhost:8080/health
    
    # Or start the server
-   cd server/WebIntractMCPServer
+   cd server/WebInteractMCPServer
    dotnet run
    ```
 
@@ -93,7 +93,7 @@ Common issues and their solutions when working with WebIntractMCP.
 
 1. **Increase reconnection attempts**:
    ```typescript
-   const controller = createWebIntractMCPController({
+   const controller = createWebInteractMCPController({
      reconnectAttempts: 5,
      reconnectDelay: 2000
    });
@@ -134,7 +134,7 @@ Common issues and their solutions when working with WebIntractMCP.
 
 4. **Enable logging for debugging**:
    ```typescript
-   const controller = createWebIntractMCPController({
+   const controller = createWebInteractMCPController({
      enableLogging: true
    });
    ```
@@ -275,7 +275,7 @@ function MyComponent() {
     // Initialize once
     const initMCP = async () => {
       if (!controllerRef.current) {
-        controllerRef.current = createWebIntractMCPController();
+        controllerRef.current = createWebInteractMCPController();
         await controllerRef.current.loadTools('/mcp-tools.json');
         await controllerRef.current.createSession();
       }
@@ -331,7 +331,7 @@ const controller = ref(null);
 
 onMounted(async () => {
   await nextTick(); // Wait for DOM to be ready
-  controller.value = createWebIntractMCPController();
+  controller.value = createWebInteractMCPController();
   await controller.value.loadTools('/mcp-tools.json');
   await controller.value.createSession();
 });
@@ -401,7 +401,7 @@ onMounted(async () => {
 3. **Avoid creating multiple controllers**:
    ```typescript
    // Create once, reuse
-   const globalController = createWebIntractMCPController();
+   const globalController = createWebInteractMCPController();
    ```
 
 ## Browser Compatibility Issues
@@ -413,7 +413,7 @@ onMounted(async () => {
 **Solutions**:
 
 1. **Check browser support**:
-   - WebIntractMCP requires modern browsers with WebSocket support
+   - WebInteractMCP requires modern browsers with WebSocket support
    - Test in target browsers
 
 2. **Use browser-specific selectors**:
@@ -471,7 +471,7 @@ onMounted(async () => {
 ### Enable debug logging
 
 ```typescript
-const controller = createWebIntractMCPController({
+const controller = createWebInteractMCPController({
   enableLogging: true,
   logLevel: 'debug'
 });
@@ -507,13 +507,13 @@ await controller.executeTool('single-tool-id');
 If you're still experiencing issues:
 
 1. **Check the documentation**: Review the [API Reference](./api-reference) and [Examples](./examples)
-2. **Search existing issues**: Look through [GitHub Issues](https://github.com/Vijay-Nirmal/WebIntractMCP/issues)
+2. **Search existing issues**: Look through [GitHub Issues](https://github.com/Vijay-Nirmal/WebInteractMCP/issues)
 3. **Create a minimal reproduction**: Isolate the problem to the smallest possible example
-4. **Join the community**: Participate in [GitHub Discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions)
+4. **Join the community**: Participate in [GitHub Discussions](https://github.com/Vijay-Nirmal/WebInteractMCP/discussions)
 5. **Contact support**: Reach out via [email](mailto:me@vijaynirmal.com)
 
 When reporting issues, please include:
-- WebIntractMCP version
+- WebInteractMCP version
 - Browser and version
 - Framework and version (React, Angular, etc.)
 - Minimal code example

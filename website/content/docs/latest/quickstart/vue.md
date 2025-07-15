@@ -9,7 +9,7 @@ category: "Quick Start Guides"
 ## Installation
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ## Basic Setup
@@ -17,24 +17,24 @@ npm install @web-intract-mcp/client
 ### 1. Create Vue Composable
 
 ```typescript
-// composables/use-@web-intract-mcp/client.ts
+// composables/use-@web-interact-mcp/client.ts
 import { ref, onMounted } from 'vue';
-import { createWebIntractMCPController, WebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController, WebInteractMCPController } from '@web-interact-mcp/client';
 
-export function useWebIntractMCP(serverUrl: string = 'http://localhost:8080') {
-  const controller = ref<WebIntractMCPController | null>(null);
+export function useWebInteractMCP(serverUrl: string = 'http://localhost:8080') {
+  const controller = ref<WebInteractMCPController | null>(null);
   const isConnected = ref(false);
   const error = ref<string | null>(null);
 
   onMounted(async () => {
     try {
-      controller.value = createWebIntractMCPController();
+      controller.value = createWebInteractMCPController();
       await controller.value.loadTools('/mcp-tools.json');
       await controller.value.createSession(serverUrl);
       isConnected.value = true;
     } catch (err) {
       error.value = err instanceof Error ? err.message : 'Unknown error';
-      console.error('Failed to initialize WebIntractMCP:', err);
+      console.error('Failed to initialize WebInteractMCP:', err);
     }
   });
 
@@ -52,14 +52,14 @@ export function useWebIntractMCP(serverUrl: string = 'http://localhost:8080') {
 <!-- App.vue -->
 <template>
   <div class="app-container">
-    <h1>My Vue App with WebIntractMCP</h1>
+    <h1>My Vue App with WebInteractMCP</h1>
     <button data-cy="submit-btn">Click Me</button>
     
     <div v-if="error" class="error">
       Error: {{ error }}
     </div>
     <div v-else-if="isConnected" class="success">
-      Connected to WebIntractMCPServer
+      Connected to WebInteractMCPServer
     </div>
     <div v-else class="loading">
       Connecting...
@@ -68,9 +68,9 @@ export function useWebIntractMCP(serverUrl: string = 'http://localhost:8080') {
 </template>
 
 <script setup lang="ts">
-import { useWebIntractMCP } from './composables/use-@web-intract-mcp/client';
+import { useWebInteractMCP } from './composables/use-@web-interact-mcp/client';
 
-const { controller, isConnected, error } = useWebIntractMCP(); // Connect to WebIntractMCPServer
+const { controller, isConnected, error } = useWebInteractMCP(); // Connect to WebInteractMCPServer
 </script>
 ```
 
@@ -98,13 +98,13 @@ Create `public/mcp-tools.json`:
 ]
 ```
 
-## Docker Configuration (WebIntractMCPServer)
+## Docker Configuration (WebInteractMCPServer)
 
 If using Docker deployment, update server URL:
 
 ```typescript
 // Use Docker container URL
-const { controller, isConnected, error } = useWebIntractMCP('http://localhost:8080'); // Docker mapped port
+const { controller, isConnected, error } = useWebInteractMCP('http://localhost:8080'); // Docker mapped port
 ```
 
 ## Next Steps

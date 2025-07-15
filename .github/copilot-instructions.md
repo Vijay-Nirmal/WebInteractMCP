@@ -1,17 +1,17 @@
-# WebIntractMCP - GitHub Copilot Instructions
+# WebInteractMCP - GitHub Copilot Instructions
 
 ## Project Overview
 
-WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly integrated components (@web-intract-mcp/client and WebIntractMCPServer) that transform web applications into MCP servers with real-time two-way communication.
+WebInteractMCP is an MCP (Model Context Protocol) ecosystem with two tightly integrated components (@web-interact-mcp/client and WebInteractMCPServer) that transform web applications into MCP servers with real-time two-way communication.
 
 ## Components
 
-### 📁 `lib/@web-intract-mcp/client` - TypeScript MCP Library
+### 📁 `lib/@web-interact-mcp/client` - TypeScript MCP Library
 - **Tech**: TypeScript 5.8+, SignalR, Shepherd.js, Jest
 - **Purpose**: Framework-agnostic library that transforms web apps into MCP servers
 - **Key**: Real-time communication, tool registration, UI automation
 
-### 📁 `server/WebIntractMCPServer` - .NET MCP Server  
+### 📁 `server/WebInteractMCPServer` - .NET MCP Server  
 - **Tech**: .NET 9, ASP.NET Core, SignalR, ModelContextProtocol.AspNetCore
 - **Purpose**: MCP server managing client web applications
 - **Key**: MCP protocol implementation, SignalR hub, CORS config
@@ -25,8 +25,8 @@ WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly inte
 
 **ALWAYS test cross-component compatibility when making changes could affect that:**
 
-1. **@web-intract-mcp/client changes** → Test WebIntractMCPServer + Sample app
-2. **WebIntractMCPServer changes** → Test @web-intract-mcp/client + Sample app  
+1. **@web-interact-mcp/client changes** → Test WebInteractMCPServer + Sample app
+2. **WebInteractMCPServer changes** → Test @web-interact-mcp/client + Sample app  
 3. **Sample app changes** → Test end-to-end MCP communication
 
 ## Documentation Update Requirements
@@ -78,18 +78,18 @@ WebIntractMCP is an MCP (Model Context Protocol) ecosystem with two tightly inte
 ```bash
 # Setup
 npm install
-cd lib/@web-intract-mcp/client && npm install
+cd lib/@web-interact-mcp/client && npm install
 cd sample/angular-dotnetnet-semantic-kernel && npm install
 
 # Start servers
 cd sample/angular-dotnetnet-semantic-kernel
-npm run start:server    # Web Intract MCP server
+npm run start:server    # Web Interact MCP server
 npm run start:client    # .NET client backend sample app
 npm run start           # Angular frontend sample app
 
 # Testing
-cd lib/@web-intract-mcp/client && npm test
-cd server/WebIntractMCPServer && dotnet test
+cd lib/@web-interact-mcp/client && npm test
+cd server/WebInteractMCPServer && dotnet test
 cd sample/angular-dotnetnet-semantic-kernel && npm test
 ```
 
@@ -97,14 +97,14 @@ cd sample/angular-dotnetnet-semantic-kernel && npm test
 
 ### File Organization
 ```
-lib/web-intract-mcp/src/
+lib/web-interact-mcp/src/
 ├── controller.ts           # Main MCP controller
 ├── signalr.service.ts     # SignalR communication
 ├── tool-registry.ts       # Tool management
 ├── types.ts              # TypeScript definitions
 └── __tests__/            # Unit tests
 
-server/WebIntractMCPServer/
+server/WebInteractMCPServer/
 ├── Program.cs            # Main entry point
 ├── Hubs/                 # SignalR hubs
 ├── Services/             # Business logic

@@ -13,9 +13,9 @@ on:
           - production
 
 env:
-  DOCKER_IMAGE: vijaynirmalpon/web-intract-mcp-server
+  DOCKER_IMAGE: vijaynirmalpon/web-interact-mcp-server
   DOCKERFILE_PATH: ./server/Dockerfile
-  CSPROJ_PATH: ./server/WebIntractMCPServer/WebIntractMCPServer.csproj
+  CSPROJ_PATH: ./server/WebInteractMCPServer/WebInteractMCPServer.csproj
 
 jobs:
   build:
@@ -108,7 +108,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     environment: 
       name: ${{ needs.build.outputs.is-production == 'true' && 'production' || 'preview' }}
-      url: https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server
+      url: https://hub.docker.com/r/vijaynirmalpon/web-interact-mcp-server
       
     steps:
       - name: Checkout repository
@@ -159,7 +159,7 @@ jobs:
         with:
           username: vijaynirmalpon
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-          repository: vijaynirmalpon/web-intract-mcp-server
+          repository: vijaynirmalpon/web-interact-mcp-server
           readme-filepath: ./README.md
 
   summary:
@@ -173,7 +173,7 @@ jobs:
         run: |
           echo "## 🐳 Docker Build & Deploy Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Project:** WebIntract MCP Server" >> $GITHUB_STEP_SUMMARY
+          echo "**Project:** WebInteract MCP Server" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ needs.build.outputs.build-version }}" >> $GITHUB_STEP_SUMMARY
           echo "**Release Type:** ${{ needs.build.outputs.release-type }}" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
@@ -226,5 +226,5 @@ jobs:
           
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 🔗 Links" >> $GITHUB_STEP_SUMMARY
-          echo "- [Docker Hub Repository](https://hub.docker.com/r/vijaynirmalpon/web-intract-mcp-server)" >> $GITHUB_STEP_SUMMARY
-          echo "- [Documentation](https://github.com/Vijay-Nirmal/WebIntractMCP)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Docker Hub Repository](https://hub.docker.com/r/vijaynirmalpon/web-interact-mcp-server)" >> $GITHUB_STEP_SUMMARY
+          echo "- [Documentation](https://github.com/Vijay-Nirmal/WebInteractMCP)" >> $GITHUB_STEP_SUMMARY

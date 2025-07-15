@@ -513,7 +513,7 @@ export class ChatbotComponent implements OnInit, OnDestroy {
       
       // Add session ID header if available
       if (sessionId) {
-        headers['McpIntract-Session-Id'] = sessionId;
+        headers['McpInteract-Session-Id'] = sessionId;
         console.log('Sending message with session ID:', sessionId);
       } else {
         console.warn('No session ID available for chat request');

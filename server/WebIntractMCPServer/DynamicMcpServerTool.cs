@@ -1,8 +1,8 @@
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
-using WebIntractMCPServer.Abstractions;
+using WebInteractMCPServer.Abstractions;
 
-namespace WebIntractMCPServer;
+namespace WebInteractMCPServer;
 
 /// <summary>
 /// Dynamic MCP server tool that delegates execution to the client via SignalR

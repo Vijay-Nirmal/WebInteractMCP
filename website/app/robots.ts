@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://webintractmcp.com/sitemap.xml',
+    sitemap: 'https://webinteractmcp.com/sitemap.xml',
   }
 }

@@ -1,14 +1,14 @@
 ---
-title: "Introducing WebIntractMCP: Transforming Web Applications into MCP Servers"
+title: "Introducing WebInteractMCP: Transforming Web Applications into MCP Servers"
 date: "2025-01-07"
 author: "Vijay Nirmal"
-excerpt: "Discover how WebIntractMCP revolutionizes web automation by enabling any web application to become an MCP server with real-time two-way communication."
+excerpt: "Discover how WebInteractMCP revolutionizes web automation by enabling any web application to become an MCP server with real-time two-way communication."
 tags: ["mcp", "web-automation", "chatbot-integration", "announcement"]
 ---
 
-# Introducing WebIntractMCP: Transforming Web Applications into MCP Servers
+# Introducing WebInteractMCP: Transforming Web Applications into MCP Servers
 
-Today, I'm excited to introduce **WebIntractMCP**, an innovative open-source ecosystem that bridges the gap between web applications and the Model Context Protocol (MCP). This groundbreaking project enables any web application to become an MCP server, allowing chatbots and AI clients to control user sessions seamlessly.
+Today, I'm excited to introduce **WebInteractMCP**, an innovative open-source ecosystem that bridges the gap between web applications and the Model Context Protocol (MCP). This groundbreaking project enables any web application to become an MCP server, allowing chatbots and AI clients to control user sessions seamlessly.
 
 ## The Problem We're Solving
 
@@ -20,9 +20,9 @@ Traditional solutions require:
 - Limited real-time communication capabilities
 - Framework-specific implementations
 
-## Enter WebIntractMCP
+## Enter WebInteractMCP
 
-WebIntractMCP solves these challenges by creating a standardized way for web applications to expose their functionality through the Model Context Protocol. This enables:
+WebInteractMCP solves these challenges by creating a standardized way for web applications to expose their functionality through the Model Context Protocol. This enables:
 
 - **Real-time Communication**: Robust bidirectional communication using SignalR
 - **Framework Agnostic**: Works with React, Angular, Vue, or any JavaScript framework
@@ -34,23 +34,23 @@ WebIntractMCP solves these challenges by creating a standardized way for web app
 
 The ecosystem consists of two main components:
 
-### 1. @web-intract-mcp/client (TypeScript Library)
+### 1. @web-interact-mcp/client (TypeScript Library)
 A lightweight, framework-agnostic library that integrates into your web application:
 
 ```typescript
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
-const controller = createWebIntractMCPController();
+const controller = createWebInteractMCPController();
 await controller.loadTools('/mcp-tools.json');
 await controller.createSession('http://localhost:8080');
 ```
 
-### 2. WebIntractMCPServer (.NET Server)
+### 2. WebInteractMCPServer (.NET Server)
 A robust MCP server built with .NET 9 and ASP.NET Core:
 
 ```bash
 # Quick start with Docker
-docker run -p 8080:8080 webintract-mcp-server
+docker run -p 8080:8080 webinteract-mcp-server
 ```
 
 ## Real-World Use Cases
@@ -142,7 +142,7 @@ Session-based isolation ensures that multiple users can safely use the system si
 
 ### 1. Install the Library
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ### 2. Create Your Tools Configuration
@@ -167,7 +167,7 @@ npm install @web-intract-mcp/client
 ### 3. Initialize in Your App
 ```typescript
 // Works with any framework!
-const controller = createWebIntractMCPController();
+const controller = createWebInteractMCPController();
 await controller.loadTools('/mcp-tools.json');
 await controller.createSession('http://localhost:8080');
 ```
@@ -182,7 +182,7 @@ We've chosen modern, robust technologies:
 
 ## What's Next?
 
-WebIntractMCP is actively being developed with exciting features on the roadmap:
+WebInteractMCP is actively being developed with exciting features on the roadmap:
 
 - 🔄 **Enhanced Tool Types**: More action types and validation options
 - 🎨 **Visual Tool Builder**: GUI for creating tools without JSON
@@ -192,25 +192,25 @@ WebIntractMCP is actively being developed with exciting features on the roadmap:
 
 ## Join the Community
 
-WebIntractMCP is open source and welcomes contributions from the community:
+WebInteractMCP is open source and welcomes contributions from the community:
 
-- **GitHub**: [Vijay-Nirmal/WebIntractMCP](https://github.com/Vijay-Nirmal/WebIntractMCP)
-- **Documentation**: [WebIntractMCP.com/docs](https://webintractmcp.com/docs)
+- **GitHub**: [Vijay-Nirmal/WebInteractMCP](https://github.com/Vijay-Nirmal/WebInteractMCP)
+- **Documentation**: [WebInteractMCP.com/docs](https://webinteractmcp.com/docs)
 - **Issues**: Report bugs and request features
 - **Discussions**: Join our community discussions
 
 ## Development Status
 
-⚠️ **Important Note**: WebIntractMCP is currently in active development and hasn't reached version 1.0 yet. While the core functionality is working and production-ready components are available, breaking changes may occur. We recommend using it in your projects while being prepared for potential updates.
+⚠️ **Important Note**: WebInteractMCP is currently in active development and hasn't reached version 1.0 yet. While the core functionality is working and production-ready components are available, breaking changes may occur. We recommend using it in your projects while being prepared for potential updates.
 
 ## Conclusion
 
-WebIntractMCP represents a new paradigm in web application automation and AI integration. By making it simple for any web application to become an MCP server, we're opening up endless possibilities for intelligent user assistance, automated testing, and process automation.
+WebInteractMCP represents a new paradigm in web application automation and AI integration. By making it simple for any web application to become an MCP server, we're opening up endless possibilities for intelligent user assistance, automated testing, and process automation.
 
-Whether you're building the next generation of web applications or looking to enhance existing ones with AI capabilities, WebIntractMCP provides the tools and infrastructure you need.
+Whether you're building the next generation of web applications or looking to enhance existing ones with AI capabilities, WebInteractMCP provides the tools and infrastructure you need.
 
-Ready to transform your web application? [Get started today](https://webintractmcp.com/docs/getting-started) and join the MCP revolution!
+Ready to transform your web application? [Get started today](https://webinteractmcp.com/docs/getting-started) and join the MCP revolution!
 
 ---
 
-*Have questions or want to contribute? Feel free to [reach out](mailto:me@vijaynirmal.com) or join our [GitHub discussions](https://github.com/Vijay-Nirmal/WebIntractMCP/discussions). I'd love to hear from you!*
+*Have questions or want to contribute? Feel free to [reach out](mailto:me@vijaynirmal.com) or join our [GitHub discussions](https://github.com/Vijay-Nirmal/WebInteractMCP/discussions). I'd love to hear from you!*

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# WebIntract MCP Server - Quick Start Script
-# This script helps you quickly deploy the WebIntract MCP Server using Docker
+# WebInteract MCP Server - Quick Start Script
+# This script helps you quickly deploy the WebInteract MCP Server using Docker
 
 set -e
 
-echo "🐳 WebIntract MCP Server - Quick Start"
+echo "🐳 WebInteract MCP Server - Quick Start"
 echo "======================================"
 echo ""
 
@@ -13,14 +13,14 @@ echo ""
 IMAGE_TAG="latest"
 PORT="8080"
 CLIENT_URL="http://localhost:4200"
-CONTAINER_NAME="web-intract-mcp-server"
+CONTAINER_NAME="web-interact-mcp-server"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
     case $1 in
         --preview)
             IMAGE_TAG="preview"
-            CONTAINER_NAME="web-intract-mcp-server-preview"
+            CONTAINER_NAME="web-interact-mcp-server-preview"
             shift
             ;;
         --port)
@@ -56,7 +56,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 echo "Configuration:"
-echo "  Image: vijaynirmalpon/web-intract-mcp-server:$IMAGE_TAG"
+echo "  Image: vijaynirmalpon/web-interact-mcp-server:$IMAGE_TAG"
 echo "  Port: $PORT"
 echo "  Client URL: $CLIENT_URL"
 echo "  Container Name: $CONTAINER_NAME"
@@ -85,7 +85,7 @@ fi
 
 # Pull the latest image
 echo "📥 Pulling Docker image..."
-docker pull "vijaynirmalpon/web-intract-mcp-server:$IMAGE_TAG"
+docker pull "vijaynirmalpon/web-interact-mcp-server:$IMAGE_TAG"
 
 # Set environment based on image tag
 if [[ "$IMAGE_TAG" == "preview" ]]; then
@@ -97,14 +97,14 @@ else
 fi
 
 # Run the container
-echo "🚀 Starting WebIntract MCP Server..."
+echo "🚀 Starting WebInteract MCP Server..."
 docker run -d \
     --name "$CONTAINER_NAME" \
     -p "$PORT:8080" \
     -e ASPNETCORE_ENVIRONMENT="$ENVIRONMENT" \
-    -e McpIntract__Cors__AllowedOrigins__0="$CLIENT_URL" \
-    -e McpIntract__Tool__EnableDetailedErrorLogging="$DETAILED_LOGGING" \
-    "vijaynirmalpon/web-intract-mcp-server:$IMAGE_TAG"
+    -e McpInteract__Cors__AllowedOrigins__0="$CLIENT_URL" \
+    -e McpInteract__Tool__EnableDetailedErrorLogging="$DETAILED_LOGGING" \
+    "vijaynirmalpon/web-interact-mcp-server:$IMAGE_TAG"
 
 # Wait a moment for the container to start
 echo "⏳ Waiting for server to start..."
@@ -112,7 +112,7 @@ sleep 5
 
 # Check if container is running
 if docker ps --format 'table {{.Names}}' | grep -q "^$CONTAINER_NAME$"; then
-    echo "✅ WebIntract MCP Server is running!"
+    echo "✅ WebInteract MCP Server is running!"
     echo ""
     echo "🔗 Server Information:"
     echo "  Health Check: http://localhost:$PORT/health"
@@ -135,10 +135,10 @@ if docker ps --format 'table {{.Names}}' | grep -q "^$CONTAINER_NAME$"; then
         echo "   Check logs with: docker logs $CONTAINER_NAME"
     fi
 else
-    echo "❌ Failed to start WebIntract MCP Server"
+    echo "❌ Failed to start WebInteract MCP Server"
     echo "Check logs with: docker logs $CONTAINER_NAME"
     exit 1
 fi
 
 echo ""
-echo "🎉 Setup complete! Your WebIntract MCP Server is ready to use."
+echo "🎉 Setup complete! Your WebInteract MCP Server is ready to use."

@@ -13,27 +13,27 @@ Choose your framework and get started in minutes with minimal setup!
 ## React Integration
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ```tsx
 // App.tsx
 import React, { useEffect } from 'react';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 function App() {
   useEffect(() => {
     const initMCP = async () => {
-      const controller = createWebIntractMCPController();
+      const controller = createWebInteractMCPController();
       await controller.loadTools('/mcp-tools.json');
-      await controller.createSession('http://localhost:8080'); // Connect to WebIntractMCPServer
+      await controller.createSession('http://localhost:8080'); // Connect to WebInteractMCPServer
     };
     initMCP();
   }, []);
 
   return (
     <div className="App">
-      <h1>My React App with WebIntractMCP</h1>
+      <h1>My React App with WebInteractMCP</h1>
       <button data-testid="submit-btn">Click Me</button>
     </div>
   );
@@ -45,20 +45,20 @@ function App() {
 ## Angular Integration
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ```typescript
 // mcp.service.ts
 import { Injectable } from '@angular/core';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 @Injectable({ providedIn: 'root' })
 export class McpService {
   async initialize() {
-    const controller = createWebIntractMCPController();
+    const controller = createWebInteractMCPController();
     await controller.loadTools('/assets/mcp-tools.json');
-    await controller.createSession('http://localhost:8080'); // Connect to WebIntractMCPServer
+    await controller.createSession('http://localhost:8080'); // Connect to WebInteractMCPServer
   }
 }
 
@@ -74,26 +74,26 @@ export class AppComponent implements OnInit {
 ## Vue.js Integration
 
 ```bash
-npm install @web-intract-mcp/client
+npm install @web-interact-mcp/client
 ```
 
 ```vue
 <!-- App.vue -->
 <template>
   <div id="app">
-    <h1>My Vue App with WebIntractMCP</h1>
+    <h1>My Vue App with WebInteractMCP</h1>
     <button data-testid="submit-btn">Click Me</button>
   </div>
 </template>
 
 <script setup>
 import { onMounted } from 'vue';
-import { createWebIntractMCPController } from '@web-intract-mcp/client';
+import { createWebInteractMCPController } from '@web-interact-mcp/client';
 
 onMounted(async () => {
-  const controller = createWebIntractMCPController();
+  const controller = createWebInteractMCPController();
   await controller.loadTools('/mcp-tools.json');
-  await controller.createSession('http://localhost:8080'); // Connect to WebIntractMCPServer
+  await controller.createSession('http://localhost:8080'); // Connect to WebInteractMCPServer
 });
 </script>
 ```

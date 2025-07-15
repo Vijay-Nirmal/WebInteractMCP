@@ -77,12 +77,12 @@ app.MapPost("/api/chat", async (ChatRequest request, IChatService chatService, H
     try
     {
         // Get session ID from headers
-        var sessionId = context.Request.Headers["McpIntract-Session-Id"].FirstOrDefault();
+        var sessionId = context.Request.Headers["McpInteract-Session-Id"].FirstOrDefault();
         
         if (string.IsNullOrEmpty(sessionId))
         {
             app.Logger.LogWarning("Chat request received without session ID");
-            return Results.BadRequest("Session ID is required. Please provide McpIntract-Session-Id header.");
+            return Results.BadRequest("Session ID is required. Please provide McpInteract-Session-Id header.");
         }
         
         app.Logger.LogInformation("Processing chat request for session: {SessionId} with message: {Message}", sessionId, request.Message?.Substring(0, Math.Min(50, request.Message?.Length ?? 0)) ?? "");

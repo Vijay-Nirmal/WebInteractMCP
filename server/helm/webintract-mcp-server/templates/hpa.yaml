@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "webintract-mcp-server.fullname" . }}
+  name: {{ include "webinteract-mcp-server.fullname" . }}
   labels:
-    {{- include "webintract-mcp-server.labels" . | nindent 4 }}
+    {{- include "webinteract-mcp-server.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "webintract-mcp-server.fullname" . }}
+    name: {{ include "webinteract-mcp-server.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

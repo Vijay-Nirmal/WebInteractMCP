@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   return {
-    title: `${post.title} - WebIntract MCP Blog`,
+    title: `${post.title} - WebInteract MCP Blog`,
     description: post.excerpt,
     openGraph: {
       title: post.title,

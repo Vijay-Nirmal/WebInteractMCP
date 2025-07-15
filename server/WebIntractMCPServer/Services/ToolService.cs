@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
-using WebIntractMCPServer.Abstractions;
-using WebIntractMCPServer.Configuration;
-using WebIntractMCPServer.Hubs;
+using WebInteractMCPServer.Abstractions;
+using WebInteractMCPServer.Configuration;
+using WebInteractMCPServer.Hubs;
 
-namespace WebIntractMCPServer.Services;
+namespace WebInteractMCPServer.Services;
 
 /// <summary>
 /// Service implementation for managing tool operations with the client
@@ -13,12 +13,12 @@ namespace WebIntractMCPServer.Services;
 internal sealed class ToolService : IToolService
 {
     private readonly IHubContext<McpToolsHub> _hubContext;
-    private readonly IOptionsMonitor<McpIntractOptions> _options;
+    private readonly IOptionsMonitor<McpInteractOptions> _options;
     private readonly ILogger<ToolService> _logger;
 
     public ToolService(
         IHubContext<McpToolsHub> hubContext,
-        IOptionsMonitor<McpIntractOptions> options,
+        IOptionsMonitor<McpInteractOptions> options,
         ILogger<ToolService> logger)
     {
         _hubContext = hubContext ?? throw new ArgumentNullException(nameof(hubContext));

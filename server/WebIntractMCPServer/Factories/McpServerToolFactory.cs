@@ -1,6 +1,6 @@
-using WebIntractMCPServer.Abstractions;
+using WebInteractMCPServer.Abstractions;
 
-namespace WebIntractMCPServer.Factories;
+namespace WebInteractMCPServer.Factories;
 
 /// <summary>
 /// Factory for creating MCP server tool instances

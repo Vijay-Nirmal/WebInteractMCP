@@ -1,5 +1,5 @@
 /**
- * Test setup file for Web Intract MCP library
+ * Test setup file for Web Interact MCP library
  */
 
 // Mock Shepherd.js if not available

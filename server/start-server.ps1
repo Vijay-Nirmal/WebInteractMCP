@@ -1,5 +1,5 @@
-# WebIntract MCP Server - Quick Start Script (PowerShell)
-# This script helps you quickly deploy the WebIntract MCP Server using Docker
+# WebInteract MCP Server - Quick Start Script (PowerShell)
+# This script helps you quickly deploy the WebInteract MCP Server using Docker
 
 param(
     [switch]$Preview,
@@ -9,7 +9,7 @@ param(
 )
 
 if ($Help) {
-    Write-Host "🐳 WebIntract MCP Server - Quick Start" -ForegroundColor Cyan
+    Write-Host "🐳 WebInteract MCP Server - Quick Start" -ForegroundColor Cyan
     Write-Host "======================================"
     Write-Host ""
     Write-Host "Usage: .\start-server.ps1 [OPTIONS]"
@@ -30,14 +30,14 @@ if ($Help) {
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "🐳 WebIntract MCP Server - Quick Start" -ForegroundColor Cyan
+Write-Host "🐳 WebInteract MCP Server - Quick Start" -ForegroundColor Cyan
 Write-Host "======================================"
 Write-Host ""
 
 # Set variables based on parameters
 $ImageTag = if ($Preview) { "preview" } else { "latest" }
-$ContainerName = if ($Preview) { "web-intract-mcp-server-preview" } else { "web-intract-mcp-server" }
-$ImageName = "vijaynirmalpon/web-intract-mcp-server:$ImageTag"
+$ContainerName = if ($Preview) { "web-interact-mcp-server-preview" } else { "web-interact-mcp-server" }
+$ImageName = "vijaynirmalpon/web-interact-mcp-server:$ImageTag"
 
 Write-Host "Configuration:"
 Write-Host "  Image: $ImageName"
@@ -82,13 +82,13 @@ $Environment = if ($Preview) { "Development" } else { "Production" }
 $DetailedLogging = if ($Preview) { "true" } else { "false" }
 
 # Run the container
-Write-Host "🚀 Starting WebIntract MCP Server..." -ForegroundColor Green
+Write-Host "🚀 Starting WebInteract MCP Server..." -ForegroundColor Green
 docker run -d `
     --name $ContainerName `
     -p "${Port}:8080" `
     -e ASPNETCORE_ENVIRONMENT=$Environment `
-    -e McpIntract__Cors__AllowedOrigins__0=$ClientUrl `
-    -e McpIntract__Tool__EnableDetailedErrorLogging=$DetailedLogging `
+    -e McpInteract__Cors__AllowedOrigins__0=$ClientUrl `
+    -e McpInteract__Tool__EnableDetailedErrorLogging=$DetailedLogging `
     $ImageName
 
 # Wait a moment for the container to start
@@ -98,7 +98,7 @@ Start-Sleep -Seconds 5
 # Check if container is running
 $runningContainer = docker ps --format "table {{.Names}}" | Where-Object { $_ -eq $ContainerName }
 if ($runningContainer) {
-    Write-Host "✅ WebIntract MCP Server is running!" -ForegroundColor Green
+    Write-Host "✅ WebInteract MCP Server is running!" -ForegroundColor Green
     Write-Host ""
     Write-Host "🔗 Server Information:" -ForegroundColor Cyan
     Write-Host "  Health Check: http://localhost:$Port/health"
@@ -126,10 +126,10 @@ if ($runningContainer) {
         Write-Host "   Check logs with: docker logs $ContainerName"
     }
 } else {
-    Write-Host "❌ Failed to start WebIntract MCP Server" -ForegroundColor Red
+    Write-Host "❌ Failed to start WebInteract MCP Server" -ForegroundColor Red
     Write-Host "Check logs with: docker logs $ContainerName"
     exit 1
 }
 
 Write-Host ""
-Write-Host "🎉 Setup complete! Your WebIntract MCP Server is ready to use." -ForegroundColor Green
+Write-Host "🎉 Setup complete! Your WebInteract MCP Server is ready to use." -ForegroundColor Green
