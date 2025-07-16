@@ -76,11 +76,24 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+dist    
 
 # Gatsby files
 .cache/
-public
+
+# Public directory
+public/*
+!public/*.png
+!public/*.jpg
+!public/*.jpeg
+!public/*.gif
+!public/*.svg
+!public/*.webp
+!public/*.ico
+!public/*.bmp
+!public/*.tiff
+!public/*.avif
+!public/manifest.json
 
 # vuepress build output
 .vuepress/dist
