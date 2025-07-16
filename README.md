@@ -1,4 +1,4 @@
-# WebInteractMCP
+# <img src="assets/logo.svg" alt="WebInteractMCP Logo" width="32" height="32" style="vertical-align: middle;"> WebInteractMCP
 
 > Transform any web application into an MCP server with real-time two-way communication
 
@@ -8,7 +8,7 @@
 
 WebInteractMCP is an innovative MCP (Model Context Protocol) ecosystem that enables any web application to become an MCP server, allowing chatbots and other MCP clients to control client sessions and complete intended actions on behalf of users.
 
-> **📢 Check out the preview version available now!** This project is in active development. Expect breaking changes in future releases as we evolve toward version 1.0.
+> **📢 Check out the preview version available now!** This project is in active development. Expect breaking changes in future releases as we evolve toward version 1.0.0
 
 ## 🚀 Overview
 

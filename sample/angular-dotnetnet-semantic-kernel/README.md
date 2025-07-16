@@ -1,4 +1,4 @@
-# WebInteractMCP
+# <img src="public/logo.svg" alt="WebInteractMCP Logo" width="32" height="32" style="vertical-align: middle;"> WebInteractMCP
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.0.1.
 

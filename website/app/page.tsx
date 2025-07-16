@@ -3,7 +3,44 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'WebInteract MCP - Transform Web Applications into MCP Servers',
-  description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
+  description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly with comprehensive MCP tool protocol support.',
+  keywords: [
+    'MCP server',
+    'Model Context Protocol',
+    'web automation',
+    'AI integration',
+    'SignalR',
+    'real-time communication',
+    'TypeScript library',
+    'framework agnostic',
+    'web application control',
+    'chatbot integration',
+    'AI agents',
+    'developer tools'
+  ],
+  openGraph: {
+    title: 'WebInteract MCP - Transform Web Applications into MCP Servers',
+    description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
+    type: 'website',
+    url: 'https://webinteractmcp.com',
+    images: [
+      {
+        url: '/android-chrome-512x512.png',
+        width: 512,
+        height: 512,
+        alt: 'WebInteract MCP - Transform Web Applications into MCP Servers',
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'WebInteract MCP - Transform Web Applications into MCP Servers',
+    description: 'Transform any web application into an MCP server with real-time two-way communication. Enable chatbots and AI clients to control web sessions seamlessly.',
+    images: ['/android-chrome-512x512.png']
+  },
+  alternates: {
+    canonical: 'https://webinteractmcp.com',
+  },
 }
 
 const features = [

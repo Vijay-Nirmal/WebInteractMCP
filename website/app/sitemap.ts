@@ -12,32 +12,32 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: baseUrl,
       lastModified: currentDate,
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 1.0,
     },
     {
       url: `${baseUrl}/about`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.7,
+      changeFrequency: 'monthly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
       lastModified: currentDate,
-      changeFrequency: 'yearly',
+      changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/blog`,
       lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.8,
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/docs`,
       lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
+      changeFrequency: 'daily',
+      priority: 0.95,
     },
   ]
 
@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${baseUrl}/docs/${version.version}`,
         lastModified: currentDate,
         changeFrequency: 'weekly',
-        priority: version.isLatest ? 0.9 : 0.8,
+        priority: version.isLatest ? 0.95 : 0.8,
       })
       
       // Add individual doc pages
@@ -71,7 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           url: `${baseUrl}/docs/${version.version}/${doc.slug}`,
           lastModified: currentDate,
           changeFrequency: 'weekly',
-          priority: 0.9,
+          priority: version.isLatest ? 0.9 : 0.7,
         })
       }
     }

@@ -1,4 +1,4 @@
-# WebInteractMCP
+# <img src="logo.svg" alt="WebInteractMCP Logo" width="32" height="32" style="vertical-align: middle;"> WebInteractMCP
 
 > Transform any web application into an MCP server with real-time two-way communication
 

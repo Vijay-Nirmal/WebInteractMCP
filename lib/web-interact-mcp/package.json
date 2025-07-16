@@ -8,7 +8,8 @@
   "files": [
     "dist/**/*",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "logo.svg"
   ],
   "engines": {
     "node": ">=14.0.0"
@@ -51,6 +52,7 @@
     "url": "https://github.com/Vijay-Nirmal/WebInteractMCP/issues"
   },
   "homepage": "https://github.com/Vijay-Nirmal/WebInteractMCP#readme",
+  "icon": "logo.svg",
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

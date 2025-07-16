@@ -1,4 +1,4 @@
-# WebInteract MCP Server
+# <img src="logo.svg" alt="WebInteractMCP Logo" width="32" height="32" style="vertical-align: middle;"> WebInteract MCP Server
 
 A Model Context Protocol (MCP) server that converts client web applications into MCP servers with robust two-way communication using the @web-interact-mcp/client npm library
 
